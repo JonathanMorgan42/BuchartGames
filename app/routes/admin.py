@@ -107,10 +107,25 @@ def add_game():
             'sequence_number': form.sequence_number.data,
             'point_scheme': form.point_scheme.data,
             'metric_type': form.metric_type.data,
-            'lower_is_better': form.lower_is_better.data
+            'scoring_direction': form.scoring_direction.data,
+            'public_input': form.public_input.data
         }
 
-        GameService.create_game(form_data)
+        # Collect penalties from form
+        penalties_data = []
+        penalties_dict = request.form.to_dict(flat=False)
+        penalty_count = 0
+
+        while f'penalties[{penalty_count}][name]' in penalties_dict:
+            penalty = {
+                'name': penalties_dict[f'penalties[{penalty_count}][name]'][0],
+                'value': int(penalties_dict[f'penalties[{penalty_count}][value]'][0]),
+                'stackable': f'penalties[{penalty_count}][stackable]' in penalties_dict
+            }
+            penalties_data.append(penalty)
+            penalty_count += 1
+
+        GameService.create_game(form_data, penalties_data)
         flash('Game created successfully!', 'success')
         return redirect(url_for('main.games'))
 
@@ -131,17 +146,41 @@ def edit_game(game_id):
             'sequence_number': form.sequence_number.data,
             'point_scheme': form.point_scheme.data,
             'metric_type': form.metric_type.data,
-            'lower_is_better': form.lower_is_better.data
+            'scoring_direction': form.scoring_direction.data,
+            'public_input': form.public_input.data
         }
 
+        # Collect penalties from form
+        penalties_data = []
+        penalties_dict = request.form.to_dict(flat=False)
+        penalty_count = 0
+
+        while f'penalties[{penalty_count}][name]' in penalties_dict:
+            penalty = {
+                'name': penalties_dict[f'penalties[{penalty_count}][name]'][0],
+                'value': int(penalties_dict[f'penalties[{penalty_count}][value]'][0]),
+                'stackable': f'penalties[{penalty_count}][stackable]' in penalties_dict
+            }
+            penalties_data.append(penalty)
+            penalty_count += 1
+
         try:
-            GameService.update_game(game_id, form_data)
+            GameService.update_game(game_id, form_data, penalties_data)
             flash('Game updated successfully!', 'success')
             return redirect(url_for('main.games'))
         except Exception as e:
             flash(f'Error updating game: {str(e)}', 'error')
 
-    return render_template('admin/edit_game.html', form=form, game=game)
+    # Convert penalties to dictionaries for JSON serialization
+    penalties = game.penalties.all()
+    penalties_dict = [{
+        'id': p.id,
+        'name': p.name,
+        'value': p.value,
+        'stackable': p.stackable
+    } for p in penalties]
+
+    return render_template('admin/edit_game.html', form=form, game=game, penalties_json=penalties_dict)
 
 
 @admin_bp.route('/games/delete/<int:game_id>', methods=['POST'])
@@ -214,12 +253,42 @@ def edit_scores(game_id):
         except Exception as e:
             flash(f'Error saving scores: {str(e)}', 'error')
 
+    penalties = game.penalties.all()
+
+    # Convert penalties to dictionaries for JSON serialization
+    penalties_dict = [{
+        'id': p.id,
+        'name': p.name,
+        'value': p.value,
+        'unit': 'seconds' if game.metric_type == 'time' else 'points',
+        'stackable': p.stackable
+    } for p in penalties]
+
+    # Convert teams to dictionaries for JSON serialization
+    teams_dict = [{
+        'id': t.id,
+        'name': t.name,
+        'color': t.color
+    } for t in teams]
+
+    # Convert existing_scores to dictionaries for JSON serialization
+    existing_scores_dict = {}
+    for team_id, score in existing_scores.items():
+        existing_scores_dict[team_id] = {
+            'score_value': score.score_value,
+            'points': score.points,
+            'notes': score.notes
+        }
+
     return render_template(
         'admin/live_scoring.html',
         form=form,
         game=game,
         teams=teams,
-        existing_scores=existing_scores
+        teams_json=teams_dict,
+        existing_scores=existing_scores,
+        existing_scores_json=existing_scores_dict,
+        penalties=penalties_dict
     )
 
 

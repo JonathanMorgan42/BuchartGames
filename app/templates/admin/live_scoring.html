@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Game Night Tracker - Live Scoring: {{ game.name }}{% endblock %}
+{% block title %}Live Scoring - {{ game.name }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/scores.css') }}">
@@ -8,162 +8,273 @@
 {% endblock %}
 
 {% block content %}
-<div class="live-scoring-header card">
-    <h1>Live Scoring: {{ game.name }}</h1>
-    <p>Game #{{ game.sequence_number }} - {{ game.type|title }}</p>
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Live Scoring</h1>
+        <p class="page-subtitle">{{ game.name }}</p>
+    </div>
+    <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Games
+    </a>
 </div>
 
-<div class="card scoring-tools">
-    <div class="scoring-method">
-        <div class="preview-header">
-        <h2>Scoring Method: {{ game.metric_type|title }}</h2>
-            <p class="preview-description">Configure how teams will be scored in this game</p>
+<!-- Game Info Card -->
+<div class="game-info-card">
+    <div class="game-info-content">
+        <div class="game-info-item">
+            <span class="game-info-label">Type:</span>
+            <span class="game-info-value">{{ game.type|title }}</span>
         </div>
+        <div class="game-info-item">
+            <span class="game-info-label">Scoring:</span>
+            <span class="game-info-value">{{ game.metric_type|title }} ({{ game.scoring_direction.replace('_', ' ')|title }})</span>
+        </div>
+        <div class="game-info-item">
+            <span class="game-info-label">Points:</span>
+            <span class="game-info-value">{{ game.point_scheme }}x multiplier</span>
+        </div>
+    </div>
 
-        <div class="scoring-info">
-            <div class="info-item">
-                <span class="info-label">Point Increment:</span>
-                <span class="info-value">{{ game.point_scheme }}</span>
-                <input type="hidden" id="pointIncrement" value="{{ game.point_scheme }}">
+    {% if game.isCompleted %}
+    <div class="alert alert-warning">
+        <strong>Note:</strong> This game has been marked as completed. Changes will update final scores.
+    </div>
+    {% endif %}
+</div>
+
+{% if penalties %}
+<div class="penalties-info-section">
+    <h3>Available Penalties</h3>
+    <div class="penalties-grid">
+        {% for penalty in penalties %}
+        <div class="penalty-card">
+            <div class="penalty-card-header">
+                <span class="penalty-card-name">{{ penalty.name }}</span>
+                <span class="penalty-type-badge">{% if penalty.stackable %}Stackable{% else %}One-time{% endif %}</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">Scoring Direction:</span>
-                <span class="info-value">
-                    {% if game.lower_is_better %}
-                    Lower is better (e.g. time)
-                    {% else %}
-                    Higher is better (e.g. count)
-                    {% endif %}
-                </span>
-                <input type="hidden" id="lowerIsBetter" value="{{ "true" if game.lower_is_better else "false" }}">
+            <div class="penalty-card-value">+{{ penalty.value }} {{ penalty.unit }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Team Selector -->
+<div class="team-selector-container">
+    <label for="team-selector">Select Team to Score:</label>
+    <select id="team-selector" class="team-selector" onchange="switchTeam()">
+        <option value="">Choose a team...</option>
+        {% for team in teams %}
+        <option value="{{ team.id }}" data-color="{{ team.color }}">
+            {{ team.name }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Team Scoring Card (Initially Hidden) -->
+<div id="team-scoring-card" class="team-scoring-card" style="display: none;">
+    <!-- Team Header -->
+    <div class="team-header" id="team-header">
+        <div class="team-info">
+            <div class="team-color-indicator" id="team-color"></div>
+            <h2 id="selected-team-name">Team Name</h2>
+        </div>
+        <div class="team-rank-display">
+            <div class="rank-badge" id="rank-badge">
+                <span class="rank-label">Rank</span>
+                <span class="rank-value" id="rank-display">-</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">Teams Participating:</span>
-                <span class="info-value" id="participatingTeamsCount">{{ teams|length }}</span>
+            <div class="points-badge">
+                <span class="points-label">Points</span>
+                <span class="points-value" id="points-display">0</span>
             </div>
+        </div>
+    </div>
+
+    <!-- Score Input Section -->
+    <div class="score-section">
+        <h3>
+            {% if game.metric_type == 'time' %}
+            Time (seconds)
+            {% elif game.metric_type == 'count' %}
+            Count
+            {% else %}
+            Score
+            {% endif %}
+        </h3>
+
+        <div class="unified-score-input">
+            <button type="button" class="score-btn btn-decrement" onclick="decrementScore()">
+                <i class="fas fa-minus"></i>
+            </button>
+
+            <input type="number"
+                   id="score-input"
+                   class="score-input-field"
+                   placeholder="Enter score"
+                   step="0.01"
+                   value=""
+                   oninput="onScoreChange()">
+
+            <button type="button" class="score-btn btn-increment" onclick="incrementScore()">
+                <i class="fas fa-plus"></i>
+            </button>
         </div>
 
         {% if game.metric_type == 'time' %}
-        <div class="stopwatch-container">
-            <div id="stopwatchDisplay">00:00.000</div>
-            <div class="stopwatch-controls">
-                <button id="startStopwatch" class="btn" type="button">Start</button>
-                <button id="stopStopwatch" class="btn" type="button">Stop</button>
-                <button id="resetStopwatch" class="btn" type="button">Reset</button>
-            </div>
-            <div class="time-record-container">
-                <select id="teamSelect" class="form-control">
-                    <option value="">Select Team to Record Time</option>
-                    {% for team in teams %}
-                    <option value="{{ team.id }}">{{ team.name }}</option>
-                    {% endfor %}
-                </select>
-                <button id="recordTime" class="btn btn-secondary" type="button">Record Time</button>
+        <div class="stopwatch-controls-mobile">
+            <div class="timer-display-mobile" id="timer-display">00:00:00</div>
+            <div class="stopwatch-buttons-mobile">
+                <button type="button" onclick="startStopwatch()" class="btn-stopwatch btn-start">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button type="button" onclick="stopStopwatch()" class="btn-stopwatch btn-stop">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button type="button" onclick="resetStopwatch()" class="btn-stopwatch btn-reset">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
             </div>
         </div>
         {% endif %}
     </div>
-</div>
 
-<div class="card">
-    <form id="liveScoreForm" method="POST" action="{{ url_for('admin.edit_scores', game_id=game.id) }}" onsubmit="return prepareFormSubmission()">
-        {{ form.hidden_tag() }}
-        {{ form.game_id }}
+    <!-- Penalties Section -->
+    {% if penalties %}
+    <div class="penalties-section">
+        <h3>Penalties</h3>
 
-        <div class="team-scoring-container">
-            <div class="table-wrapper">
-            <table class="scoring-table">
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Score</th>
-                        {% if game.metric_type == 'count' %}
-                        <th>Counter</th>
-                        {% endif %}
-                        <th>Rank</th>
-                        <th>Points</th>
-                        <th>Clear</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in teams %}
-                    <tr>
-                        <td>{{ team.name }}</td>
-                        <td>
-                            <input type="number"
-                                   class="team-score form-control"
-                                   data-team-id="{{ team.id }}"
-                                   id="score-{{ team.id }}"
-                                   name="score-{{ team.id }}"
-                                   step="0.01"
-                                   value="{{ existing_scores[team.id].score_value if team.id in existing_scores else '' }}"
-                                   onchange="updateRankingsAndPoints()">
-                        </td>
-                        {% if game.metric_type == 'count' %}
-                        <td>
-                            <div class="counter-controls">
-                                <button type="button" onclick="decrementCounter('{{ team.id }}')" class="counter-btn">-</button>
-                                <span id="counter-{{ team.id }}" class="counter-value">
-                                    {{ existing_scores[team.id].score_value|int if team.id in existing_scores and existing_scores[team.id].score_value else 0 }}
-                                </span>
-                                <button type="button" onclick="incrementCounter('{{ team.id }}')" class="counter-btn">+</button>
-                            </div>
-                        </td>
-                        {% endif %}
-                        <td><span id="rank-{{ team.id }}" class="team-rank">
-                            {% if team.id in existing_scores %}
-                                {{ loop.index }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </span></td>
-                        <td><span id="points-{{ team.id }}" class="team-points">
-                            {{ existing_scores[team.id].points if team.id in existing_scores else 0 }}
-                        </span></td>
-                        <td>
-                            <button type="button" onclick="clearTeamScore('{{ team.id }}')" class="clear-btn" title="Clear score">✕</button>
-                        </td>
-                        <input type="hidden" id="points-input-{{ team.id }}" name="points-input-{{ team.id }}" value="{{ existing_scores[team.id].points if team.id in existing_scores else 0 }}">
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% set stackable_penalties = penalties|selectattr('stackable')|list %}
+        {% set onetime_penalties = penalties|rejectattr('stackable')|list %}
+
+        {% if stackable_penalties %}
+        <div class="stackable-penalties">
+            <h4>Stackable Penalties</h4>
+            <p class="help-text">Can be applied multiple times</p>
+
+            {% for penalty in stackable_penalties %}
+            <div class="penalty-counter-row">
+                <div class="penalty-info-mobile">
+                    <span class="penalty-icon">🔵</span>
+                    <div>
+                        <div class="penalty-name-mobile">{{ penalty.name }}</div>
+                        <div class="penalty-details-mobile">+{{ penalty.value }} {{ penalty.unit }}</div>
+                    </div>
+                </div>
+
+                <div class="penalty-counter">
+                    <button type="button" class="penalty-btn btn-decrement"
+                            onclick="decrementPenalty('{{ penalty.id }}')">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="penalty-count" id="penalty-count-{{ penalty.id }}">0</span>
+                    <button type="button" class="penalty-btn btn-increment"
+                            onclick="incrementPenalty('{{ penalty.id }}', {{ penalty.value }}, '{{ penalty.unit }}')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
             </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if onetime_penalties %}
+        <div class="onetime-penalties">
+            <h4>One-Time Penalties</h4>
+            <p class="help-text">Select penalties that apply</p>
+
+            <div class="penalty-tags">
+                {% for penalty in onetime_penalties %}
+                <div class="penalty-tag" id="penalty-tag-{{ penalty.id }}"
+                     data-penalty-id="{{ penalty.id }}"
+                     data-penalty-value="{{ penalty.value }}"
+                     data-penalty-unit="{{ penalty.unit }}"
+                     onclick="togglePenaltyTag('{{ penalty.id }}', {{ penalty.value }}, '{{ penalty.unit }}')">
+                    <span class="penalty-tag-icon">⚪</span>
+                    <div class="penalty-tag-content">
+                        <div class="penalty-tag-name">{{ penalty.name }}</div>
+                        <div class="penalty-tag-value">+{{ penalty.value }} {{ penalty.unit }}</div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
+        {% endif %}
 
-        <div class="save-actions">
-            <div class="form-group checkbox">
-                {{ form.is_completed(class="form-check", id="markGameCompleted") }}
-                {{ form.is_completed.label }}
+        <!-- Total with Penalties -->
+        <div class="penalty-total">
+            <div class="penalty-total-row">
+                <span>Base Score:</span>
+                <span id="base-score-display">0</span>
             </div>
-            <a href="{{ url_for('main.games') }}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary" onclick="prepareFormSubmission(); return false;">
-                <i class="fas fa-save"></i> Save Scores
-            </button>
-        </div>
-    
-
+            <div class="penalty-total-row">
+                <span>Penalty Total:</span>
+                <span id="penalty-total-display">0</span>
+            </div>
+            <div class="penalty-total-row final">
+                <span>Final Score:</span>
+                <span id="final-score-display">0</span>
             </div>
         </div>
-    </form>
-</div>
-
-<div class="card point-calculation-preview">
-    <div class="preview-header">
-        <h2>Point Distribution Preview</h2>
-        <p class="preview-description">Based on the selected point increment, here's how points will be distributed to teams</p>
     </div>
+    {% endif %}
 
-    <div class="point-distribution-preview" id="pointDistributionPreview">
-        <!-- Will be populated by JavaScript -->
+    <!-- Clear Button -->
+    <div class="action-buttons">
+        <button type="button" class="btn btn-warning" onclick="clearCurrentTeam()">
+            <i class="fas fa-eraser"></i> Clear Team Score
+        </button>
     </div>
 </div>
 
+<!-- Rankings Overview (Always Visible) -->
+<div class="rankings-overview">
+    <h3>Current Rankings</h3>
+    <div class="rankings-list" id="rankings-list">
+        <!-- Populated by JavaScript -->
+    </div>
+</div>
 
+<!-- Form for Submission -->
+<form id="scoring-form" method="POST">
+    {{ form.hidden_tag() }}
 
+    <!-- Save Button -->
+    <div class="form-actions">
+        <div class="checkbox-group">
+            {{ form.is_completed(class="form-check") }}
+            {{ form.is_completed.label }}
+        </div>
+        <button type="submit" class="btn btn-primary btn-save">
+            <i class="fas fa-save"></i> Save All Scores
+        </button>
+    </div>
 
+    <!-- Hidden inputs for all teams -->
+    {% for team in teams %}
+    <input type="hidden" id="score-{{ team.id }}" name="score-{{ team.id }}" value="{{ existing_scores[team.id].score_value if team.id in existing_scores else '' }}">
+    <input type="hidden" id="points-input-{{ team.id }}" name="points-input-{{ team.id }}" value="{{ existing_scores[team.id].points if team.id in existing_scores else 0 }}">
+    <input type="hidden" id="penalties-{{ team.id }}" name="penalties-{{ team.id }}" value="">
+    {% endfor %}
+</form>
 
+{% endblock %}
 
+{% block scripts %}
+<script>
+// Pass data to JavaScript
+window.gameData = {
+    id: {{ game.id }},
+    metricType: '{{ game.metric_type }}',
+    scoringDirection: '{{ game.scoring_direction }}',
+    pointScheme: {{ game.point_scheme }},
+    teamsCount: {{ teams|length }}
+};
+
+window.teamsData = {{ teams_json|tojson|safe }};
+window.existingScores = {{ existing_scores_json|tojson|safe }};
+window.penaltiesData = {{ penalties|tojson|safe }};
+</script>
 <script src="{{ url_for('static', filename='js/scores.js') }}"></script>
 {% endblock %}

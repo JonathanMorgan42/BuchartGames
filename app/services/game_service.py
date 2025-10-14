@@ -1,6 +1,6 @@
 """Game service - business logic for games."""
 from app import db
-from app.models import Game, Score
+from app.models import Game, Score, Penalty
 
 
 class GameService:
@@ -27,12 +27,13 @@ class GameService:
         return Game.query.get_or_404(game_id)
 
     @staticmethod
-    def create_game(form_data):
+    def create_game(form_data, penalties_data=None):
         """
         Create a new game.
 
         Args:
             form_data: Dict with game data from form
+            penalties_data: List of penalty dicts (optional)
 
         Returns:
             Created Game object
@@ -43,21 +44,36 @@ class GameService:
             sequence_number=form_data['sequence_number'],
             point_scheme=form_data['point_scheme'],
             metric_type=form_data['metric_type'],
-            lower_is_better=form_data.get('lower_is_better', True),
+            scoring_direction=form_data.get('scoring_direction', 'lower_better'),
+            public_input=form_data.get('public_input', False),
             isCompleted=False
         )
         db.session.add(game)
+        db.session.flush()  # Get game.id for penalties
+
+        # Add penalties if provided
+        if penalties_data:
+            for penalty_data in penalties_data:
+                penalty = Penalty(
+                    game_id=game.id,
+                    name=penalty_data['name'],
+                    value=penalty_data['value'],
+                    stackable=penalty_data.get('stackable', False)
+                )
+                db.session.add(penalty)
+
         db.session.commit()
         return game
 
     @staticmethod
-    def update_game(game_id, form_data):
+    def update_game(game_id, form_data, penalties_data=None):
         """
         Update game.
 
         Args:
             game_id: Game ID
             form_data: Dict with updated game data
+            penalties_data: List of penalty dicts (optional)
         """
         game = Game.query.get_or_404(game_id)
 
@@ -66,7 +82,22 @@ class GameService:
         game.sequence_number = form_data['sequence_number']
         game.point_scheme = form_data['point_scheme']
         game.metric_type = form_data['metric_type']
-        game.lower_is_better = form_data.get('lower_is_better', True)
+        game.scoring_direction = form_data.get('scoring_direction', 'lower_better')
+        game.public_input = form_data.get('public_input', False)
+
+        # Delete existing penalties
+        Penalty.query.filter_by(game_id=game_id).delete()
+
+        # Add new penalties if provided
+        if penalties_data:
+            for penalty_data in penalties_data:
+                penalty = Penalty(
+                    game_id=game_id,
+                    name=penalty_data['name'],
+                    value=penalty_data['value'],
+                    stackable=penalty_data.get('stackable', False)
+                )
+                db.session.add(penalty)
 
         db.session.commit()
         return game

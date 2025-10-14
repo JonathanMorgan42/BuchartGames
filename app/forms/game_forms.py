@@ -25,7 +25,7 @@ class GameForm(FlaskForm):
         default=0
     )
     point_scheme = SelectField(
-        'Point Increment',
+        'Points Distribution',
         choices=[
             (1, 'Standard (1, 2, 3, 4, 5, 6...)'),
             (2, 'Double (2, 4, 6, 8, 10, 12...)'),
@@ -43,7 +43,16 @@ class GameForm(FlaskForm):
         ],
         validators=[DataRequired()]
     )
-    lower_is_better = BooleanField('Lower value is better', default=True)
+    scoring_direction = SelectField(
+        'Scoring Direction',
+        choices=[
+            ('lower_better', 'Lower is Better (e.g., time-based)'),
+            ('higher_better', 'Higher is Better (e.g., points-based)')
+        ],
+        validators=[DataRequired()],
+        default='lower_better'
+    )
+    public_input = BooleanField('Allow Public Score Input', default=False)
     submit = SubmitField('Save Game')
 
 

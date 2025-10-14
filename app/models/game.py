@@ -13,6 +13,8 @@ class Game(db.Model):
     sequence_number = db.Column(db.Integer, default=0)
     point_scheme = db.Column(db.Integer, default=1)
     metric_type = db.Column(db.String(20), default='manual')
-    lower_is_better = db.Column(db.Boolean, default=True)
-    
+    scoring_direction = db.Column(db.String(20), default='lower_better')
+    public_input = db.Column(db.Boolean, default=False)
+
     scores = db.relationship('Score', back_populates='game', lazy='dynamic', cascade='all, delete-orphan')
+    penalties = db.relationship('Penalty', back_populates='game', lazy='dynamic', cascade='all, delete-orphan')

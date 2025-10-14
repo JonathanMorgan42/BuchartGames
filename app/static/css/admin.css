@@ -376,3 +376,158 @@
         gap: 1.5rem;
     }
 }
+
+/* Penalty Management */
+.penalty-item {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.penalty-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-gold);
+}
+
+.penalty-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: end;
+}
+
+.penalty-actions {
+    display: flex;
+    align-items: flex-end;
+}
+
+.penalty-actions button {
+    width: 100%;
+}
+
+#penalties-container:empty::after {
+    content: "No penalties added yet. Click 'Add Penalty' to define penalties for this game.";
+    display: block;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-light);
+}
+
+@media (min-width: 640px) {
+    .penalty-row {
+        grid-template-columns: 2fr 1fr 1fr auto;
+    }
+}
+
+@media (min-width: 768px) {
+    .penalty-item {
+        padding: 1.5rem;
+    }
+}
+
+/* Scoring Direction Toggle Tiles */
+.scoring-direction-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.scoring-tile {
+    position: relative;
+    background: rgba(15, 23, 42, 0.5);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.scoring-tile:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.scoring-tile.active {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+    border-color: var(--accent-gold);
+    border-width: 3px;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2),
+                0 8px 24px rgba(251, 191, 36, 0.3);
+}
+
+.tile-icon {
+    font-size: 3rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.scoring-tile:hover .tile-icon {
+    transform: scale(1.1);
+}
+
+.scoring-tile.active .tile-icon {
+    transform: scale(1.15);
+}
+
+.tile-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.scoring-tile.active .tile-label {
+    color: var(--accent-gold);
+}
+
+/* Tooltip for scoring tiles */
+.scoring-tile::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    border: 1px solid var(--border-light);
+    z-index: 10;
+}
+
+.scoring-tile:hover::after {
+    opacity: 1;
+}
+
+@media (max-width: 640px) {
+    .scoring-direction-tiles {
+        grid-template-columns: 1fr;
+    }
+
+    .scoring-tile {
+        padding: 1.5rem 1rem;
+    }
+
+    .tile-icon {
+        font-size: 2.5rem;
+    }
+}

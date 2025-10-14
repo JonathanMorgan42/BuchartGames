@@ -46,7 +46,8 @@ def create_app(config_name='development'):
         from app.models.participant import Participant
         from app.models.game import Game
         from app.models.score import Score
-        
+        from app.models.penalty import Penalty
+
         # Now create tables
         db.create_all()
         initialize_admins(app)

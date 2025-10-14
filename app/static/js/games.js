@@ -153,3 +153,105 @@ if (pointSchemeElement) {
     updatePointDistributionPreview();
     pointSchemeElement.addEventListener('change', updatePointDistributionPreview);
 }
+
+// Penalty management
+let penaltyCount = 0;
+
+function addPenalty(name = '', value = '', stackable = false) {
+    const container = document.getElementById('penalties-container');
+    if (!container) return;
+
+    const penaltyDiv = document.createElement('div');
+    penaltyDiv.className = 'penalty-item';
+    penaltyDiv.dataset.penaltyId = penaltyCount;
+
+    penaltyDiv.innerHTML = `
+        <div class="form-row penalty-row">
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="penalties[${penaltyCount}][name]"
+                       class="form-control" placeholder="e.g., False start"
+                       value="${name}" required>
+            </div>
+            <div class="form-group">
+                <label>Value</label>
+                <input type="number" name="penalties[${penaltyCount}][value]"
+                       class="form-control" placeholder="e.g., 5"
+                       value="${value}" required>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="penalties[${penaltyCount}][stackable]"
+                           value="true" ${stackable ? 'checked' : ''}>
+                    Stackable (can apply multiple times)
+                </label>
+            </div>
+            <div class="form-group penalty-actions">
+                <button type="button" class="btn btn-danger btn-sm remove-penalty-btn"
+                        onclick="removePenalty(${penaltyCount})">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(penaltyDiv);
+    penaltyCount++;
+}
+
+function removePenalty(penaltyId) {
+    const penaltyItem = document.querySelector(`[data-penalty-id="${penaltyId}"]`);
+    if (penaltyItem) {
+        penaltyItem.remove();
+    }
+}
+
+// Initialize penalty management
+document.addEventListener('DOMContentLoaded', function() {
+    const addPenaltyBtn = document.getElementById('add-penalty-btn');
+    if (addPenaltyBtn) {
+        addPenaltyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addPenalty();
+        });
+    }
+
+    // Load existing penalties if on edit page
+    const existingPenalties = window.existingPenalties || [];
+    existingPenalties.forEach(penalty => {
+        addPenalty(penalty.name, penalty.value, penalty.stackable);
+    });
+
+    // Initialize scoring direction tiles
+    initializeScoringTiles();
+});
+
+// Scoring direction tile management
+function initializeScoringTiles() {
+    const tiles = document.querySelectorAll('.scoring-tile');
+    const hiddenInput = document.getElementById('scoring_direction');
+
+    if (!tiles.length || !hiddenInput) return;
+
+    // Set initial active tile based on hidden input value
+    const currentValue = hiddenInput.value || 'lower_better';
+    tiles.forEach(tile => {
+        if (tile.dataset.value === currentValue) {
+            tile.classList.add('active');
+        }
+    });
+
+    // Add click handlers
+    tiles.forEach(tile => {
+        tile.addEventListener('click', function() {
+            // Remove active class from all tiles
+            tiles.forEach(t => t.classList.remove('active'));
+
+            // Add active class to clicked tile
+            this.classList.add('active');
+
+            // Update hidden input value
+            hiddenInput.value = this.dataset.value;
+        });
+    });
+}
