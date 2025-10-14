@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <title>{% block title %}Game Night Tracker{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Logout Confirmation Bar -->
+    {% if current_user.is_authenticated %}
+    <div id="logoutConfirmBar" class="notification-bar" style="display: none;">
+        <div class="notification-content">
+            <span>⚠️ Are you sure you want to log out?</span>
+            <div class="notification-actions">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">Yes, Logout</a>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeLogoutConfirm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="{{ url_for('main.index') }}" class="logo">
+                🏆 Game Night Tracker
+            </a>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                ☰
+            </button>
+            <nav class="nav-menu" id="navMenu">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('main.index') }}"
+                           class="{{ 'active' if request.endpoint == 'main.index' else '' }}">
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('main.teams') }}"
+                           class="{{ 'active' if request.endpoint == 'main.teams' else '' }}">
+                            Teams
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('main.games') }}"
+                           class="{{ 'active' if request.endpoint == 'main.games' else '' }}">
+                            Games
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li>
+                        <a href="#" id="logoutLink">
+                            Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('auth.login') }}"
+                           class="{{ 'active' if request.endpoint == 'auth.login' else '' }}">
+                            Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {% if category == 'success' %}✅{% endif %}
+                            {% if category == 'error' %}❌{% endif %}
+                            {% if category == 'warning' %}⚠️{% endif %}
+                            {% if category == 'info' %}ℹ️{% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Game Night Tracker | Built for epic game nights 🎮</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

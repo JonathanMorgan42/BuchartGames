@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Game Night Tracker - Edit Team
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('color');
+    const colorPreview = document.getElementById('colorPreview');
+    const colorValue = document.getElementById('colorValue');
+
+    if (colorInput && colorPreview && colorValue) {
+        function updatePreview() {
+            const color = colorInput.value;
+            colorPreview.style.backgroundColor = color;
+            colorValue.textContent = color.toUpperCase();
+        }
+
+        colorInput.addEventListener('input', updatePreview);
+        updatePreview();
+    }
+});
+</script>
+
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/teams.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('color');
+    const colorPreview = document.getElementById('colorPreview');
+    const colorValue = document.getElementById('colorValue');
+
+    if (colorInput && colorPreview && colorValue) {
+        function updatePreview() {
+            const color = colorInput.value;
+            colorPreview.style.backgroundColor = color;
+            colorValue.textContent = color.toUpperCase();
+        }
+
+        colorInput.addEventListener('input', updatePreview);
+        updatePreview();
+    }
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Edit Team: {{ team.name }}</h1>
+        <p class="page-subtitle">Update team information and participants</p>
+    </div>
+    <a href="{{ url_for('main.teams') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Teams
+    </a>
+</div>
+
+<div class="card form-card">
+    <form method="POST" action="{{ url_for('admin.edit_team', team_id=team.id) }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-section">
+            <h2>Team Information</h2>
+
+            <div class="team-stats-summary">
+                <div class="stat-card">
+                    <div class="stat-value">{{ team.totalPoints }}</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ team.games_played }}</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Team Name</label>
+                {{ form.name(class="form-control", placeholder="Enter team name") }}
+                {% if form.name.errors %}
+                    <div class="form-error">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="color">Team Color</label>
+                <div class="color-picker-container">
+                    {{ form.color(class="form-control color-input", type="color") }}
+                    <span class="color-preview" id="colorPreview"></span>
+                    <span class="color-value" id="colorValue">{{ form.color.data or '#3b82f6' }}</span>
+                </div>
+                {% if form.color.errors %}
+                    <div class="form-error">
+                        {% for error in form.color.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="help-text">Choose a color to identify this team on the leaderboard</small>
+            </div>
+
+        </div>
+
+        <div class="form-section">
+            <h2>Participant 1</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="participant1FirstName">First Name</label>
+                    {{ form.participant1FirstName(class="form-control", placeholder="First name") }}
+                    {% if form.participant1FirstName.errors %}
+                        <div class="form-error">
+                            {% for error in form.participant1FirstName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="participant1LastName">Last Name</label>
+                    {{ form.participant1LastName(class="form-control", placeholder="Last name") }}
+                    {% if form.participant1LastName.errors %}
+                        <div class="form-error">
+                            {% for error in form.participant1LastName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Participant 2</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="participant2FirstName">First Name</label>
+                    {{ form.participant2FirstName(class="form-control", placeholder="First name") }}
+                    {% if form.participant2FirstName.errors %}
+                        <div class="form-error">
+                            {% for error in form.participant2FirstName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="participant2LastName">Last Name</label>
+                    {{ form.participant2LastName(class="form-control", placeholder="Last name") }}
+                    {% if form.participant2LastName.errors %}
+                        <div class="form-error">
+                            {% for error in form.participant2LastName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('color');
+    const colorPreview = document.getElementById('colorPreview');
+    const colorValue = document.getElementById('colorValue');
+
+    if (colorInput && colorPreview && colorValue) {
+        function updatePreview() {
+            const color = colorInput.value;
+            colorPreview.style.backgroundColor = color;
+            colorValue.textContent = color.toUpperCase();
+        }
+
+        colorInput.addEventListener('input', updatePreview);
+        updatePreview();
+    }
+});
+</script>
+
+{% endblock %}

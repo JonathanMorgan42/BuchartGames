@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Game Night Tracker - Live Scoring: {{ game.name }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/scores.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="live-scoring-header card">
+    <h1>Live Scoring: {{ game.name }}</h1>
+    <p>Game #{{ game.sequence_number }} - {{ game.type|title }}</p>
+</div>
+
+<div class="card scoring-tools">
+    <div class="scoring-method">
+        <div class="preview-header">
+        <h2>Scoring Method: {{ game.metric_type|title }}</h2>
+            <p class="preview-description">Configure how teams will be scored in this game</p>
+        </div>
+
+        <div class="scoring-info">
+            <div class="info-item">
+                <span class="info-label">Point Increment:</span>
+                <span class="info-value">{{ game.point_scheme }}</span>
+                <input type="hidden" id="pointIncrement" value="{{ game.point_scheme }}">
+            </div>
+            <div class="info-item">
+                <span class="info-label">Scoring Direction:</span>
+                <span class="info-value">
+                    {% if game.lower_is_better %}
+                    Lower is better (e.g. time)
+                    {% else %}
+                    Higher is better (e.g. count)
+                    {% endif %}
+                </span>
+                <input type="hidden" id="lowerIsBetter" value="{{ "true" if game.lower_is_better else "false" }}">
+            </div>
+            <div class="info-item">
+                <span class="info-label">Teams Participating:</span>
+                <span class="info-value" id="participatingTeamsCount">{{ teams|length }}</span>
+            </div>
+        </div>
+
+        {% if game.metric_type == 'time' %}
+        <div class="stopwatch-container">
+            <div id="stopwatchDisplay">00:00.000</div>
+            <div class="stopwatch-controls">
+                <button id="startStopwatch" class="btn" type="button">Start</button>
+                <button id="stopStopwatch" class="btn" type="button">Stop</button>
+                <button id="resetStopwatch" class="btn" type="button">Reset</button>
+            </div>
+            <div class="time-record-container">
+                <select id="teamSelect" class="form-control">
+                    <option value="">Select Team to Record Time</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+                <button id="recordTime" class="btn btn-secondary" type="button">Record Time</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <form id="liveScoreForm" method="POST" action="{{ url_for('admin.edit_scores', game_id=game.id) }}" onsubmit="return prepareFormSubmission()">
+        {{ form.hidden_tag() }}
+        {{ form.game_id }}
+
+        <div class="team-scoring-container">
+            <div class="table-wrapper">
+            <table class="scoring-table">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Score</th>
+                        {% if game.metric_type == 'count' %}
+                        <th>Counter</th>
+                        {% endif %}
+                        <th>Rank</th>
+                        <th>Points</th>
+                        <th>Clear</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr>
+                        <td>{{ team.name }}</td>
+                        <td>
+                            <input type="number"
+                                   class="team-score form-control"
+                                   data-team-id="{{ team.id }}"
+                                   id="score-{{ team.id }}"
+                                   name="score-{{ team.id }}"
+                                   step="0.01"
+                                   value="{{ existing_scores[team.id].score_value if team.id in existing_scores else '' }}"
+                                   onchange="updateRankingsAndPoints()">
+                        </td>
+                        {% if game.metric_type == 'count' %}
+                        <td>
+                            <div class="counter-controls">
+                                <button type="button" onclick="decrementCounter('{{ team.id }}')" class="counter-btn">-</button>
+                                <span id="counter-{{ team.id }}" class="counter-value">
+                                    {{ existing_scores[team.id].score_value|int if team.id in existing_scores and existing_scores[team.id].score_value else 0 }}
+                                </span>
+                                <button type="button" onclick="incrementCounter('{{ team.id }}')" class="counter-btn">+</button>
+                            </div>
+                        </td>
+                        {% endif %}
+                        <td><span id="rank-{{ team.id }}" class="team-rank">
+                            {% if team.id in existing_scores %}
+                                {{ loop.index }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span></td>
+                        <td><span id="points-{{ team.id }}" class="team-points">
+                            {{ existing_scores[team.id].points if team.id in existing_scores else 0 }}
+                        </span></td>
+                        <td>
+                            <button type="button" onclick="clearTeamScore('{{ team.id }}')" class="clear-btn" title="Clear score">✕</button>
+                        </td>
+                        <input type="hidden" id="points-input-{{ team.id }}" name="points-input-{{ team.id }}" value="{{ existing_scores[team.id].points if team.id in existing_scores else 0 }}">
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            </div>
+        </div>
+
+        <div class="save-actions">
+            <div class="form-group checkbox">
+                {{ form.is_completed(class="form-check", id="markGameCompleted") }}
+                {{ form.is_completed.label }}
+            </div>
+            <a href="{{ url_for('main.games') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary" onclick="prepareFormSubmission(); return false;">
+                <i class="fas fa-save"></i> Save Scores
+            </button>
+        </div>
+    
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card point-calculation-preview">
+    <div class="preview-header">
+        <h2>Point Distribution Preview</h2>
+        <p class="preview-description">Based on the selected point increment, here's how points will be distributed to teams</p>
+    </div>
+
+    <div class="point-distribution-preview" id="pointDistributionPreview">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+
+
+
+
+
+
+<script src="{{ url_for('static', filename='js/scores.js') }}"></script>
+{% endblock %}

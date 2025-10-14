@@ -1,0 +1,107 @@
+<!-- ========================================
+     FILE: app/templates/admin/login.html
+     Modern Dark Theme Login Page
+     ======================================== -->
+
+{% extends "base.html" %}
+
+{% block title %}Admin Login - Game Night Tracker{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<style>
+    /* Override for login page - full height background */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    header, footer {
+        display: none; /* Hide header/footer on login page */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h1>Admin Login</h1>
+            <p>Enter your credentials to continue</p>
+        </div>
+
+        <!-- Flash Messages (errors) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {% if category == 'error' %}❌{% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                {{ form.username(class="form-control", placeholder="Enter username", autocomplete="username") }}
+                {% if form.username.errors %}
+                    <div class="form-error">
+                        {% for error in form.username.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", placeholder="Enter password", autocomplete="current-password") }}
+                {% if form.password.errors %}
+                    <div class="form-error">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="login-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🔓 Login
+                </button>
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-lg">
+                    🏠 Back to Home
+                </a>
+            </div>
+        </form>
+
+        <!-- Additional Info -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-light); text-align: center;">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                🎮 Game Night Tracker Admin Portal
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- No additional scripts needed for login page -->
+{% endblock %}

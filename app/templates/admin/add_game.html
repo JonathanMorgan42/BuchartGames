@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Game Night Tracker - Add New Game{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/scores.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Add New Game</h1>
+        <p class="page-subtitle">Create a new game with scoring settings</p>
+    </div>
+    <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Games
+    </a>
+</div>
+
+<div class="card form-card">
+    <form method="POST" action="{{ url_for('admin.add_game') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.name.label }}
+                    {{ form.name(class="form-control", placeholder="Enter game name") }}
+                    {% if form.name.errors %}
+                        <div class="form-error">
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.type.label }}
+                    {{ form.type(class="form-control") }}
+                    {% if form.type.errors %}
+                        <div class="form-error">
+                            {% for error in form.type.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form.sequence_number.label }}
+                {{ form.sequence_number(class="form-control", placeholder="Game order (1, 2, 3, etc.)") }}
+                {% if form.sequence_number.errors %}
+                    <div class="form-error">
+                        {% for error in form.sequence_number.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="help-text">Determines the order in which games appear</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Scoring Settings</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.point_scheme.label }}
+                    {{ form.point_scheme(class="form-control") }}
+                    {% if form.point_scheme.errors %}
+                        <div class="form-error">
+                            {% for error in form.point_scheme.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <p class="help-text">Points awarded between each place</p>
+                </div>
+
+                <div class="form-group">
+                    {{ form.metric_type.label }}
+                    {{ form.metric_type(class="form-control") }}
+                    {% if form.metric_type.errors %}
+                        <div class="form-error">
+                            {% for error in form.metric_type.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <p class="help-text">How teams will be scored</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    {{ form.lower_is_better(class="form-check") }}
+                    {{ form.lower_is_better.label }}
+                </div>
+                <p class="help-text">Enable for time-based games (lower is better), disable for counting games (higher is better)</p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Create Game
+            </button>
+            <a href="{{ url_for('main.games') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Point Distribution Preview -->
+<div class="card point-calculation-preview">
+    <div class="preview-header">
+        <h2>Point Distribution Preview</h2>
+        <p class="preview-description">Based on the selected point increment, here's how points will be distributed to teams</p>
+    </div>
+
+    <div class="point-distribution-preview" id="pointDistributionPreview">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/games.js') }}"></script>
+{% endblock %}

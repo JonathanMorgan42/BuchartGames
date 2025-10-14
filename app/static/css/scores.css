@@ -1,0 +1,530 @@
+/**
+ * Scores/Scoring Page Styles - Modern Dark Theme
+ * Mobile-first with enhanced styling and proper layout
+ */
+
+/* Page Header */
+.scoring-header {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2));
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    text-align: center;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.scoring-header h1 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.scoring-header p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Game Info Display */
+.game-info-display {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-light);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.info-item {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Scoring Method Info */
+.scoring-method {
+    margin-bottom: 2rem;
+}
+
+.scoring-method h2 {
+    color: var(--accent-gold);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.scoring-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Scoring Container - Full Width with Custom Scroll */
+.scoring-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 0;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 60vh;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Scrollbar */
+.table-wrapper::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--radius-sm);
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--accent-gold);
+    border-radius: var(--radius-sm);
+    border: 2px solid rgba(15, 23, 42, 0.5);
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #fcd34d;
+}
+
+.scoring-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.scoring-table th {
+    background: rgba(15, 23, 42, 0.8);
+    padding: 1rem;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 2px solid var(--border-light);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.scoring-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.scoring-table tbody tr {
+    transition: all 0.2s;
+}
+
+.scoring-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+/* Highlight rows for top 3 teams */
+.scoring-table tbody tr.highlight-1 {
+    background: rgba(255, 215, 0, 0.1);
+    border-left: 3px solid #FFD700;
+}
+
+.scoring-table tbody tr.highlight-2 {
+    background: rgba(192, 192, 192, 0.1);
+    border-left: 3px solid #C0C0C0;
+}
+
+.scoring-table tbody tr.highlight-3 {
+    background: rgba(205, 127, 50, 0.1);
+    border-left: 3px solid #CD7F32;
+}
+
+.scoring-table tbody tr.highlight-1:hover,
+.scoring-table tbody tr.highlight-2:hover,
+.scoring-table tbody tr.highlight-3:hover {
+    background: var(--bg-hover);
+}
+
+.points-cell {
+    font-weight: 700;
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+}
+
+/* Team Cell */
+.team-cell {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 150px;
+}
+
+/* Rank Cell */
+.rank-cell {
+    text-align: center;
+    width: 100px;
+}
+
+.rank-input {
+    width: 80px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.rank-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Counter Controls */
+.counter-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.counter-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+    color: white;
+    border: none;
+    font-weight: 700;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.counter-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.counter-btn:active {
+    transform: scale(0.95);
+}
+
+.counter-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 50px;
+    text-align: center;
+}
+
+/* CLEAR BUTTON - Full Width Styled Button */
+.clear-btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.clear-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.clear-btn:active {
+    transform: translateY(0);
+}
+
+/* Stopwatch Controls */
+.stopwatch-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.stopwatch-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 1.5rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.05em;
+}
+
+.stopwatch-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Save Actions */
+.save-actions,
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-light);
+    flex-wrap: wrap;
+    background: var(--bg-card);
+}
+
+/* IMPROVED Points Distribution Preview */
+.point-calculation-preview {
+    margin: 2rem auto;
+    padding: 0;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    max-width: 800px;
+}
+
+.preview-header {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15));
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.preview-header h2 {
+    color: var(--accent-gold);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.preview-description {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.point-distribution-preview {
+    padding: 1.5rem;
+}
+
+.point-table {
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.point-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.2s;
+}
+
+.point-row:last-child {
+    border-bottom: none;
+}
+
+.point-row:hover:not(.header) {
+    background: rgba(251, 191, 36, 0.05);
+}
+
+.point-row.header {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+}
+
+.point-row.highlight-1 {
+    background: rgba(255, 215, 0, 0.15);
+    font-weight: 600;
+}
+
+.point-row.highlight-2 {
+    background: rgba(192, 192, 192, 0.15);
+    font-weight: 600;
+}
+
+.point-row.highlight-3 {
+    background: rgba(205, 127, 50, 0.15);
+    font-weight: 600;
+}
+
+.point-cell {
+    padding: 1rem;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.point-cell:first-child {
+    border-right: 1px solid var(--border-light);
+    font-weight: 600;
+}
+
+/* Empty State */
+.no-scores {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Game and Status Badges */
+.game-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.game-badge.trivia {
+    background-color: #818CF8;
+    color: white;
+}
+
+.game-badge.physical {
+    background-color: #F472B6;
+    color: white;
+}
+
+.game-badge.strategy {
+    background-color: #34D399;
+    color: white;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.status-badge.upcoming {
+    background-color: #E0E7FF;
+    color: #3730A3;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .info-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stopwatch-display {
+        font-size: 4rem;
+    }
+
+    .scoring-container {
+        padding: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .stopwatch-display {
+        font-size: 2.5rem;
+        min-width: 220px;
+    }
+
+    .counter-value {
+        font-size: 1.25rem;
+    }
+
+    .scoring-table {
+        font-size: 0.9rem;
+    }
+
+    .scoring-table th,
+    .scoring-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .save-actions,
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+    .counter-controls {
+        gap: 0.5rem;
+    }
+
+    .counter-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+}

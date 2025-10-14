@@ -1,0 +1,99 @@
+"""Team service - business logic for teams."""
+from app import db
+from app.models import Team, Participant, Score
+
+
+class TeamService:
+    """Service class for team operations."""
+
+    @staticmethod
+    def get_all_teams(sort_by_points=True):
+        """
+        Get all teams.
+
+        Args:
+            sort_by_points: If True, sort by total points descending
+
+        Returns:
+            List of Team objects
+        """
+        teams = Team.query.all()
+        if sort_by_points:
+            teams = sorted(teams, key=lambda t: t.totalPoints, reverse=True)
+        return teams
+
+    @staticmethod
+    def get_team_by_id(team_id):
+        """Get team by ID."""
+        return Team.query.get_or_404(team_id)
+
+    @staticmethod
+    def create_team(name, participants_data, color='#3b82f6'):
+        """
+        Create a new team with participants.
+
+        Args:
+            name: Team name
+            participants_data: List of dicts with firstName and lastName
+
+        Returns:
+            Created Team object
+        """
+        team = Team(name=name, color=color)
+        db.session.add(team)
+        db.session.flush()  # Get team.id
+
+        for participant_data in participants_data:
+            participant = Participant(
+                firstName=participant_data['firstName'],
+                lastName=participant_data['lastName'],
+                team_id=team.id
+            )
+            db.session.add(participant)
+
+        db.session.commit()
+        return team
+
+    @staticmethod
+    def update_team(team_id, name, participants_data, color=None):
+        """
+        Update team and participants.
+
+        Args:
+            team_id: Team ID
+            name: New team name
+            participants_data: List of dicts with firstName and lastName
+        """
+        team = Team.query.get_or_404(team_id)
+        team.name = name
+        if color:
+            team.color = color
+
+        participants = team.participants.all()
+        for i, participant_data in enumerate(participants_data):
+            if i < len(participants):
+                participants[i].firstName = participant_data['firstName']
+                participants[i].lastName = participant_data['lastName']
+
+        db.session.commit()
+        return team
+
+    @staticmethod
+    def delete_team(team_id):
+        """
+        Delete team and all associated data.
+
+        Args:
+            team_id: Team ID to delete
+        """
+        team = Team.query.get_or_404(team_id)
+
+        # Delete scores
+        Score.query.filter_by(team_id=team_id).delete()
+
+        # Delete participants
+        Participant.query.filter_by(team_id=team_id).delete()
+
+        # Delete team
+        db.session.delete(team)
+        db.session.commit()

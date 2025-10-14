@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Game Night Tracker - Leaderboard{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <div class="header-content">
+            <div class="header-icon">🏆</div>
+            <h1>Leaderboard</h1>
+        </div>
+        <p>Live team standings</p>
+    </div>
+
+    <div class="view-controls">
+        <div class="view-toggles">
+            <button id="tableViewBtn" class="view-btn active">📊 Table</button>
+            <button id="cardViewBtn" class="view-btn">🎴 Cards</button>
+        </div>
+    </div>
+
+    <div id="cardView" class="card-view hidden">
+        <div class="rankings-card">
+            <h2 class="card-section-title">Current Standings</h2>
+            {% for team in teams %}
+            <div class="team-ranking-item">
+                <div class="rank-number">{{ loop.index }}</div>
+                <div class="team-color-dot" style="background-color: {{ team.color or '#3b82f6' }};"></div>
+                <div class="team-name-large">{{ team.name }}</div>
+                <div class="team-total-points">{{ team.totalPoints or 0 }} pts</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if upcoming_games %}
+        <div class="upcoming-games-card">
+            <h2 class="card-section-title">Upcoming Games</h2>
+            {% for game in upcoming_games %}
+            <div class="upcoming-game-item">
+                <div class="game-number">#{{ game.sequence_number }}</div>
+                <div class="game-details">
+                    <div class="game-name">{{ game.name }}</div>
+                    <div class="game-meta">
+                        <span class="game-badge {{ game.type }}">{{ game.type }}</span>
+                        <span class="game-points">×{{ game.point_scheme }} points</span>
+                    </div>
+                </div>
+                <div class="game-status">
+                    <span class="status-badge upcoming">Upcoming</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="tableView" class="table-view">
+        <div class="table-card">
+            <div class="table-scroll">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="sticky-col rank-column">#</th>
+                            <th class="sticky-col team-column">Team</th>
+                            {% for game in games|reverse %}
+                            <th>{{ game.name }}</th>
+                            {% endfor %}
+                            <th class="total-column">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team in teams %}
+                        <tr>
+                            <td class="sticky-col rank-column">{{ loop.index }}</td>
+                            <td class="sticky-col team-column">
+                                <div class="team-info-cell">
+                                    <div class="team-color-dot" style="background-color: {{ team.color or '#3b82f6' }};"></div>
+                                    <span class="team-name-text" data-full-name="{{ team.name }}" title="{{ team.name }}">
+                                        {{ team.name[:15] }}{% if team.name|length > 15 %}...{% endif %}
+                                    </span>
+                                </div>
+                            </td>
+                            {% for game in games|reverse %}
+                            {% set score = getScore(team.id, game.id) %}
+                            <td>{{ score.points if score else '—' }}</td>
+                            {% endfor %}
+                            <td class="total-column">{{ team.totalPoints or 0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
