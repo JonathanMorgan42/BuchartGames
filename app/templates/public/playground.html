@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Simulation Playground - Game Night Tracker{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/playground.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="playground-container">
+    <!-- Header with Team Selection and Win Possibility -->
+    <div class="playground-header">
+        <div class="playground-header-top">
+            <div class="header-content">
+                <div class="header-icon">🎮</div>
+                <h1>Simulation Playground</h1>
+            </div>
+            <a href="{{ url_for('main.index') }}" class="btn-back">
+                ← Back to Home
+            </a>
+        </div>
+        <p>Explore hypothetical game outcomes and find your path to victory</p>
+    </div>
+
+    <!-- Team Selector -->
+    <div class="team-selector-section">
+        <div id="teamSelectorContainer"></div>
+    </div>
+
+    <!-- Win Possibility Banner -->
+    <div class="win-possibility-section">
+        <div id="winPossibilityContainer"></div>
+    </div>
+
+    <!-- Win Simulator -->
+    <div class="simulator-section">
+        <div id="winSimulatorContainer"></div>
+    </div>
+
+    <!-- Current Standings -->
+    <div class="standings-section">
+        <h2 class="section-title">📊 Current Standings</h2>
+        <div class="standings-list" id="currentStandings">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Game Simulations -->
+    <div class="games-section">
+        <div class="section-header">
+            <h2 class="section-title">🎯 Upcoming Games</h2>
+            <button class="btn-reset-all" id="resetAllBtn">Reset All</button>
+        </div>
+        <div id="gamePlacementContainer">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Simulated Standings -->
+    <div class="standings-section">
+        <h2 class="section-title">🔮 Projected Results</h2>
+        <div id="outcomeSummaryContainer" class="outcome-summary-wrapper"></div>
+        <div class="standings-list" id="simulatedStandings">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Share Scenario -->
+    <div class="share-section">
+        <div id="shareScenarioContainer"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/playground.js') }}"></script>
+<script>
+// Initialize data from backend
+const teams = {{ teams_json|tojson }};
+const upcomingGames = {{ upcoming_games_json|tojson }};
+
+console.log('Teams data:', teams);
+console.log('Upcoming games data:', upcomingGames);
+
+// Initialize the playground when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing playground...');
+    if (typeof window.initPlayground === 'function') {
+        window.initPlayground(teams, upcomingGames);
+        console.log('Playground initialized');
+    } else {
+        console.error('initPlayground function not found!');
+    }
+});
+</script>
+{% endblock %}
