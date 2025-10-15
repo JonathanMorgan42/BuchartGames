@@ -3,7 +3,7 @@ import math
 import random
 from typing import List, Dict, Optional, Tuple
 from app import db
-from app.models import Tournament, Match, Team, Game
+from app.models import Tournament, Match, Team, Game, Score
 
 
 class TournamentService:
