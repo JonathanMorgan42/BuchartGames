@@ -18,12 +18,12 @@
 <body>
     <!-- Logout Confirmation Bar -->
     {% if current_user.is_authenticated %}
-    <div id="logoutConfirmBar" class="notification-bar" style="display: none;">
+    <div id="logoutConfirmBar" class="notification-bar display-none">
         <div class="notification-content">
             <span>⚠️ Are you sure you want to log out?</span>
             <div class="notification-actions">
                 <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">Yes, Logout</a>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="closeLogoutConfirm()">Cancel</button>
+                <button type="button" class="btn btn-sm btn-secondary" id="cancelLogout">Cancel</button>
             </div>
         </div>
     </div>

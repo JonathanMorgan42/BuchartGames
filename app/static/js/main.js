@@ -61,19 +61,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Logout confirmation
 const logoutLink = document.getElementById('logoutLink');
+const cancelLogout = document.getElementById('cancelLogout');
+
 if (logoutLink) {
     logoutLink.addEventListener('click', function(e) {
         e.preventDefault();
         const confirmBar = document.getElementById('logoutConfirmBar');
         if (confirmBar) {
+            confirmBar.classList.remove('display-none');
             confirmBar.style.display = 'block';
         }
     });
+}
+
+if (cancelLogout) {
+    cancelLogout.addEventListener('click', closeLogoutConfirm);
 }
 
 function closeLogoutConfirm() {
     const confirmBar = document.getElementById('logoutConfirmBar');
     if (confirmBar) {
         confirmBar.style.display = 'none';
+        confirmBar.classList.add('display-none');
     }
 }

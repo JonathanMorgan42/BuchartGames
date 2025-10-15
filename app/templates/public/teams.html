@@ -20,7 +20,7 @@
 <div class="card">
     <div class="team-actions">
         <div class="search">
-            <input type="text" id="teamSearch" placeholder="Search teams..." onkeyup="filterTeams()">
+            <input type="text" id="teamSearch" placeholder="Search teams...">
         </div>
         <div class="team-count">
             <span>{{ teams|length }} teams total</span>
@@ -74,8 +74,8 @@
                             <a href="{{ url_for('admin.edit_team', team_id=team.id) }}" class="btn btn-sm btn-primary" title="Edit Team">
                                 Edit
                             </a>
-                            <button class="btn btn-sm btn-danger" title="Delete Team"
-                                    onclick="confirmDelete({{ team.id }}, '{{ team.name }}')">
+                            <button class="btn btn-sm btn-danger delete-team-btn" title="Delete Team"
+                                    data-team-id="{{ team.id }}" data-team-name="{{ team.name }}">
                                 Delete
                             </button>
                         </div>
@@ -97,7 +97,7 @@
         <p>Are you sure you want to delete the team "<span id="teamToDelete"></span>"?</p>
         <p class="warning">This action cannot be undone and will remove all participant and score data associated with this team.</p>
         <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-secondary cancel-delete-btn">Cancel</button>
             <form id="deleteForm" method="POST" action="">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger">Delete Team</button>
@@ -106,11 +106,8 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
 
-
-
-
-
-
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/teams.js') }}"></script>
 {% endblock %}

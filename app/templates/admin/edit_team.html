@@ -1,50 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Game Night Tracker - Edit Team
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const colorInput = document.getElementById('color');
-    const colorPreview = document.getElementById('colorPreview');
-    const colorValue = document.getElementById('colorValue');
-
-    if (colorInput && colorPreview && colorValue) {
-        function updatePreview() {
-            const color = colorInput.value;
-            colorPreview.style.backgroundColor = color;
-            colorValue.textContent = color.toUpperCase();
-        }
-
-        colorInput.addEventListener('input', updatePreview);
-        updatePreview();
-    }
-});
-</script>
-
-{% endblock %}
+{% block title %}Game Night Tracker - Edit Team{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/teams.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const colorInput = document.getElementById('color');
-    const colorPreview = document.getElementById('colorPreview');
-    const colorValue = document.getElementById('colorValue');
-
-    if (colorInput && colorPreview && colorValue) {
-        function updatePreview() {
-            const color = colorInput.value;
-            colorPreview.style.backgroundColor = color;
-            colorValue.textContent = color.toUpperCase();
-        }
-
-        colorInput.addEventListener('input', updatePreview);
-        updatePreview();
-    }
-});
-</script>
-
 {% endblock %}
 
 {% block content %}
@@ -170,10 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Optional Additional Participants -->
         <div id="additional-participants-container">
             {% for i in range(3, 7) %}
-            <div class="form-section additional-participant" id="participant-section-{{ i }}" style="display: none;">
+            <div class="form-section additional-participant display-none" id="participant-section-{{ i }}">
                 <div class="participant-header">
                     <h2>Participant {{ i }}</h2>
-                    <button type="button" class="btn btn-sm btn-danger remove-participant-btn" onclick="removeParticipant({{ i }})">
+                    <button type="button" class="btn btn-sm btn-danger remove-participant-btn" data-participant-index="{{ i }}">
                         <i class="fas fa-times"></i> Remove
                     </button>
                 </div>
@@ -194,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div class="add-participant-section">
-            <button type="button" class="btn btn-secondary" id="add-participant-btn" onclick="addParticipant()">
+            <button type="button" class="btn btn-secondary" id="add-participant-btn">
                 <i class="fas fa-user-plus"></i> Add Team Member
             </button>
             <p class="help-text">Teams must have at least 2 members. You can add up to 6 members total.</p>
@@ -207,101 +167,8 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </form>
 </div>
+{% endblock %}
 
-
-
-<script>
-// Color picker functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const colorInput = document.getElementById('color');
-    const colorPreview = document.getElementById('colorPreview');
-    const colorValue = document.getElementById('colorValue');
-
-    if (colorInput && colorPreview && colorValue) {
-        function updatePreview() {
-            const color = colorInput.value;
-            colorPreview.style.backgroundColor = color;
-            colorValue.textContent = color.toUpperCase();
-        }
-
-        colorInput.addEventListener('input', updatePreview);
-        updatePreview();
-    }
-
-    // Show existing participants on page load
-    for (let i = 3; i <= 6; i++) {
-        const firstNameInput = document.getElementById(`participant${i}FirstName`);
-        const lastNameInput = document.getElementById(`participant${i}LastName`);
-
-        if (firstNameInput && firstNameInput.value && firstNameInput.value.trim()) {
-            const section = document.getElementById(`participant-section-${i}`);
-            if (section) {
-                section.style.display = 'block';
-                visibleParticipants.push(i);
-                nextParticipantIndex = i + 1;
-            }
-        }
-    }
-
-    // Hide add button if at max
-    if (nextParticipantIndex > 6) {
-        document.getElementById('add-participant-btn').style.display = 'none';
-    }
-});
-
-// Dynamic participant management
-let nextParticipantIndex = 3; // Start from participant 3
-let visibleParticipants = [1, 2]; // Track which participants are visible
-
-function addParticipant() {
-    if (nextParticipantIndex > 6) {
-        alert('Maximum of 6 team members allowed');
-        return;
-    }
-
-    // Show the next hidden participant section
-    const section = document.getElementById(`participant-section-${nextParticipantIndex}`);
-    if (section) {
-        section.style.display = 'block';
-        visibleParticipants.push(nextParticipantIndex);
-        nextParticipantIndex++;
-
-        // Hide the add button if we've reached the maximum
-        if (nextParticipantIndex > 6) {
-            document.getElementById('add-participant-btn').style.display = 'none';
-        }
-    }
-}
-
-function removeParticipant(index) {
-    const section = document.getElementById(`participant-section-${index}`);
-    if (section) {
-        // Clear the input fields
-        const firstNameInput = document.getElementById(`participant${index}FirstName`);
-        const lastNameInput = document.getElementById(`participant${index}LastName`);
-
-        if (firstNameInput) firstNameInput.value = '';
-        if (lastNameInput) lastNameInput.value = '';
-
-        // Hide the section
-        section.style.display = 'none';
-
-        // Remove from visible participants
-        visibleParticipants = visibleParticipants.filter(p => p !== index);
-
-        // Update nextParticipantIndex to the lowest hidden participant
-        nextParticipantIndex = 3;
-        for (let i = 3; i <= 6; i++) {
-            if (!visibleParticipants.includes(i)) {
-                nextParticipantIndex = i;
-                break;
-            }
-        }
-
-        // Show the add button again
-        document.getElementById('add-participant-btn').style.display = 'inline-flex';
-    }
-}
-</script>
-
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/team-form.js') }}"></script>
 {% endblock %}

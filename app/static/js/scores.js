@@ -15,7 +15,83 @@ let teamPenalties = {};
 document.addEventListener('DOMContentLoaded', function() {
     initializeScores();
     updateRankingsOverview();
+    attachEventListeners();
 });
+
+// Attach event listeners using data attributes
+function attachEventListeners() {
+    // Team selector
+    const teamSelector = document.querySelector('[data-action="switch-team"]');
+    if (teamSelector) {
+        teamSelector.addEventListener('change', switchTeam);
+    }
+
+    // Score input
+    const scoreInput = document.querySelector('[data-action="score-change"]');
+    if (scoreInput) {
+        scoreInput.addEventListener('input', onScoreChange);
+    }
+
+    // Score increment/decrement buttons
+    const incrementBtn = document.querySelector('[data-action="increment-score"]');
+    if (incrementBtn) {
+        incrementBtn.addEventListener('click', incrementScore);
+    }
+
+    const decrementBtn = document.querySelector('[data-action="decrement-score"]');
+    if (decrementBtn) {
+        decrementBtn.addEventListener('click', decrementScore);
+    }
+
+    // Stopwatch buttons
+    const startBtn = document.querySelector('[data-action="start-stopwatch"]');
+    if (startBtn) {
+        startBtn.addEventListener('click', startStopwatch);
+    }
+
+    const stopBtn = document.querySelector('[data-action="stop-stopwatch"]');
+    if (stopBtn) {
+        stopBtn.addEventListener('click', stopStopwatch);
+    }
+
+    const resetBtn = document.querySelector('[data-action="reset-stopwatch"]');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetStopwatch);
+    }
+
+    // Penalty increment/decrement buttons (stackable)
+    document.querySelectorAll('[data-action="increment-penalty"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const penaltyId = this.getAttribute('data-penalty-id');
+            const penaltyValue = parseFloat(this.getAttribute('data-penalty-value'));
+            const penaltyUnit = this.getAttribute('data-penalty-unit');
+            incrementPenalty(penaltyId, penaltyValue, penaltyUnit);
+        });
+    });
+
+    document.querySelectorAll('[data-action="decrement-penalty"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const penaltyId = this.getAttribute('data-penalty-id');
+            decrementPenalty(penaltyId);
+        });
+    });
+
+    // Penalty tags (one-time)
+    document.querySelectorAll('[data-action="toggle-penalty-tag"]').forEach(tag => {
+        tag.addEventListener('click', function() {
+            const penaltyId = this.getAttribute('data-penalty-id');
+            const penaltyValue = parseFloat(this.getAttribute('data-penalty-value'));
+            const penaltyUnit = this.getAttribute('data-penalty-unit');
+            togglePenaltyTag(penaltyId, penaltyValue, penaltyUnit);
+        });
+    });
+
+    // Clear team button
+    const clearBtn = document.querySelector('[data-action="clear-team"]');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearCurrentTeam);
+    }
+}
 
 // Initialize scores from existing data
 function initializeScores() {
@@ -53,9 +129,10 @@ function initializeScores() {
 function switchTeam() {
     const selector = document.getElementById('team-selector');
     const teamId = selector.value;
+    const scoringCard = document.getElementById('team-scoring-card');
 
     if (!teamId) {
-        document.getElementById('team-scoring-card').style.display = 'none';
+        scoringCard.classList.add('display-none');
         currentTeamId = null;
         return;
     }
@@ -64,7 +141,7 @@ function switchTeam() {
     const team = window.teamsData.find(t => t.id == teamId);
 
     // Show scoring card
-    document.getElementById('team-scoring-card').style.display = 'block';
+    scoringCard.classList.remove('display-none');
 
     // Update team header
     document.getElementById('selected-team-name').textContent = team.name;

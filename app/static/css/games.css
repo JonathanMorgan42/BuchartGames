@@ -756,3 +756,25 @@ tbody tr:hover {
 .game-order-list::-webkit-scrollbar-thumb:hover {
     background: rgba(251, 191, 36, 0.5);
 }
+
+/* Game Mode Toggle Styles */
+.game-mode-toggle {
+    padding: 1rem;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.game-mode-toggle .checkbox-group {
+    margin: 0;
+}
+
+.game-mode-toggle label {
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.game-mode-toggle input:checked + label {
+    color: #8b5cf6;
+}

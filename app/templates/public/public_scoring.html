@@ -62,7 +62,7 @@
 <!-- Team Selector -->
 <div class="team-selector-container">
     <label for="team-selector">Select Team to Score:</label>
-    <select id="team-selector" class="team-selector" onchange="switchTeam()">
+    <select id="team-selector" class="team-selector" data-action="switch-team">
         <option value="">Choose a team...</option>
         {% for team in teams %}
         <option value="{{ team.id }}" data-color="{{ team.color }}">
@@ -73,7 +73,7 @@
 </div>
 
 <!-- Team Scoring Card (Initially Hidden) -->
-<div id="team-scoring-card" class="team-scoring-card" style="display: none;">
+<div id="team-scoring-card" class="team-scoring-card display-none">
     <!-- Team Header -->
     <div class="team-header" id="team-header">
         <div class="team-info">
@@ -105,7 +105,7 @@
         </h3>
 
         <div class="unified-score-input">
-            <button type="button" class="score-btn btn-decrement" onclick="decrementScore()">
+            <button type="button" class="score-btn btn-decrement" data-action="decrement-score">
                 <i class="fas fa-minus"></i>
             </button>
 
@@ -115,9 +115,9 @@
                    placeholder="Enter score"
                    step="0.01"
                    value=""
-                   oninput="onScoreChange()">
+                   data-action="score-change">
 
-            <button type="button" class="score-btn btn-increment" onclick="incrementScore()">
+            <button type="button" class="score-btn btn-increment" data-action="increment-score">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
@@ -126,13 +126,13 @@
         <div class="stopwatch-controls-mobile">
             <div class="timer-display-mobile" id="timer-display">00:00:00</div>
             <div class="stopwatch-buttons-mobile">
-                <button type="button" onclick="startStopwatch()" class="btn-stopwatch btn-start">
+                <button type="button" data-action="start-stopwatch" class="btn-stopwatch btn-start">
                     <i class="fas fa-play"></i> Start
                 </button>
-                <button type="button" onclick="stopStopwatch()" class="btn-stopwatch btn-stop">
+                <button type="button" data-action="stop-stopwatch" class="btn-stopwatch btn-stop">
                     <i class="fas fa-stop"></i> Stop
                 </button>
-                <button type="button" onclick="resetStopwatch()" class="btn-stopwatch btn-reset">
+                <button type="button" data-action="reset-stopwatch" class="btn-stopwatch btn-reset">
                     <i class="fas fa-redo"></i> Reset
                 </button>
             </div>
@@ -165,12 +165,16 @@
 
                 <div class="penalty-counter">
                     <button type="button" class="penalty-btn btn-decrement"
-                            onclick="decrementPenalty('{{ penalty.id }}')">
+                            data-action="decrement-penalty"
+                            data-penalty-id="{{ penalty.id }}">
                         <i class="fas fa-minus"></i>
                     </button>
                     <span class="penalty-count" id="penalty-count-{{ penalty.id }}">0</span>
                     <button type="button" class="penalty-btn btn-increment"
-                            onclick="incrementPenalty('{{ penalty.id }}', {{ penalty.value }}, '{{ penalty.unit }}')">
+                            data-action="increment-penalty"
+                            data-penalty-id="{{ penalty.id }}"
+                            data-penalty-value="{{ penalty.value }}"
+                            data-penalty-unit="{{ penalty.unit }}">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -187,10 +191,10 @@
             <div class="penalty-tags">
                 {% for penalty in onetime_penalties %}
                 <div class="penalty-tag" id="penalty-tag-{{ penalty.id }}"
+                     data-action="toggle-penalty-tag"
                      data-penalty-id="{{ penalty.id }}"
                      data-penalty-value="{{ penalty.value }}"
-                     data-penalty-unit="{{ penalty.unit }}"
-                     onclick="togglePenaltyTag('{{ penalty.id }}', {{ penalty.value }}, '{{ penalty.unit }}')">
+                     data-penalty-unit="{{ penalty.unit }}">
                     <span class="penalty-tag-icon">⚪</span>
                     <div class="penalty-tag-content">
                         <div class="penalty-tag-name">{{ penalty.name }}</div>
@@ -222,7 +226,7 @@
 
     <!-- Clear Button -->
     <div class="action-buttons">
-        <button type="button" class="btn btn-warning" onclick="clearCurrentTeam()">
+        <button type="button" class="btn btn-warning" data-action="clear-team">
             <i class="fas fa-eraser"></i> Clear Team Score
         </button>
     </div>

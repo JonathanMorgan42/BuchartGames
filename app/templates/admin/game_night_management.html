@@ -69,7 +69,7 @@
                 <div class="card-actions">
                     {% if not gn.is_completed %}
                         {% if not gn.is_active %}
-                        <form method="POST" action="{{ url_for('admin.activate_game_night', game_night_id=gn.id) }}" style="display: inline;">
+                        <form method="POST" action="{{ url_for('admin.activate_game_night', game_night_id=gn.id) }}" class="display-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-success btn-sm">Set Active</button>
                         </form>
@@ -77,14 +77,16 @@
 
                         {% if gn.is_active %}
                         <form method="POST" action="{{ url_for('admin.end_game_night', game_night_id=gn.id) }}"
-                              onsubmit="return confirm('Are you sure you want to end this game night? This will finalize all data and lock edits.')" style="display: inline;">
+                              class="display-inline confirm-form"
+                              data-confirm-message="Are you sure you want to end this game night? This will finalize all data and lock edits.">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-warning btn-sm">End Game Night</button>
                         </form>
                         {% endif %}
 
                         <form method="POST" action="{{ url_for('admin.wipe_game_night', game_night_id=gn.id) }}"
-                              onsubmit="return confirm('Are you sure you want to wipe all data from this game night? This cannot be undone!')" style="display: inline;">
+                              class="display-inline confirm-form"
+                              data-confirm-message="Are you sure you want to wipe all data from this game night? This cannot be undone!">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger btn-sm">Wipe Data</button>
                         </form>
@@ -93,7 +95,8 @@
                     <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm">View Details</a>
 
                     <form method="POST" action="{{ url_for('admin.delete_game_night', game_night_id=gn.id) }}"
-                          onsubmit="return confirm('Are you sure you want to permanently delete this game night? This cannot be undone!')" style="display: inline;">
+                          class="display-inline confirm-form"
+                          data-confirm-message="Are you sure you want to permanently delete this game night? This cannot be undone!">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
@@ -108,4 +111,22 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Handle form confirmation dialogs
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmForms = document.querySelectorAll('.confirm-form');
+    confirmForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const message = this.dataset.confirmMessage;
+            if (!confirm(message)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

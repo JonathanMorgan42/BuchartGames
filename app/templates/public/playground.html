@@ -73,24 +73,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/playground.js') }}"></script>
 <script>
-// Initialize data from backend
-const teams = {{ teams_json|tojson }};
-const upcomingGames = {{ upcoming_games_json|tojson }};
-
-console.log('Teams data:', teams);
-console.log('Upcoming games data:', upcomingGames);
-
-// Initialize the playground when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing playground...');
-    if (typeof window.initPlayground === 'function') {
-        window.initPlayground(teams, upcomingGames);
-        console.log('Playground initialized');
-    } else {
-        console.error('initPlayground function not found!');
-    }
-});
+// Pass data from backend to JavaScript
+window.playgroundTeams = {{ teams_json|tojson }};
+window.playgroundGames = {{ upcoming_games_json|tojson }};
 </script>
+<script src="{{ url_for('static', filename='js/playground.js') }}"></script>
 {% endblock %}

@@ -68,6 +68,24 @@ function closeModal() {
 
 // Initialize modal event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Set up search input event listener
+    const searchInput = document.getElementById('teamSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterTeams);
+    }
+
+    // Set up delete button click handlers using event delegation
+    const deleteButtons = document.querySelectorAll('.delete-team-btn');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const teamId = this.dataset.teamId;
+            const teamName = this.dataset.teamName;
+            confirmDelete(teamId, teamName);
+        });
+    });
+
+    // Modal initialization
     const modal = document.getElementById('deleteModal');
     if (!modal) return; // Only run if modal exists (admin users)
 
@@ -75,6 +93,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = modal.querySelector('.close');
     if (closeBtn) {
         closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal();
+        });
+    }
+
+    // Cancel button in modal
+    const cancelBtn = modal.querySelector('.cancel-delete-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
             e.preventDefault();
             closeModal();
         });
@@ -93,18 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }
     });
-
-    // Cancel button in modal
-    const cancelBtn = modal.querySelector('.btn-secondary');
-    if (cancelBtn && cancelBtn.getAttribute('onclick')) {
-        // onclick attribute already handles this, but add event listener as backup
-        cancelBtn.addEventListener('click', function(e) {
-            if (e.target.tagName === 'BUTTON') {
-                e.preventDefault();
-                closeModal();
-            }
-        });
-    }
 
     // Handle form submission
     const deleteForm = document.getElementById('deleteForm');

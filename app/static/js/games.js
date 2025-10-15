@@ -194,25 +194,7 @@ function removePenalty(penaltyId) {
     }
 }
 
-// Initialize penalty management
-document.addEventListener('DOMContentLoaded', function() {
-    const addPenaltyBtn = document.getElementById('add-penalty-btn');
-    if (addPenaltyBtn) {
-        addPenaltyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            addPenalty();
-        });
-    }
-
-    // Load existing penalties if on edit page
-    const existingPenalties = window.existingPenalties || [];
-    existingPenalties.forEach(penalty => {
-        addPenalty(penalty.name, penalty.value, penalty.stackable);
-    });
-
-    // Initialize scoring direction tiles
-    initializeScoringTiles();
-});
+// (Moved to consolidated DOMContentLoaded below)
 
 // Scoring direction tile management
 function initializeScoringTiles() {
@@ -243,3 +225,155 @@ function initializeScoringTiles() {
         });
     });
 }
+
+// Toggle custom type input field
+function toggleCustomType() {
+    const typeSelect = document.getElementById('game-type-select');
+    const customTypeGroup = document.getElementById('custom-type-group');
+    const customTypeInput = document.getElementById('custom_type');
+
+    if (!typeSelect || !customTypeGroup) return;
+
+    if (typeSelect.value === 'custom') {
+        customTypeGroup.style.display = 'block';
+    } else {
+        customTypeGroup.style.display = 'none';
+        // Clear custom type if switching away from custom
+        if (customTypeInput) customTypeInput.value = '';
+    }
+}
+
+// Toggle between tournament mode and regular scoring
+function toggleGameMode() {
+    const tournamentCheckbox = document.getElementById('create_as_tournament');
+    const scoringSection = document.getElementById('scoring-section');
+    const penaltiesSection = document.getElementById('penalties-section');
+
+    if (!tournamentCheckbox) return;
+
+    if (tournamentCheckbox.checked) {
+        if (scoringSection) scoringSection.style.display = 'none';
+        if (penaltiesSection) penaltiesSection.style.display = 'none';
+    } else {
+        if (scoringSection) scoringSection.style.display = 'block';
+        if (penaltiesSection) penaltiesSection.style.display = 'block';
+    }
+}
+
+// Initialize game form-specific functionality
+function initializeGameForm() {
+    // Check if we're on an edit page and need to pre-fill custom type
+    const typeSelect = document.getElementById('game-type-select');
+    const customTypeInput = document.getElementById('custom_type');
+
+    if (typeSelect && window.gameType) {
+        // Check if current game type is not in standard options
+        const standardTypes = ['trivia', 'physical', 'strategy', 'custom'];
+        if (!standardTypes.includes(window.gameType)) {
+            // Set to custom and show the field with the current value
+            typeSelect.value = 'custom';
+            if (customTypeInput) {
+                customTypeInput.value = window.gameType;
+            }
+        }
+    }
+
+    // Initialize toggles
+    toggleCustomType();
+    toggleGameMode();
+
+    // Set up event listeners for type select
+    if (typeSelect) {
+        typeSelect.addEventListener('change', toggleCustomType);
+    }
+
+    // Set up event listener for tournament checkbox
+    const tournamentCheckbox = document.getElementById('create_as_tournament');
+    if (tournamentCheckbox) {
+        tournamentCheckbox.addEventListener('change', toggleGameMode);
+    }
+}
+
+// Initialize all functionality when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up search input event listener
+    const searchInput = document.getElementById('gameSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterGames);
+    }
+
+    // Set up delete button click handlers using event delegation
+    const deleteButtons = document.querySelectorAll('.delete-game-btn');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const gameId = this.dataset.gameId;
+            const gameName = this.dataset.gameName;
+            confirmDelete(gameId, gameName);
+        });
+    });
+
+    // Modal initialization
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        // Close button (X)
+        const closeBtn = modal.querySelector('.close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeModal();
+            });
+        }
+
+        // Cancel button in modal
+        const cancelBtn = modal.querySelector('.cancel-delete-btn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeModal();
+            });
+        }
+
+        // Close when clicking outside modal content
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // ESC key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.style.display === 'block') {
+                closeModal();
+            }
+        });
+
+        // Handle form submission
+        const deleteForm = document.getElementById('deleteForm');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                console.log('Deleting game...');
+            });
+        }
+    }
+
+    // Penalty management initialization
+    const addPenaltyBtn = document.getElementById('add-penalty-btn');
+    if (addPenaltyBtn) {
+        addPenaltyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addPenalty();
+        });
+    }
+
+    // Load existing penalties if on edit page
+    const existingPenalties = window.existingPenalties || [];
+    existingPenalties.forEach(penalty => {
+        addPenalty(penalty.name, penalty.value, penalty.stackable);
+    });
+
+    // Initialize scoring direction tiles
+    initializeScoringTiles();
+
+    // Initialize game form if on add/edit page
+    initializeGameForm();

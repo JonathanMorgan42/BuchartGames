@@ -22,7 +22,7 @@
 <div class="card">
     <div class="game-actions">
         <div class="search">
-            <input type="text" id="gameSearch" placeholder="Search games..." onkeyup="filterGames()">
+            <input type="text" id="gameSearch" placeholder="Search games...">
         </div>
         <div class="game-count">
             <span>{{ games|length }} games total</span>
@@ -82,7 +82,7 @@
                             {# Admin controls for all games #}
                             {% if current_user.is_authenticated %}
                                 <a href="{{ url_for('admin.edit_game', game_id=game.id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ game.id }}, '{{ game.name }}')">Delete</button>
+                                <button class="btn btn-sm btn-danger delete-game-btn" data-game-id="{{ game.id }}" data-game-name="{{ game.name }}">Delete</button>
                             {% endif %}
                         </div>
                     </td>
@@ -102,7 +102,7 @@
         <p>Are you sure you want to delete the game "<span id="gameToDelete"></span>"?</p>
         <p class="warning">This action cannot be undone and will remove all score data associated with this game.</p>
         <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-secondary cancel-delete-btn">Cancel</button>
             <form id="deleteForm" method="POST" action="">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger">Delete Game</button>
