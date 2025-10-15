@@ -7,19 +7,25 @@ class GameService:
     """Service class for game operations."""
 
     @staticmethod
-    def get_all_games(ordered=True):
+    def get_all_games(ordered=True, game_night_id=None):
         """
-        Get all games.
+        Get all games, optionally filtered by game night.
 
         Args:
             ordered: If True, order by sequence_number
+            game_night_id: If provided, filter games by game night
 
         Returns:
             List of Game objects
         """
+        query = Game.query
+
+        if game_night_id:
+            query = query.filter_by(game_night_id=game_night_id)
+
         if ordered:
-            return Game.query.order_by(Game.sequence_number).all()
-        return Game.query.all()
+            return query.order_by(Game.sequence_number).all()
+        return query.all()
 
     @staticmethod
     def get_game_by_id(game_id):
@@ -27,17 +33,25 @@ class GameService:
         return Game.query.get_or_404(game_id)
 
     @staticmethod
-    def create_game(form_data, penalties_data=None):
+    def create_game(form_data, penalties_data=None, game_night_id=None):
         """
         Create a new game.
 
         Args:
             form_data: Dict with game data from form
             penalties_data: List of penalty dicts (optional)
+            game_night_id: Optional game night ID to associate with
 
         Returns:
             Created Game object
         """
+        # Auto-associate with active game night if not specified
+        if game_night_id is None:
+            from app.services.game_night_service import GameNightService
+            active_gn = GameNightService.get_active_game_night()
+            if active_gn:
+                game_night_id = active_gn.id
+
         new_sequence = form_data['sequence_number']
 
         # Shift existing games to make room for the new game
@@ -53,6 +67,7 @@ class GameService:
             metric_type=form_data['metric_type'],
             scoring_direction=form_data.get('scoring_direction', 'lower_better'),
             public_input=form_data.get('public_input', False),
+            game_night_id=game_night_id,
             isCompleted=False
         )
         db.session.add(game)

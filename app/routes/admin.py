@@ -1,12 +1,13 @@
-"""Admin routes - Team, Game, and Score management."""
+"""Admin routes - Team, Game, Score, and Game Night management."""
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from app.services import TeamService, GameService, ScoreService, TournamentService
+from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
 from app.forms import TeamForm, GameForm, LiveScoringForm
 from app.forms.tournament_forms import TournamentSetupForm, MatchScoreForm
-from app.models import Team, Game, Tournament, Match
+from app.forms.game_night_forms import GameNightForm
+from app.models import Team, Game, Tournament, Match, GameNight
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -546,3 +547,96 @@ def reset_tournament(tournament_id):
     except Exception as e:
         flash(f'Error resetting tournament: {str(e)}', 'error')
         return redirect(url_for('main.games'))
+
+
+# ============================================================================
+# GAME NIGHT MANAGEMENT
+# ============================================================================
+
+@admin_bp.route('/game-nights')
+@login_required
+def game_night_management():
+    """Game night management dashboard."""
+    game_nights = GameNightService.get_all_game_nights(order='desc')
+    active_game_night = GameNightService.get_active_game_night()
+
+    return render_template(
+        'admin/game_night_management.html',
+        game_nights=game_nights,
+        active_game_night=active_game_night
+    )
+
+
+@admin_bp.route('/game-nights/create', methods=['GET', 'POST'])
+@login_required
+def create_game_night():
+    """Create a new game night."""
+    form = GameNightForm()
+
+    if form.validate_on_submit():
+        try:
+            game_night = GameNightService.create_game_night(
+                name=form.name.data,
+                game_date=form.date.data
+            )
+            flash(f'Game Night "{game_night.name}" created successfully!', 'success')
+            return redirect(url_for('admin.game_night_management'))
+        except Exception as e:
+            flash(f'Error creating game night: {str(e)}', 'error')
+
+    return render_template('admin/create_game_night.html', form=form)
+
+
+@admin_bp.route('/game-nights/<int:game_night_id>/activate', methods=['POST'])
+@login_required
+def activate_game_night(game_night_id):
+    """Set a game night as active."""
+    try:
+        game_night = GameNightService.set_active_game_night(game_night_id)
+        flash(f'"{game_night.name}" is now the active game night!', 'success')
+    except Exception as e:
+        flash(f'Error activating game night: {str(e)}', 'error')
+
+    return redirect(url_for('admin.game_night_management'))
+
+
+@admin_bp.route('/game-nights/<int:game_night_id>/end', methods=['POST'])
+@login_required
+def end_game_night(game_night_id):
+    """End/finalize a game night."""
+    try:
+        game_night = GameNightService.end_game_night(game_night_id)
+        flash(f'Game Night "{game_night.name}" has been ended and finalized!', 'success')
+    except Exception as e:
+        flash(f'Error ending game night: {str(e)}', 'error')
+
+    return redirect(url_for('admin.game_night_management'))
+
+
+@admin_bp.route('/game-nights/<int:game_night_id>/wipe', methods=['POST'])
+@login_required
+def wipe_game_night(game_night_id):
+    """Wipe data from a game night."""
+    try:
+        game_night = GameNightService.wipe_game_night_data(game_night_id)
+        flash(f'All data cleared from "{game_night.name}"!', 'success')
+    except Exception as e:
+        flash(f'Error wiping game night: {str(e)}', 'error')
+
+    return redirect(url_for('admin.game_night_management'))
+
+
+@admin_bp.route('/game-nights/<int:game_night_id>/delete', methods=['POST'])
+@login_required
+def delete_game_night(game_night_id):
+    """Delete a game night permanently."""
+    try:
+        game_night = GameNightService.get_game_night_by_id(game_night_id)
+        game_night_name = game_night.name
+
+        GameNightService.delete_game_night(game_night_id)
+        flash(f'Game Night "{game_night_name}" has been deleted!', 'success')
+    except Exception as e:
+        flash(f'Error deleting game night: {str(e)}', 'error')
+
+    return redirect(url_for('admin.game_night_management'))

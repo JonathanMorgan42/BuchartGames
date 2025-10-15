@@ -6,7 +6,7 @@
 /* Admin Page Header */
 .admin-header {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(251, 191, 36, 0.2));
-    padding: 2rem 1.5rem;
+    padding: 1rem 0.75rem;
     border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     text-align: center;
@@ -37,7 +37,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
-    padding: 2rem;
+    padding: 1rem 0.75rem;
     width: 100%;
     max-width: 420px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -81,7 +81,7 @@
 .form-card {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 1rem 0.75rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-light);
     max-width: 800px;
@@ -140,7 +140,7 @@
 /* Dashboard */
 .dashboard-header {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-    padding: 2rem 1.5rem;
+    padding: 1rem 0.75rem;
     border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     text-align: center;
@@ -158,7 +158,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-lg);
-    padding: 2rem 1.5rem;
+    padding: 1rem 0.75rem;
     transition: all 0.2s;
     text-decoration: none;
     display: block;
@@ -198,7 +198,7 @@
 .stat-card {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 1rem 0.75rem;
     border: 1px solid var(--border-light);
     text-align: center;
 }
@@ -352,6 +352,54 @@
 
     .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .dashboard-header {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .login-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .form-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .dashboard-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .form-error,
+    .success-message,
+    .warning-box {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .delete-confirmation {
+        padding: 1rem 0.5rem;
+    }
+
+    .checkbox-group {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .form-nav {
+        padding: 1rem 0.5rem;
+    }
+
+    .scoring-tile {
+        padding: 1.25rem 0.75rem;
     }
 }
 
@@ -529,5 +577,57 @@
 
     .tile-icon {
         font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .dashboard-header {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .login-card {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .form-card {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .dashboard-card {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .stat-card {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .form-error,
+    .success-message,
+    .warning-box {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .delete-confirmation {
+        padding: 0.75rem 0.35rem;
+    }
+
+    .checkbox-group {
+        padding: 0.5rem 0.35rem;
+    }
+
+    .form-nav {
+        padding: 0.75rem 0.35rem;
+    }
+
+    .scoring-tile {
+        padding: 1rem 0.5rem;
+    }
+
+    .penalty-item {
+        padding: 0.75rem 0.5rem;
     }
 }

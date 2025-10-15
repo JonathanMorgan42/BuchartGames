@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Game Night Management - Admin{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game_night_admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="game-night-management-container">
+    <div class="page-header">
+        <h1>Game Night Management</h1>
+        <a href="{{ url_for('admin.create_game_night') }}" class="btn btn-primary">
+            + Create New Game Night
+        </a>
+    </div>
+
+    {% if active_game_night %}
+    <div class="active-game-night-banner">
+        <div class="banner-content">
+            <span class="banner-label">Currently Active:</span>
+            <h2>{{ active_game_night.name }}</h2>
+            <span class="banner-date">{{ active_game_night.date.strftime('%B %d, %Y') }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-active-banner">
+        <p>No active game night. Create one or activate an existing game night to begin.</p>
+    </div>
+    {% endif %}
+
+    <div class="game-nights-list">
+        <h2>All Game Nights</h2>
+
+        {% if game_nights %}
+        <div class="game-nights-grid">
+            {% for gn in game_nights %}
+            <div class="game-night-card {% if gn.is_active %}active{% endif %} {% if gn.is_completed %}completed{% endif %}">
+                <div class="card-header">
+                    <div class="card-title-section">
+                        <h3>{{ gn.name }}</h3>
+                        <p class="card-date">{{ gn.date.strftime('%B %d, %Y') }}</p>
+                    </div>
+                    <div class="card-status-badges">
+                        {% if gn.is_active %}
+                        <span class="status-badge active">Active</span>
+                        {% endif %}
+                        {% if gn.is_completed %}
+                        <span class="status-badge completed">Completed</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-stats">
+                    <div class="stat">
+                        <span class="stat-value">{{ gn.teams.count() }}</span>
+                        <span class="stat-label">Teams</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">{{ gn.total_games }}</span>
+                        <span class="stat-label">Games</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">{{ gn.completed_games }}</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    {% if not gn.is_completed %}
+                        {% if not gn.is_active %}
+                        <form method="POST" action="{{ url_for('admin.activate_game_night', game_night_id=gn.id) }}" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-success btn-sm">Set Active</button>
+                        </form>
+                        {% endif %}
+
+                        {% if gn.is_active %}
+                        <form method="POST" action="{{ url_for('admin.end_game_night', game_night_id=gn.id) }}"
+                              onsubmit="return confirm('Are you sure you want to end this game night? This will finalize all data and lock edits.')" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-warning btn-sm">End Game Night</button>
+                        </form>
+                        {% endif %}
+
+                        <form method="POST" action="{{ url_for('admin.wipe_game_night', game_night_id=gn.id) }}"
+                              onsubmit="return confirm('Are you sure you want to wipe all data from this game night? This cannot be undone!')" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Wipe Data</button>
+                        </form>
+                    {% endif %}
+
+                    <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm">View Details</a>
+
+                    <form method="POST" action="{{ url_for('admin.delete_game_night', game_night_id=gn.id) }}"
+                          onsubmit="return confirm('Are you sure you want to permanently delete this game night? This cannot be undone!')" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No game nights yet. Create your first one to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

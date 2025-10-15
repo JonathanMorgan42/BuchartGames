@@ -33,7 +33,12 @@
     <header>
         <div class="header-container">
             <a href="{{ url_for('main.index') }}" class="logo">
+                {% if active_game_night %}
+                🏆 {{ active_game_night.name }}
+                <span class="logo-date">{{ active_game_night.date.strftime('%B %d, %Y') }}</span>
+                {% else %}
                 🏆 Game Night Tracker
+                {% endif %}
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
                 ☰
@@ -58,7 +63,19 @@
                             Games
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ url_for('main.history') }}"
+                           class="{{ 'active' if request.endpoint == 'main.history' or request.endpoint == 'main.history_detail' else '' }}">
+                            History
+                        </a>
+                    </li>
                     {% if current_user.is_authenticated %}
+                    <li>
+                        <a href="{{ url_for('admin.game_night_management') }}"
+                           class="{{ 'active' if 'game_night' in request.endpoint else '' }}">
+                            Admin
+                        </a>
+                    </li>
                     <li>
                         <a href="#" id="logoutLink">
                             Logout

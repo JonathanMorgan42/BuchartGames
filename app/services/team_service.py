@@ -7,17 +7,23 @@ class TeamService:
     """Service class for team operations."""
 
     @staticmethod
-    def get_all_teams(sort_by_points=True):
+    def get_all_teams(sort_by_points=True, game_night_id=None):
         """
-        Get all teams.
+        Get all teams, optionally filtered by game night.
 
         Args:
             sort_by_points: If True, sort by total points descending
+            game_night_id: If provided, filter teams by game night
 
         Returns:
             List of Team objects
         """
-        teams = Team.query.all()
+        query = Team.query
+
+        if game_night_id:
+            query = query.filter_by(game_night_id=game_night_id)
+
+        teams = query.all()
         if sort_by_points:
             teams = sorted(teams, key=lambda t: t.totalPoints, reverse=True)
         return teams
@@ -28,18 +34,27 @@ class TeamService:
         return Team.query.get_or_404(team_id)
 
     @staticmethod
-    def create_team(name, participants_data, color='#3b82f6'):
+    def create_team(name, participants_data, color='#3b82f6', game_night_id=None):
         """
         Create a new team with participants.
 
         Args:
             name: Team name
             participants_data: List of dicts with firstName and lastName
+            color: Team color (default: blue)
+            game_night_id: Optional game night ID to associate with
 
         Returns:
             Created Team object
         """
-        team = Team(name=name, color=color)
+        # Auto-associate with active game night if not specified
+        if game_night_id is None:
+            from app.services.game_night_service import GameNightService
+            active_gn = GameNightService.get_active_game_night()
+            if active_gn:
+                game_night_id = active_gn.id
+
+        team = Team(name=name, color=color, game_night_id=game_night_id)
         db.session.add(team)
         db.session.flush()  # Get team.id
 

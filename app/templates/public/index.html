@@ -13,7 +13,11 @@
             <div class="header-icon">🏆</div>
             <h1>Leaderboard</h1>
         </div>
+        {% if active_game_night %}
         <p>Live team standings</p>
+        {% else %}
+        <p>No active game night. Admin: activate a game night to begin!</p>
+        {% endif %}
     </div>
 
     <div class="view-controls">

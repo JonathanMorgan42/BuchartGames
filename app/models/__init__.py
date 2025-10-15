@@ -7,5 +7,6 @@ from app.models.score import Score
 from app.models.penalty import Penalty
 from app.models.tournament import Tournament
 from app.models.match import Match
+from app.models.game_night import GameNight
 
-__all__ = ['Admin', 'Team', 'Participant', 'Game', 'Score', 'Penalty', 'Tournament', 'Match']
+__all__ = ['Admin', 'Team', 'Participant', 'Game', 'Score', 'Penalty', 'Tournament', 'Match', 'GameNight']

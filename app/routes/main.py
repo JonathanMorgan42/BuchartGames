@@ -1,7 +1,7 @@
 """Public routes."""
 from flask import Blueprint, render_template, request, jsonify
 
-from app.services import TeamService, GameService, ScoreService, TournamentService
+from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
 from app.models import Score, Tournament
 
 main_bp = Blueprint('main', __name__)
@@ -10,8 +10,13 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def index():
     """Homepage with comprehensive leaderboard."""
-    teams = TeamService.get_all_teams(sort_by_points=True)
-    games = GameService.get_all_games(ordered=True)
+    # Get active game night
+    active_game_night = GameNightService.get_active_game_night()
+
+    # Filter teams and games by active game night
+    game_night_id = active_game_night.id if active_game_night else None
+    teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
+    games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
 
     # Separate completed and upcoming games
     completed_games = [g for g in games if g.isCompleted]
@@ -27,28 +32,36 @@ def index():
         games=games,
         completed_games=completed_games,
         upcoming_games=upcoming_games,
-        getScore=getScore
+        getScore=getScore,
+        active_game_night=active_game_night
     )
 
 
 @main_bp.route('/teams')
 def teams():
     """Teams listing page."""
-    teams = TeamService.get_all_teams(sort_by_points=True)
-    return render_template('public/teams.html', teams=teams)
+    active_game_night = GameNightService.get_active_game_night()
+    game_night_id = active_game_night.id if active_game_night else None
+
+    teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
+    return render_template('public/teams.html', teams=teams, active_game_night=active_game_night)
 
 
 @main_bp.route('/games')
 def games():
     """Games listing page."""
-    games = GameService.get_all_games(ordered=True)
-    teams = TeamService.get_all_teams(sort_by_points=False)
+    active_game_night = GameNightService.get_active_game_night()
+    game_night_id = active_game_night.id if active_game_night else None
+
+    games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
+    teams = TeamService.get_all_teams(sort_by_points=False, game_night_id=game_night_id)
 
     return render_template(
         'public/games.html',
         games=games,
         teams=teams,
-        Score=Score
+        Score=Score,
+        active_game_night=active_game_night
     )
 
 
@@ -167,8 +180,12 @@ def public_score_game(game_id):
 @main_bp.route('/playground')
 def playground():
     """Simulation playground for exploring hypothetical game outcomes."""
-    teams = TeamService.get_all_teams(sort_by_points=True)
-    games = GameService.get_all_games(ordered=True)
+    # Get active game night to filter teams and games
+    active_game_night = GameNightService.get_active_game_night()
+    game_night_id = active_game_night.id if active_game_night else None
+
+    teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
+    games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
 
     # Separate completed and upcoming games
     completed_games = [g for g in games if g.isCompleted]
@@ -250,3 +267,35 @@ def score_match_public(match_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@main_bp.route('/history')
+def history():
+    """View all completed game night history."""
+    game_nights = GameNightService.get_completed_game_nights()
+
+    return render_template(
+        'public/history.html',
+        game_nights=game_nights
+    )
+
+
+@main_bp.route('/history/<int:game_night_id>')
+def history_detail(game_night_id):
+    """View detailed information about a specific game night."""
+    details = GameNightService.get_game_night_details(game_night_id)
+
+    def getScore(team_id, game_id):
+        """Helper function for templates to get score."""
+        return ScoreService.get_score(team_id, game_id)
+
+    return render_template(
+        'public/history_detail.html',
+        game_night=details['game_night'],
+        teams=details['teams'],
+        games=details['games'],
+        completed_games=details['completed_games'],
+        upcoming_games=details['upcoming_games'],
+        winner=details['winner'],
+        getScore=getScore
+    )

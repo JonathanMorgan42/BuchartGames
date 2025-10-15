@@ -437,13 +437,19 @@ class WinPossibilityBanner {
             case 'possible':
                 statusClass = 'win-possible-maybe';
                 statusIcon = '🟡';
-                statusText = 'Victory possible!';
+                statusText = '';
                 break;
             case 'none':
                 statusClass = 'win-possible-none';
                 statusIcon = '🔴';
                 statusText = 'No mathematical path to first.';
                 break;
+        }
+
+        // Only show banner for 'guaranteed' and 'none' cases, hide for 'possible'
+        if (analysis.status === 'possible') {
+            this.container.innerHTML = '';
+            return;
         }
 
         this.container.innerHTML = `
@@ -721,7 +727,7 @@ class WinSimulator {
 
         this.container.innerHTML = `
             <div class="win-simulator-card">
-                <button class="btn-primary btn-compute-path" id="computePathBtn">🎯 Find Easiest Path to 1st Place</button>
+                <button class="btn-primary btn-compute-path" id="computePathBtn">🎯 Apply Easiest Path to Win</button>
                 <div id="pathResults"></div>
             </div>
         `;
@@ -752,35 +758,32 @@ class WinSimulator {
                     </div>
                 `;
             } else {
+                // Automatically apply the scenario
+                // Apply the user's placements
+                scenario.placements.forEach(p => {
+                    this.state.setPlacement(p.game.id, this.state.selectedTeamId, p.place);
+                });
+
+                // Apply all rivals' placements from the complete scenario
+                if (scenario.completeScenario) {
+                    Object.keys(scenario.completeScenario).forEach(gameId => {
+                        const gamePlacements = scenario.completeScenario[gameId];
+                        Object.keys(gamePlacements).forEach(teamId => {
+                            this.state.setPlacement(
+                                parseInt(gameId),
+                                parseInt(teamId),
+                                gamePlacements[teamId]
+                            );
+                        });
+                    });
+                }
+
+                // Show success message
                 resultsContainer.innerHTML = `
                     <div class="path-results has-path">
-                        <p>✅ <strong>Winning path found!</strong></p>
-                        <button class="btn-apply-scenario" id="applyScenario">Apply Winning Scenario</button>
+                        <p>✅ <strong>Winning path applied!</strong></p>
                     </div>
                 `;
-
-                // Apply scenario button
-                const applyBtn = this.container.querySelector('#applyScenario');
-                applyBtn.addEventListener('click', () => {
-                    // Apply the user's placements
-                    scenario.placements.forEach(p => {
-                        this.state.setPlacement(p.game.id, this.state.selectedTeamId, p.place);
-                    });
-
-                    // Apply all rivals' placements from the complete scenario
-                    if (scenario.completeScenario) {
-                        Object.keys(scenario.completeScenario).forEach(gameId => {
-                            const gamePlacements = scenario.completeScenario[gameId];
-                            Object.keys(gamePlacements).forEach(teamId => {
-                                this.state.setPlacement(
-                                    parseInt(gameId),
-                                    parseInt(teamId),
-                                    gamePlacements[teamId]
-                                );
-                            });
-                        });
-                    }
-                });
             }
         }, 100);
     }
