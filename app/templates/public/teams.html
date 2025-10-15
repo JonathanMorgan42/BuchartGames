@@ -55,7 +55,12 @@
                 {% for team in teams %}
                 <tr>
                     <td>{{ team.id }}</td>
-                    <td class="team-name">{{ team.name }}</td>
+                    <td class="team-name">
+                        <div class="team-name-with-color">
+                            <div class="team-color-indicator" style="background-color: {{ team.color or '#3b82f6' }};"></div>
+                            <span>{{ team.name }}</span>
+                        </div>
+                    </td>
                     <td>
                         {% for participant in team.participants %}
                             <div class="participant">{{ participant.getFullName() }}</div>

@@ -37,6 +37,47 @@
             {% endfor %}
         </div>
 
+        {% if completed_games %}
+        <div class="completed-games-card">
+            <h2 class="card-section-title">Completed Games</h2>
+            {% for game in completed_games %}
+            <div class="completed-game-card">
+                <div class="completed-game-header">
+                    <div class="game-number">#{{ game.sequence_number }}</div>
+                    <div class="game-title-section">
+                        <div class="game-name">{{ game.name }}</div>
+                        <div class="game-meta">
+                            <span class="game-badge {{ game.type }}">{{ game.type }}</span>
+                            <span class="game-points">×{{ game.point_scheme }} points</span>
+                        </div>
+                    </div>
+                    <span class="status-badge completed">Completed</span>
+                </div>
+                <div class="completed-game-scores">
+                    {% for team in teams %}
+                    {% set score = getScore(team.id, game.id) %}
+                    {% if score %}
+                    <div class="team-score-row">
+                        <div class="team-score-info">
+                            <div class="team-color-dot" style="background-color: {{ team.color or '#3b82f6' }};"></div>
+                            <span class="team-name-small">{{ team.name }}</span>
+                        </div>
+                        <div class="score-values">
+                            {% if score.score_value is not none %}
+                            <span class="raw-score">{{ score.score_value }}{% if game.metric_type == 'time' %}s{% endif %}</span>
+                            <span class="score-separator">→</span>
+                            {% endif %}
+                            <span class="points-earned">{{ score.points }} pts</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         {% if upcoming_games %}
         <div class="upcoming-games-card">
             <h2 class="card-section-title">Upcoming Games</h2>
@@ -67,7 +108,7 @@
                         <tr>
                             <th class="sticky-col rank-column">#</th>
                             <th class="sticky-col team-column">Team</th>
-                            {% for game in games|reverse %}
+                            {% for game in games %}
                             <th>{{ game.name }}</th>
                             {% endfor %}
                             <th class="total-column">Total</th>
@@ -85,7 +126,7 @@
                                     </span>
                                 </div>
                             </td>
-                            {% for game in games|reverse %}
+                            {% for game in games %}
                             {% set score = getScore(team.id, game.id) %}
                             <td>{{ score.points if score else '—' }}</td>
                             {% endfor %}
@@ -98,8 +139,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}

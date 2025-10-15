@@ -1,10 +1,11 @@
 """Admin routes - Team, Game, and Score management."""
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
+from sqlalchemy import func
 
 from app.services import TeamService, GameService, ScoreService
 from app.forms import TeamForm, GameForm, LiveScoringForm
-from app.models import Team
+from app.models import Team, Game
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -31,6 +32,22 @@ def add_team():
             }
         ]
 
+        # Add optional participants (3-6)
+        for i in range(3, 7):
+            first_name_field = getattr(form, f'participant{i}FirstName', None)
+            last_name_field = getattr(form, f'participant{i}LastName', None)
+
+            if first_name_field and last_name_field:
+                first_name = first_name_field.data
+                last_name = last_name_field.data
+
+                # Only add if at least first name is provided
+                if first_name and first_name.strip():
+                    participants_data.append({
+                        'firstName': first_name,
+                        'lastName': last_name if last_name else ''
+                    })
+
         TeamService.create_team(form.name.data, participants_data, form.color.data)
         flash('Team created successfully!', 'success')
         return redirect(url_for('main.teams'))
@@ -50,13 +67,15 @@ def edit_team(team_id):
         form.name.data = team.name
         form.color.data = team.color
 
-        if len(participants) >= 1:
-            form.participant1FirstName.data = participants[0].firstName
-            form.participant1LastName.data = participants[0].lastName
+        # Populate all participant fields (1-6)
+        for i, participant in enumerate(participants, start=1):
+            if i <= 6:
+                first_name_field = getattr(form, f'participant{i}FirstName', None)
+                last_name_field = getattr(form, f'participant{i}LastName', None)
 
-        if len(participants) >= 2:
-            form.participant2FirstName.data = participants[1].firstName
-            form.participant2LastName.data = participants[1].lastName
+                if first_name_field and last_name_field:
+                    first_name_field.data = participant.firstName
+                    last_name_field.data = participant.lastName
 
     if form.validate_on_submit():
         participants_data = [
@@ -69,6 +88,22 @@ def edit_team(team_id):
                 'lastName': form.participant2LastName.data
             }
         ]
+
+        # Add optional participants (3-6)
+        for i in range(3, 7):
+            first_name_field = getattr(form, f'participant{i}FirstName', None)
+            last_name_field = getattr(form, f'participant{i}LastName', None)
+
+            if first_name_field and last_name_field:
+                first_name = first_name_field.data
+                last_name = last_name_field.data
+
+                # Only add if at least first name is provided
+                if first_name and first_name.strip():
+                    participants_data.append({
+                        'firstName': first_name,
+                        'lastName': last_name if last_name else ''
+                    })
 
         TeamService.update_team(team_id, form.name.data, participants_data, form.color.data)
         flash('Team updated successfully!', 'success')
@@ -101,9 +136,14 @@ def add_game():
     form = GameForm()
 
     if form.validate_on_submit():
+        # Handle custom game type
+        game_type = form.type.data
+        if game_type == 'custom' and form.custom_type.data:
+            game_type = form.custom_type.data.strip()
+
         form_data = {
             'name': form.name.data,
-            'type': form.type.data,
+            'type': game_type,
             'sequence_number': form.sequence_number.data,
             'point_scheme': form.point_scheme.data,
             'metric_type': form.metric_type.data,
@@ -129,7 +169,20 @@ def add_game():
         flash('Game created successfully!', 'success')
         return redirect(url_for('main.games'))
 
-    return render_template('admin/add_game.html', form=form)
+    # Get next available sequence number
+    max_sequence = Game.query.with_entities(func.max(Game.sequence_number)).scalar()
+    next_sequence = (max_sequence or 0) + 1
+
+    # Get existing games for reference
+    existing_games = Game.query.order_by(Game.sequence_number).all()
+
+    # Set default sequence number if not already set
+    if not form.sequence_number.data:
+        form.sequence_number.data = next_sequence
+
+    team_count = Team.query.count()
+    return render_template('admin/add_game.html', form=form, team_count=team_count,
+                         next_sequence=next_sequence, existing_games=existing_games)
 
 
 @admin_bp.route('/games/edit/<int:game_id>', methods=['GET', 'POST'])
@@ -140,9 +193,14 @@ def edit_game(game_id):
     form = GameForm(obj=game)
 
     if form.validate_on_submit():
+        # Handle custom game type
+        game_type = form.type.data
+        if game_type == 'custom' and form.custom_type.data:
+            game_type = form.custom_type.data.strip()
+
         form_data = {
             'name': form.name.data,
-            'type': form.type.data,
+            'type': game_type,
             'sequence_number': form.sequence_number.data,
             'point_scheme': form.point_scheme.data,
             'metric_type': form.metric_type.data,
@@ -180,7 +238,12 @@ def edit_game(game_id):
         'stackable': p.stackable
     } for p in penalties]
 
-    return render_template('admin/edit_game.html', form=form, game=game, penalties_json=penalties_dict)
+    # Get existing games for reference (excluding current game)
+    existing_games = Game.query.filter(Game.id != game_id).order_by(Game.sequence_number).all()
+
+    team_count = Team.query.count()
+    return render_template('admin/edit_game.html', form=form, game=game, penalties_json=penalties_dict,
+                         team_count=team_count, existing_games=existing_games)
 
 
 @admin_bp.route('/games/delete/<int:game_id>', methods=['POST'])

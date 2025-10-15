@@ -109,7 +109,8 @@
     border: 1px solid rgba(71, 85, 105, 0.5);
 }
 
-.upcoming-games-card {
+.upcoming-games-card,
+.completed-games-card {
     background: rgba(30, 41, 59, 0.5);
     border-radius: 1rem;
     padding: 1.5rem;
@@ -254,6 +255,94 @@
 .status-badge.upcoming {
     background-color: #E0E7FF;
     color: #3730A3;
+}
+
+.status-badge.completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+/* Completed Games Card with Team Scores */
+.completed-game-card {
+    margin-bottom: 1.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.completed-game-card:last-child {
+    margin-bottom: 0;
+}
+
+.completed-game-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+    margin-bottom: 1rem;
+}
+
+.game-title-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.completed-game-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.team-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+}
+
+.team-score-row:hover {
+    background: rgba(71, 85, 105, 0.2);
+}
+
+.team-score-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.team-name-small {
+    font-weight: 500;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.score-values {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.raw-score {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.score-separator {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.points-earned {
+    color: var(--accent-gold);
+    font-size: 1rem;
 }
 
 /* Table View - Abbreviated Names for Better Scrolling */
@@ -461,12 +550,122 @@
         padding: 0.75rem;
     }
 
-    .rankings-card {
+    /* Card view mobile optimizations */
+    .card-view {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .rankings-card,
+    .upcoming-games-card,
+    .completed-games-card {
+        padding: 1rem;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .completed-game-card {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .completed-game-header {
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .game-title-section {
+        width: 100%;
+        order: 2;
+    }
+
+    .game-number {
+        order: 1;
+    }
+
+    .status-badge.completed {
+        order: 3;
+    }
+
+    .team-score-row {
+        padding: 0.5rem;
+    }
+
+    .team-name-small {
+        font-size: 0.9rem;
+    }
+
+    .score-values {
+        gap: 0.35rem;
+    }
+
+    .raw-score {
+        font-size: 0.85rem;
+    }
+
+    .points-earned {
+        font-size: 0.95rem;
+    }
+
+    .card-section-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .team-ranking-item {
+        padding: 0.75rem 0.5rem;
+        gap: 0.75rem;
+    }
+
+    .rank-number {
+        font-size: 1.25rem;
+        min-width: 2rem;
+    }
+
+    .team-name-large {
+        font-size: 1rem;
+    }
+
+    .team-total-points {
+        font-size: 1.5rem;
+    }
+
+    .upcoming-game-item {
+        padding: 0.75rem 0.5rem;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .game-number {
+        font-size: 1.1rem;
+        min-width: 2.5rem;
+    }
+
+    .game-name {
+        font-size: 1rem;
+    }
+
+    .game-meta {
+        flex-wrap: wrap;
+    }
+
+    .game-status {
+        min-width: auto;
+        width: 100%;
+        text-align: left;
+        margin-top: 0.25rem;
+    }
+
+    /* Table view mobile optimizations */
+    .table-scroll {
         max-height: calc(100vh - 220px);
     }
 
-    .table-scroll {
-        max-height: calc(100vh - 220px);
+    .leaderboard-table {
+        min-width: 600px;
     }
 
     .leaderboard-table th,
@@ -475,30 +674,129 @@
         font-size: 0.85rem;
     }
 
+    /* Reduce sticky column widths for more game visibility */
+    .rank-column {
+        width: 2.5rem;
+        min-width: 2.5rem;
+        font-size: 0.9rem;
+        padding: 0.75rem 0.25rem;
+    }
+
     .team-column {
-        min-width: 120px;
-        max-width: 120px;
+        left: 2.5rem;
+        min-width: 90px;
+        max-width: 90px;
+    }
+
+    .team-info-cell {
+        gap: 0.35rem;
+    }
+
+    .team-color-dot {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    .team-name-text {
+        font-size: 0.8rem;
+    }
+
+    /* Reduce total column width */
+    .total-column {
+        min-width: 60px;
+        font-size: 1rem;
+        padding: 0.75rem 0.35rem;
+    }
+
+    /* Optimize game score columns */
+    .leaderboard-table tbody td:not(.sticky-col):not(.total-column),
+    .leaderboard-table thead th:not(.sticky-col):not(.total-column) {
+        min-width: 60px;
+        font-size: 0.8rem;
+        padding: 0.75rem 0.35rem;
     }
 }
 
 @media (max-width: 480px) {
+    /* Extra compact for very small screens */
+    .card-view {
+        padding: 0.5rem;
+    }
+
+    .rankings-card,
+    .upcoming-games-card,
+    .completed-games-card {
+        padding: 0.75rem;
+    }
+
+    .completed-game-card {
+        padding: 0.5rem;
+    }
+
+    .team-score-row {
+        padding: 0.35rem 0.5rem;
+    }
+
+    .team-name-small {
+        font-size: 0.85rem;
+    }
+
+    .raw-score {
+        font-size: 0.8rem;
+    }
+
+    .points-earned {
+        font-size: 0.9rem;
+    }
+
+    .team-ranking-item {
+        padding: 0.5rem 0.25rem;
+        gap: 0.5rem;
+    }
+
+    .rank-number {
+        font-size: 1.1rem;
+        min-width: 1.75rem;
+    }
+
+    .team-name-large {
+        font-size: 0.95rem;
+    }
+
+    .team-total-points {
+        font-size: 1.35rem;
+    }
+
+    /* Ultra-compact table for tiny screens */
     .rank-column {
-        width: 3rem;
-        min-width: 3rem;
+        width: 2rem;
+        min-width: 2rem;
+        padding: 0.5rem 0.2rem;
     }
 
     .team-column {
-        left: 3rem;
-        min-width: 100px;
-        max-width: 100px;
+        left: 2rem;
+        min-width: 70px;
+        max-width: 70px;
     }
 
     .team-color-dot {
-        width: 1rem;
-        height: 1rem;
+        width: 0.75rem;
+        height: 0.75rem;
     }
 
     .team-name-text {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+    }
+
+    .total-column {
+        min-width: 50px;
+        font-size: 0.95rem;
+    }
+
+    .leaderboard-table tbody td:not(.sticky-col):not(.total-column),
+    .leaderboard-table thead th:not(.sticky-col):not(.total-column) {
+        min-width: 50px;
+        font-size: 0.75rem;
     }
 }

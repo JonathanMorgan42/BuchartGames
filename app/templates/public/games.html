@@ -46,9 +46,7 @@
                     <th>Type</th>
                     <th>Status</th>
                     <th>Point Scheme</th>
-                    {% if current_user.is_authenticated %}
                     <th class="actions-column">Actions</th>
-                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -67,19 +65,23 @@
                         {% endif %}
                     </td>
                     <td class="points-cell">×{{ game.point_scheme }}</td>
-                    {% if current_user.is_authenticated %}
                     <td class="actions">
                         <div class="btn-group">
                             {% if game.isCompleted %}
                             <a href="{{ url_for('main.view_game_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">View</a>
-                            {% else %}
-                            <a href="{{ url_for('admin.edit_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">Score</a>
+                            {% elif game.public_input %}
+                            <a href="{{ url_for('main.public_score_game', game_id=game.id) }}" class="btn btn-sm btn-success">Score</a>
                             {% endif %}
-                            <a href="{{ url_for('admin.edit_game', game_id=game.id) }}" class="btn btn-sm btn-primary">Edit</a>
-                            <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ game.id }}, '{{ game.name }}')">Delete</button>
+
+                            {% if current_user.is_authenticated %}
+                                {% if not game.isCompleted and not game.public_input %}
+                                <a href="{{ url_for('admin.edit_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">Score</a>
+                                {% endif %}
+                                <a href="{{ url_for('admin.edit_game', game_id=game.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ game.id }}, '{{ game.name }}')">Delete</button>
+                            {% endif %}
                         </div>
                     </td>
-                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

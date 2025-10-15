@@ -116,42 +116,30 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-function updatePointDistributionPreview() {
-    const container = document.getElementById('pointDistributionPreview');
-    if (!container) return;
+function updateMultiplierExample() {
+    const pointSchemeElement = document.getElementById('point_scheme');
+    if (!pointSchemeElement) return;
 
-    const increment = parseInt(document.getElementById('point_scheme')?.value) || 1;
-    const teamCount = 6;
+    const multiplier = parseInt(pointSchemeElement.value) || 1;
+    const helpText = pointSchemeElement.parentElement.querySelector('.help-text');
 
-    let html = '<div class="point-table">';
-    html += '<div class="point-row header"><div class="point-cell">Place</div><div class="point-cell">Points</div></div>';
-
-    for (let i = 0; i < teamCount; i++) {
-        const place = i + 1;
-        const points = (teamCount - i) * increment;
-        html += `<div class="point-row ${place <= 3 ? 'highlight-' + place : ''}">`;
-        html += `<div class="point-cell">${place}${getOrdinalSuffix(place)}</div>`;
-        html += `<div class="point-cell">${points}</div>`;
-        html += '</div>';
+    if (helpText) {
+        // Create simple example showing the multiplier effect
+        const examples = [];
+        for (let i = 1; i <= 6; i++) {
+            examples.push(i * multiplier);
+        }
+        helpText.textContent = `Example: ${examples.join(' ')}`;
     }
-
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-function getOrdinalSuffix(num) {
-    const j = num % 10;
-    const k = num % 100;
-    if (j === 1 && k !== 11) return "st";
-    if (j === 2 && k !== 12) return "nd";
-    if (j === 3 && k !== 13) return "rd";
-    return "th";
 }
 
 const pointSchemeElement = document.getElementById('point_scheme');
 if (pointSchemeElement) {
-    updatePointDistributionPreview();
-    pointSchemeElement.addEventListener('change', updatePointDistributionPreview);
+    updateMultiplierExample();
+    // Update on 'input' for real-time feedback as user types
+    pointSchemeElement.addEventListener('input', updateMultiplierExample);
+    // Also update on 'change' for compatibility
+    pointSchemeElement.addEventListener('change', updateMultiplierExample);
 }
 
 // Penalty management

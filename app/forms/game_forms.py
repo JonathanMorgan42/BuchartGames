@@ -15,31 +15,27 @@ class GameForm(FlaskForm):
         choices=[
             ('trivia', 'Trivia'),
             ('physical', 'Physical Challenge'),
-            ('strategy', 'Strategy')
+            ('strategy', 'Strategy'),
+            ('custom', 'Custom Type...')
         ],
         validators=[DataRequired()]
     )
+    custom_type = StringField('Custom Game Type', validators=[])
     sequence_number = IntegerField(
         'Game Sequence Number',
         validators=[DataRequired()],
         default=0
     )
-    point_scheme = SelectField(
-        'Points Distribution',
-        choices=[
-            (1, 'Standard (1, 2, 3, 4, 5, 6...)'),
-            (2, 'Double (2, 4, 6, 8, 10, 12...)'),
-            (4, 'Quadruple (4, 8, 12, 16, 20, 24...)')
-        ],
-        validators=[DataRequired()],
-        coerce=int
+    point_scheme = IntegerField(
+        'Point Multiplier',
+        validators=[DataRequired(), NumberRange(min=1, max=100, message='Multiplier must be between 1 and 100')],
+        default=1
     )
     metric_type = SelectField(
         'Scoring Method',
         choices=[
-            ('manual', 'Manual Score Input'),
-            ('time', 'Time (Stopwatch)'),
-            ('count', 'Counter')
+            ('score', 'Score Input'),
+            ('time', 'Time (Stopwatch)')
         ],
         validators=[DataRequired()]
     )

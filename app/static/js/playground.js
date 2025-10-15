@@ -131,7 +131,7 @@ function evaluateWinPossibility(teams, games, selectedTeamId) {
     const pointsNeeded = highestRivalMax - (selectedTeam.totalPoints || 0) + 1;
     return {
         status: 'possible',
-        explanation: `You can still win! You need at least ${pointsNeeded} more points. Victory depends on your placements and rivals' performance.`,
+        explanation: `Need at least ${pointsNeeded} more points to secure 1st place.`,
         pointsNeeded,
         userMax,
         rivalMax: highestRivalMax
@@ -432,12 +432,12 @@ class WinPossibilityBanner {
             case 'guaranteed':
                 statusClass = 'win-possible-guaranteed';
                 statusIcon = '🟢';
-                statusText = 'You can still win!';
+                statusText = 'Victory guaranteed!';
                 break;
             case 'possible':
                 statusClass = 'win-possible-maybe';
                 statusIcon = '🟡';
-                statusText = 'You can still catch up, depends on others!';
+                statusText = 'Victory possible!';
                 break;
             case 'none':
                 statusClass = 'win-possible-none';

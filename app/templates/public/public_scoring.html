@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Live Scoring - {{ game.name }}{% endblock %}
+{% block title %}Score Game - {{ game.name }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/scores.css') }}">
@@ -10,8 +10,8 @@
 {% block content %}
 <div class="page-header">
     <div class="page-header-content">
-        <h1>Live Scoring</h1>
-        <p class="page-subtitle">{{ game.name }}</p>
+        <h1>Score Game</h1>
+        <p class="page-subtitle">{{ game.name }} (Public Scoring)</p>
     </div>
     <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Back to Games
@@ -94,35 +94,15 @@
 
     <!-- Score Input Section -->
     <div class="score-section">
-        {% if game.metric_type == 'time' %}
-        <!-- Timer is the main feature for time-based games -->
-        <h3><i class="fas fa-stopwatch"></i> Stopwatch Timer</h3>
-        <p class="timer-help-text">Use the timer below - it will automatically fill in the score when you click Stop</p>
-
-        <div class="stopwatch-main">
-            <div class="timer-display-large" id="timer-display">00:00.000</div>
-            <div class="stopwatch-controls">
-                <button type="button" onclick="startStopwatch()" class="btn-timer btn-start">
-                    <i class="fas fa-play"></i>
-                    <span>Start</span>
-                </button>
-                <button type="button" onclick="stopStopwatch()" class="btn-timer btn-stop">
-                    <i class="fas fa-stop"></i>
-                    <span>Stop & Save</span>
-                </button>
-                <button type="button" onclick="resetStopwatch()" class="btn-timer btn-reset">
-                    <i class="fas fa-redo"></i>
-                    <span>Reset</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="score-divider">
-            <span>Or enter time manually</span>
-        </div>
-        {% else %}
-        <h3>Score</h3>
-        {% endif %}
+        <h3>
+            {% if game.metric_type == 'time' %}
+            Time (seconds)
+            {% elif game.metric_type == 'count' %}
+            Count
+            {% else %}
+            Score
+            {% endif %}
+        </h3>
 
         <div class="unified-score-input">
             <button type="button" class="score-btn btn-decrement" onclick="decrementScore()">
@@ -132,7 +112,7 @@
             <input type="number"
                    id="score-input"
                    class="score-input-field"
-                   placeholder="{% if game.metric_type == 'time' %}Seconds{% else %}Enter score{% endif %}"
+                   placeholder="Enter score"
                    step="0.01"
                    value=""
                    oninput="onScoreChange()">
@@ -141,6 +121,23 @@
                 <i class="fas fa-plus"></i>
             </button>
         </div>
+
+        {% if game.metric_type == 'time' %}
+        <div class="stopwatch-controls-mobile">
+            <div class="timer-display-mobile" id="timer-display">00:00:00</div>
+            <div class="stopwatch-buttons-mobile">
+                <button type="button" onclick="startStopwatch()" class="btn-stopwatch btn-start">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button type="button" onclick="stopStopwatch()" class="btn-stopwatch btn-stop">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button type="button" onclick="resetStopwatch()" class="btn-stopwatch btn-reset">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Penalties Section -->

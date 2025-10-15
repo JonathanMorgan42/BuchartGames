@@ -38,10 +38,17 @@ class GameService:
         Returns:
             Created Game object
         """
+        new_sequence = form_data['sequence_number']
+
+        # Shift existing games to make room for the new game
+        existing_games = Game.query.filter(Game.sequence_number >= new_sequence).all()
+        for existing_game in existing_games:
+            existing_game.sequence_number += 1
+
         game = Game(
             name=form_data['name'],
             type=form_data['type'],
-            sequence_number=form_data['sequence_number'],
+            sequence_number=new_sequence,
             point_scheme=form_data['point_scheme'],
             metric_type=form_data['metric_type'],
             scoring_direction=form_data.get('scoring_direction', 'lower_better'),
@@ -76,10 +83,33 @@ class GameService:
             penalties_data: List of penalty dicts (optional)
         """
         game = Game.query.get_or_404(game_id)
+        old_sequence = game.sequence_number
+        new_sequence = form_data['sequence_number']
+
+        # If sequence number changed, handle reordering
+        if old_sequence != new_sequence:
+            if new_sequence < old_sequence:
+                # Moving up (lower number): shift games between new and old position down
+                games_to_shift = Game.query.filter(
+                    Game.id != game_id,
+                    Game.sequence_number >= new_sequence,
+                    Game.sequence_number < old_sequence
+                ).all()
+                for g in games_to_shift:
+                    g.sequence_number += 1
+            else:
+                # Moving down (higher number): shift games between old and new position up
+                games_to_shift = Game.query.filter(
+                    Game.id != game_id,
+                    Game.sequence_number > old_sequence,
+                    Game.sequence_number <= new_sequence
+                ).all()
+                for g in games_to_shift:
+                    g.sequence_number -= 1
 
         game.name = form_data['name']
         game.type = form_data['type']
-        game.sequence_number = form_data['sequence_number']
+        game.sequence_number = new_sequence
         game.point_scheme = form_data['point_scheme']
         game.metric_type = form_data['metric_type']
         game.scoring_direction = form_data.get('scoring_direction', 'lower_better')

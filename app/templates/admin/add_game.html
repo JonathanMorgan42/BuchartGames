@@ -42,7 +42,7 @@
 
                 <div class="form-group">
                     {{ form.type.label }}
-                    {{ form.type(class="form-control") }}
+                    {{ form.type(class="form-control", id="game-type-select", onchange="toggleCustomType()") }}
                     {% if form.type.errors %}
                         <div class="form-error">
                             {% for error in form.type.errors %}
@@ -53,9 +53,20 @@
                 </div>
             </div>
 
+            <div class="form-group" id="custom-type-group" style="display: none;">
+                {{ form.custom_type.label }}
+                {{ form.custom_type(class="form-control", placeholder="e.g., Board Game, Card Game, Puzzle") }}
+                <p class="help-text">Enter your custom game type name</p>
+            </div>
+
             <div class="form-group">
                 {{ form.sequence_number.label }}
-                {{ form.sequence_number(class="form-control", placeholder="Game order (1, 2, 3, etc.)") }}
+                <div class="sequence-input-wrapper">
+                    {{ form.sequence_number(class="form-control", placeholder=next_sequence) }}
+                    <div class="sequence-helper">
+                        <span class="sequence-badge">Recommended: {{ next_sequence }}</span>
+                    </div>
+                </div>
                 {% if form.sequence_number.errors %}
                     <div class="form-error">
                         {% for error in form.sequence_number.errors %}
@@ -63,7 +74,22 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                <p class="help-text">Determines the order in which games appear</p>
+                <p class="help-text">📝 This number controls the game order. Use {{ next_sequence }} to add at the end, or use any number to insert between existing games.</p>
+
+                {% if existing_games %}
+                <div class="game-order-preview">
+                    <strong>Current Game Order:</strong>
+                    <ol class="game-order-list">
+                        {% for existing_game in existing_games %}
+                        <li>
+                            <span class="game-seq">{{ existing_game.sequence_number }}.</span>
+                            <span class="game-name-preview">{{ existing_game.name }}</span>
+                            <span class="game-status-mini">{{ '✓' if existing_game.isCompleted else '○' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -150,20 +176,29 @@
         </div>
     </form>
 </div>
-
-<!-- Point Distribution Preview -->
-<div class="card point-calculation-preview">
-    <div class="preview-header">
-        <h2>Point Distribution Preview</h2>
-        <p class="preview-description">Based on the selected point increment, here's how points will be distributed to teams</p>
-    </div>
-
-    <div class="point-distribution-preview" id="pointDistributionPreview">
-        <!-- Will be populated by JavaScript -->
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
+<script>
+// Pass team count to JavaScript
+window.teamCount = {{ team_count }};
+
+// Toggle custom type input
+function toggleCustomType() {
+    const typeSelect = document.getElementById('game-type-select');
+    const customTypeGroup = document.getElementById('custom-type-group');
+
+    if (typeSelect.value === 'custom') {
+        customTypeGroup.style.display = 'block';
+    } else {
+        customTypeGroup.style.display = 'none';
+    }
+}
+
+// Check on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleCustomType();
+});
+</script>
 <script src="{{ url_for('static', filename='js/games.js') }}"></script>
 {% endblock %}

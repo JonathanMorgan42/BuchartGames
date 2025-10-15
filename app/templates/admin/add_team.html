@@ -156,6 +156,39 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
+        <!-- Optional Additional Participants -->
+        <div id="additional-participants-container">
+            {% for i in range(3, 7) %}
+            <div class="form-section additional-participant" id="participant-section-{{ i }}" style="display: none;">
+                <div class="participant-header">
+                    <h2>Participant {{ i }}</h2>
+                    <button type="button" class="btn btn-sm btn-danger remove-participant-btn" onclick="removeParticipant({{ i }})">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="participant{{ i }}FirstName">First Name</label>
+                        {{ form['participant' ~ i ~ 'FirstName'](class="form-control", placeholder="First name") }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participant{{ i }}LastName">Last Name</label>
+                        {{ form['participant' ~ i ~ 'LastName'](class="form-control", placeholder="Last name") }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="add-participant-section">
+            <button type="button" class="btn btn-secondary" id="add-participant-btn" onclick="addParticipant()">
+                <i class="fas fa-user-plus"></i> Add Team Member
+            </button>
+            <p class="help-text">Teams must have at least 2 members. You can add up to 6 members total.</p>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Create Team
@@ -167,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
+// Color picker functionality
 document.addEventListener('DOMContentLoaded', function() {
     const colorInput = document.getElementById('color');
     const colorPreview = document.getElementById('colorPreview');
@@ -183,6 +217,60 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePreview();
     }
 });
+
+// Dynamic participant management
+let nextParticipantIndex = 3; // Start from participant 3
+let visibleParticipants = [1, 2]; // Track which participants are visible
+
+function addParticipant() {
+    if (nextParticipantIndex > 6) {
+        alert('Maximum of 6 team members allowed');
+        return;
+    }
+
+    // Show the next hidden participant section
+    const section = document.getElementById(`participant-section-${nextParticipantIndex}`);
+    if (section) {
+        section.style.display = 'block';
+        visibleParticipants.push(nextParticipantIndex);
+        nextParticipantIndex++;
+
+        // Hide the add button if we've reached the maximum
+        if (nextParticipantIndex > 6) {
+            document.getElementById('add-participant-btn').style.display = 'none';
+        }
+    }
+}
+
+function removeParticipant(index) {
+    const section = document.getElementById(`participant-section-${index}`);
+    if (section) {
+        // Clear the input fields
+        const firstNameInput = document.getElementById(`participant${index}FirstName`);
+        const lastNameInput = document.getElementById(`participant${index}LastName`);
+
+        if (firstNameInput) firstNameInput.value = '';
+        if (lastNameInput) lastNameInput.value = '';
+
+        // Hide the section
+        section.style.display = 'none';
+
+        // Remove from visible participants
+        visibleParticipants = visibleParticipants.filter(p => p !== index);
+
+        // Update nextParticipantIndex to the lowest hidden participant
+        nextParticipantIndex = 3;
+        for (let i = 3; i <= 6; i++) {
+            if (!visibleParticipants.includes(i)) {
+                nextParticipantIndex = i;
+                break;
+            }
+        }
+
+        // Show the add button again
+        document.getElementById('add-participant-btn').style.display = 'inline-flex';
+    }
+}
 </script>
 
 {% endblock %}

@@ -12,7 +12,7 @@ class Game(db.Model):
     isCompleted = db.Column(db.Boolean, default=False)
     sequence_number = db.Column(db.Integer, default=0)
     point_scheme = db.Column(db.Integer, default=1)
-    metric_type = db.Column(db.String(20), default='manual')
+    metric_type = db.Column(db.String(20), default='score')
     scoring_direction = db.Column(db.String(20), default='lower_better')
     public_input = db.Column(db.Boolean, default=False)
 

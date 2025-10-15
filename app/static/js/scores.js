@@ -74,6 +74,9 @@ function switchTeam() {
     const teamScore = teamScores[teamId];
     document.getElementById('score-input').value = teamScore.baseScore || '';
 
+    // Reset timer when changing teams
+    resetStopwatch();
+
     // Update rank and points display
     updateCurrentTeamDisplay();
 
@@ -264,12 +267,16 @@ function updatePenaltyTotals() {
 
     const finalScore = baseScore + penaltyTotal;
 
-    // Update displays
-    document.getElementById('base-score-display').textContent = baseScore.toFixed(2);
-    document.getElementById('penalty-total-display').textContent = penaltyTotal.toFixed(2);
-    document.getElementById('final-score-display').textContent = finalScore.toFixed(2);
+    // Update displays (only if elements exist - they won't exist when there are no penalties)
+    const baseScoreDisplay = document.getElementById('base-score-display');
+    const penaltyTotalDisplay = document.getElementById('penalty-total-display');
+    const finalScoreDisplay = document.getElementById('final-score-display');
 
-    // Update team score
+    if (baseScoreDisplay) baseScoreDisplay.textContent = baseScore.toFixed(2);
+    if (penaltyTotalDisplay) penaltyTotalDisplay.textContent = penaltyTotal.toFixed(2);
+    if (finalScoreDisplay) finalScoreDisplay.textContent = finalScore.toFixed(2);
+
+    // Update team score (CRITICAL: Always update this regardless of whether penalty elements exist)
     teamScores[currentTeamId].penaltyTotal = penaltyTotal;
     teamScores[currentTeamId].finalScore = finalScore;
 }
@@ -435,9 +442,8 @@ function startStopwatch() {
 
     globalTimer = setInterval(() => {
         globalElapsed = Date.now() - globalStartTime;
-        const seconds = Math.floor(globalElapsed / 1000);
-        document.getElementById('timer-display').textContent = formatTime(seconds);
-    }, 100);
+        document.getElementById('timer-display').textContent = formatTimeWithMillis(globalElapsed);
+    }, 10); // Update every 10ms for smooth milliseconds
 }
 
 function stopStopwatch() {
@@ -446,9 +452,17 @@ function stopStopwatch() {
         globalTimer = null;
 
         if (currentTeamId) {
-            const seconds = (globalElapsed / 1000).toFixed(2);
+            const seconds = (globalElapsed / 1000).toFixed(3);
             document.getElementById('score-input').value = seconds;
-            onScoreChange();
+            onScoreChange(); // This auto-saves the score to the hidden inputs
+
+            // Show a brief success message
+            const timerDisplay = document.getElementById('timer-display');
+            const originalColor = timerDisplay.style.color;
+            timerDisplay.style.color = '#22c55e'; // Green color
+            setTimeout(() => {
+                timerDisplay.style.color = originalColor;
+            }, 1000);
         }
     }
 }
@@ -459,7 +473,10 @@ function resetStopwatch() {
         globalTimer = null;
     }
     globalElapsed = 0;
-    document.getElementById('timer-display').textContent = '00:00:00';
+    const timerDisplay = document.getElementById('timer-display');
+    if (timerDisplay) {
+        timerDisplay.textContent = '00:00.000';
+    }
 }
 
 function formatTime(seconds) {
@@ -468,6 +485,15 @@ function formatTime(seconds) {
     const secs = seconds % 60;
 
     return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function formatTimeWithMillis(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    const millis = Math.floor((milliseconds % 1000));
+
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
 }
 
 // Helper function for ordinal suffixes

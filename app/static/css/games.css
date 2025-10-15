@@ -474,3 +474,194 @@ tbody tr:hover {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+/* Point Preview Explanation Section */
+.point-preview-explanation {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.calculation-helper {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.calculation-helper strong {
+    color: var(--accent-blue);
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.calculation-example {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-gold);
+}
+
+.calculation-example strong {
+    color: var(--accent-gold);
+    font-size: 1.15rem;
+}
+
+/* Update point table for 3 columns */
+.point-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.2s;
+}
+
+.place-cell {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.calculation-cell {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.points-cell {
+    font-weight: 700;
+    color: var(--accent-gold);
+    font-size: 1.05rem;
+}
+
+.point-cell:not(:last-child) {
+    border-right: 1px solid var(--border-light);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+    .calculation-helper {
+        font-size: 0.9rem;
+    }
+
+    .calculation-example {
+        font-size: 0.95rem;
+    }
+
+    .point-row {
+        grid-template-columns: 0.8fr 1fr 0.8fr;
+        font-size: 0.9rem;
+    }
+
+    .point-cell {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+/* Sequence Number Helper UI */
+.sequence-input-wrapper {
+    position: relative;
+}
+
+.sequence-helper {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.sequence-badge, .sequence-badge-edit {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.15));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: var(--radius-sm);
+    color: #4ade80;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.sequence-badge-edit {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.game-order-preview {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+.game-order-preview strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.game-order-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.game-order-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    background: rgba(100, 116, 139, 0.1);
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.game-order-list li:hover {
+    background: rgba(100, 116, 139, 0.2);
+}
+
+.game-seq {
+    font-weight: 700;
+    color: var(--accent-gold);
+    min-width: 2rem;
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.game-name-preview {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.game-status-mini {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+/* Scrollbar styling for game order list */
+.game-order-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.game-order-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.game-order-list::-webkit-scrollbar-thumb {
+    background: rgba(251, 191, 36, 0.3);
+    border-radius: 3px;
+}
+
+.game-order-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(251, 191, 36, 0.5);
+}

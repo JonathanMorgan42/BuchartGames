@@ -139,6 +139,20 @@ tbody tr:hover {
     color: var(--primary);
 }
 
+.team-name-with-color {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.team-color-indicator {
+    width: 8px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
 .participant {
     margin-bottom: 0.25rem;
     color: var(--text-secondary);
@@ -478,4 +492,127 @@ tbody tr:hover {
     font-size: 0.85rem;
     color: var(--text-muted);
     font-style: italic;
+}
+
+/* Dynamic Participant Management Styles */
+.additional-participant {
+    background: rgba(59, 130, 246, 0.03);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.participant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.participant-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--accent-blue);
+}
+
+.remove-participant-btn {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.remove-participant-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.remove-participant-btn:active {
+    transform: translateY(0);
+}
+
+.add-participant-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(16, 185, 129, 0.05);
+    border: 2px dashed rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.add-participant-section .btn {
+    background: linear-gradient(135deg, var(--accent-green), #059669);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.add-participant-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.add-participant-section .btn:active {
+    transform: translateY(0);
+}
+
+.add-participant-section .help-text {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Mobile responsive for dynamic participants */
+@media (max-width: 640px) {
+    .participant-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .remove-participant-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .add-participant-section {
+        padding: 1rem;
+    }
+
+    .add-participant-section .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
