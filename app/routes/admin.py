@@ -3,9 +3,10 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from app.services import TeamService, GameService, ScoreService
+from app.services import TeamService, GameService, ScoreService, TournamentService
 from app.forms import TeamForm, GameForm, LiveScoringForm
-from app.models import Team, Game
+from app.forms.tournament_forms import TournamentSetupForm, MatchScoreForm
+from app.models import Team, Game, Tournament, Match
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -136,10 +137,17 @@ def add_game():
     form = GameForm()
 
     if form.validate_on_submit():
+        # Check if tournament mode is enabled
+        create_as_tournament = request.form.get('create_as_tournament') == 'on'
+
         # Handle custom game type
         game_type = form.type.data
         if game_type == 'custom' and form.custom_type.data:
             game_type = form.custom_type.data.strip()
+
+        # Override type to 'tournament' if checkbox is checked
+        if create_as_tournament:
+            game_type = 'tournament'
 
         form_data = {
             'name': form.name.data,
@@ -165,8 +173,14 @@ def add_game():
             penalties_data.append(penalty)
             penalty_count += 1
 
-        GameService.create_game(form_data, penalties_data)
+        game = GameService.create_game(form_data, penalties_data)
         flash('Game created successfully!', 'success')
+
+        # Redirect to tournament setup if tournament mode
+        if create_as_tournament:
+            flash('Now set up the tournament bracket', 'info')
+            return redirect(url_for('admin.setup_tournament', game_id=game.id))
+
         return redirect(url_for('main.games'))
 
     # Get next available sequence number
@@ -371,3 +385,164 @@ def save_scores(game_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
+
+
+# ============================================================================
+# TOURNAMENT MANAGEMENT
+# ============================================================================
+
+@admin_bp.route('/tournament/create', methods=['GET', 'POST'])
+@login_required
+def create_tournament_direct():
+    """Create a tournament directly (combines game creation and tournament setup)."""
+    from app.forms.tournament_forms import TournamentSetupForm
+
+    if request.method == 'POST':
+        form = TournamentSetupForm()
+        if form.validate_on_submit():
+            # Create the game first
+            game_name = request.form.get('game_name', 'Tournament')
+            sequence_number = Game.query.with_entities(func.max(Game.sequence_number)).scalar() or 0
+            sequence_number += 1
+
+            game_data = {
+                'name': game_name,
+                'type': 'tournament',
+                'sequence_number': sequence_number,
+                'point_scheme': 1,
+                'metric_type': 'score',
+                'scoring_direction': 'higher_better',
+                'public_input': False
+            }
+
+            game = GameService.create_game(game_data, [])
+
+            # Create tournament
+            try:
+                # Get included teams (filter out unchecked teams)
+                included_team_ids = request.form.getlist('included_teams')
+                included_team_ids = [int(tid) for tid in included_team_ids] if included_team_ids else None
+
+                tournament = TournamentService.create_tournament(
+                    game_id=game.id,
+                    pairing_type=form.pairing_type.data,
+                    bracket_style=form.bracket_style.data,
+                    public_edit=form.public_edit.data,
+                    included_team_ids=included_team_ids
+                )
+                flash(f'Tournament "{game_name}" created successfully!', 'success')
+                return redirect(url_for('admin.view_tournament', game_id=game.id))
+            except Exception as e:
+                # If tournament creation fails, delete the game
+                GameService.delete_game(game.id)
+                flash(f'Error creating tournament: {str(e)}', 'error')
+                return redirect(url_for('main.games'))
+
+    # GET request - show form
+    form = TournamentSetupForm()
+    teams = Team.query.all()
+    return render_template('admin/create_tournament_direct.html', form=form, teams=teams)
+
+
+@admin_bp.route('/tournament/setup/<int:game_id>', methods=['GET', 'POST'])
+@login_required
+def setup_tournament(game_id):
+    """Setup tournament bracket for a game."""
+    game = GameService.get_game_by_id(game_id)
+
+    # Check if tournament already exists
+    existing_tournament = TournamentService.get_tournament_by_game(game_id)
+    if existing_tournament:
+        flash('Tournament already exists for this game', 'info')
+        return redirect(url_for('admin.view_tournament', game_id=game_id))
+
+    form = TournamentSetupForm()
+    form.game_id.data = game_id
+
+    if form.validate_on_submit():
+        try:
+            # Get included teams (filter out unchecked teams)
+            included_team_ids = request.form.getlist('included_teams')
+            included_team_ids = [int(tid) for tid in included_team_ids] if included_team_ids else None
+
+            # Parse manual pairings if provided
+            manual_pairings = None
+            if form.pairing_type.data == 'manual':
+                manual_pairings_json = request.form.get('manual_pairings', '[]')
+                try:
+                    import json
+                    pairings_list = json.loads(manual_pairings_json)
+                    if pairings_list:
+                        manual_pairings = [(p[0], p[1]) for p in pairings_list]
+                except (json.JSONDecodeError, IndexError, KeyError):
+                    flash('Error parsing manual pairings. Using random pairing instead.', 'warning')
+
+            tournament = TournamentService.create_tournament(
+                game_id=game_id,
+                pairing_type=form.pairing_type.data,
+                bracket_style=form.bracket_style.data,
+                public_edit=form.public_edit.data,
+                manual_pairings=manual_pairings,
+                included_team_ids=included_team_ids
+            )
+            flash('Tournament bracket created successfully!', 'success')
+            return redirect(url_for('admin.view_tournament', game_id=game_id))
+        except Exception as e:
+            flash(f'Error creating tournament: {str(e)}', 'error')
+            import traceback
+            traceback.print_exc()
+
+    teams = Team.query.all()
+    return render_template('admin/setup_tournament.html', form=form, game=game, teams=teams)
+
+
+@admin_bp.route('/tournament/view/<int:game_id>')
+@login_required
+def view_tournament(game_id):
+    """View and manage tournament bracket."""
+    game = GameService.get_game_by_id(game_id)
+    tournament = TournamentService.get_tournament_by_game(game_id)
+
+    if not tournament:
+        flash('No tournament found for this game', 'error')
+        return redirect(url_for('main.games'))
+
+    bracket_data = TournamentService.get_bracket_structure(tournament.id)
+
+    return render_template('admin/view_tournament.html',
+                         game=game,
+                         tournament=tournament,
+                         bracket=bracket_data['bracket'],
+                         rounds=bracket_data['rounds'])
+
+
+@admin_bp.route('/tournament/match/<int:match_id>/score', methods=['POST'])
+@login_required
+def score_match(match_id):
+    """Update match score and advance winner."""
+    data = request.json
+
+    try:
+        TournamentService.update_match_result(
+            match_id=match_id,
+            team1_score=data.get('team1_score'),
+            team2_score=data.get('team2_score'),
+            winner_team_id=data.get('winner_team_id')
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@admin_bp.route('/tournament/reset/<int:tournament_id>', methods=['POST'])
+@login_required
+def reset_tournament(tournament_id):
+    """Reset tournament to initial state."""
+    try:
+        TournamentService.reset_tournament(tournament_id)
+        tournament = Tournament.query.get_or_404(tournament_id)
+        flash('Tournament has been reset', 'success')
+        return redirect(url_for('admin.view_tournament', game_id=tournament.game_id))
+    except Exception as e:
+        flash(f'Error resetting tournament: {str(e)}', 'error')
+        return redirect(url_for('main.games'))

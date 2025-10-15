@@ -11,9 +11,11 @@
 <div class="admin-header">
     <h1>Games Management</h1>
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('admin.add_game') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Add New Game
-    </a>
+    <div class="header-buttons">
+        <a href="{{ url_for('admin.add_game') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Game
+        </a>
+    </div>
     {% endif %}
 </div>
 
@@ -26,16 +28,6 @@
             <span>{{ games|length }} games total</span>
         </div>
     </div>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
     <div class="game-table">
         <table id="gamesTable">
@@ -67,16 +59,28 @@
                     <td class="points-cell">×{{ game.point_scheme }}</td>
                     <td class="actions">
                         <div class="btn-group">
-                            {% if game.isCompleted %}
-                            <a href="{{ url_for('main.view_game_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">View</a>
-                            {% elif game.public_input %}
-                            <a href="{{ url_for('main.public_score_game', game_id=game.id) }}" class="btn btn-sm btn-success">Score</a>
+                            {% if game.type == 'tournament' %}
+                                {# Tournament game buttons - Unified view for everyone #}
+                                <a href="{{ url_for('main.view_tournament_public', game_id=game.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-trophy"></i> View Bracket
+                                </a>
+                            {% else %}
+                                {# Regular game buttons #}
+                                {% if game.isCompleted %}
+                                <a href="{{ url_for('main.view_game_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">View</a>
+                                {% elif game.public_input %}
+                                <a href="{{ url_for('main.public_score_game', game_id=game.id) }}" class="btn btn-sm btn-success">Score</a>
+                                {% endif %}
+
+                                {% if current_user.is_authenticated %}
+                                    {% if not game.isCompleted and not game.public_input %}
+                                    <a href="{{ url_for('admin.edit_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">Score</a>
+                                    {% endif %}
+                                {% endif %}
                             {% endif %}
 
+                            {# Admin controls for all games #}
                             {% if current_user.is_authenticated %}
-                                {% if not game.isCompleted and not game.public_input %}
-                                <a href="{{ url_for('admin.edit_scores', game_id=game.id) }}" class="btn btn-sm btn-primary">Score</a>
-                                {% endif %}
                                 <a href="{{ url_for('admin.edit_game', game_id=game.id) }}" class="btn btn-sm btn-primary">Edit</a>
                                 <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ game.id }}, '{{ game.name }}')">Delete</button>
                             {% endif %}

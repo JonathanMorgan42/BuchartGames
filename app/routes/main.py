@@ -1,8 +1,8 @@
 """Public routes."""
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, jsonify
 
-from app.services import TeamService, GameService, ScoreService
-from app.models import Score
+from app.services import TeamService, GameService, ScoreService, TournamentService
+from app.models import Score, Tournament
 
 main_bp = Blueprint('main', __name__)
 
@@ -204,3 +204,49 @@ def playground():
         upcoming_games_json=upcoming_games_json,
         getScore=getScore
     )
+
+
+@main_bp.route('/tournament/<int:game_id>')
+def view_tournament_public(game_id):
+    """Public view of tournament bracket."""
+    game = GameService.get_game_by_id(game_id)
+    tournament = TournamentService.get_tournament_by_game(game_id)
+
+    if not tournament:
+        from flask import flash, redirect, url_for
+        flash('No tournament found for this game', 'error')
+        return redirect(url_for('main.games'))
+
+    bracket_data = TournamentService.get_bracket_structure(tournament.id)
+
+    return render_template('public/view_tournament.html',
+                         game=game,
+                         tournament=tournament,
+                         bracket=bracket_data['bracket'],
+                         rounds=bracket_data['rounds'])
+
+
+@main_bp.route('/tournament/match/<int:match_id>/score', methods=['POST'])
+def score_match_public(match_id):
+    """Public endpoint for scoring matches (when public_edit is enabled)."""
+    from app.models import Match
+
+    match = Match.query.get_or_404(match_id)
+    tournament = match.tournament
+
+    # Check if public editing is allowed
+    if not tournament.public_edit:
+        return jsonify({'success': False, 'error': 'Public editing not allowed'}), 403
+
+    data = request.json
+
+    try:
+        TournamentService.update_match_result(
+            match_id=match_id,
+            team1_score=data.get('team1_score'),
+            team2_score=data.get('team2_score'),
+            winner_team_id=data.get('winner_team_id')
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400

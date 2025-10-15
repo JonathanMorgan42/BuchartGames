@@ -94,6 +94,18 @@
         </div>
 
         <div class="form-section">
+            <h2>Game Mode</h2>
+            <p class="help-text">Choose between regular scoring or tournament bracket</p>
+
+            <div class="game-mode-toggle">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="create_as_tournament" name="create_as_tournament" class="form-check" onchange="toggleGameMode()">
+                    <label for="create_as_tournament">🏆 Create as Tournament (elimination bracket)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section" id="scoring-section">
             <h2>Scoring Settings</h2>
 
             <div class="form-row">
@@ -155,7 +167,7 @@
             </div>
         </div>
 
-        <div class="form-section">
+        <div class="form-section" id="penalties-section">
             <h2>Penalties</h2>
             <p class="help-text">Define penalties such as "False start (+5)" or "Missed target (+10)". Units are automatically based on the scoring method (time = seconds, otherwise = points).</p>
 
@@ -195,10 +207,49 @@ function toggleCustomType() {
     }
 }
 
+// Toggle between tournament mode and regular scoring
+function toggleGameMode() {
+    const tournamentCheckbox = document.getElementById('create_as_tournament');
+    const scoringSection = document.getElementById('scoring-section');
+    const penaltiesSection = document.getElementById('penalties-section');
+
+    if (tournamentCheckbox.checked) {
+        scoringSection.style.display = 'none';
+        penaltiesSection.style.display = 'none';
+    } else {
+        scoringSection.style.display = 'block';
+        penaltiesSection.style.display = 'block';
+    }
+}
+
 // Check on page load
 document.addEventListener('DOMContentLoaded', function() {
     toggleCustomType();
+    toggleGameMode();
 });
 </script>
 <script src="{{ url_for('static', filename='js/games.js') }}"></script>
+
+<style>
+.game-mode-toggle {
+    padding: 1rem;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.game-mode-toggle .checkbox-group {
+    margin: 0;
+}
+
+.game-mode-toggle label {
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.game-mode-toggle input:checked + label {
+    color: #8b5cf6;
+}
+</style>
 {% endblock %}
