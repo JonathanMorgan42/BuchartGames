@@ -53,7 +53,16 @@ class ProductionConfig(Config):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{INSTANCE_DIR}/gamenight.db'
     SQLALCHEMY_ECHO = False
+
+    # Session cookies should be secure since Cloudflare Tunnel provides HTTPS
+    # Even though Flask receives HTTP, users connect via HTTPS
     SESSION_COOKIE_SECURE = True
+
+    # Tell Flask to trust proxy headers from Cloudflare Tunnel
+    PREFERRED_URL_SCHEME = 'https'
+
+    # Don't enforce SSL-only CSRF tokens (Flask receives HTTP from tunnel)
+    WTF_CSRF_SSL_STRICT = False
 
 
 config_by_name = {

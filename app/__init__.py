@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -14,9 +15,15 @@ migrate = Migrate()
 def create_app(config_name='development'):
     """Create and configure the application."""
     app = Flask(__name__)
-    
+
     from config import config_by_name
     app.config.from_object(config_by_name[config_name])
+
+    # Add ProxyFix middleware for production (handles X-Forwarded-* headers)
+    if config_name == 'production':
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+        )
     
     db.init_app(app)
     login_manager.init_app(app)
