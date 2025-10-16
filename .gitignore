@@ -34,8 +34,17 @@ Thumbs.db
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 .tox/
+reports/
+robot-reports/
+*-report.txt
+*-report.json
+*.log
+log.html
+output.xml
+report.html
 
 # Build
 dist/

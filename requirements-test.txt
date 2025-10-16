@@ -1,0 +1,23 @@
+# Testing dependencies for GameNight application
+
+# Core testing framework
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+
+# Code coverage
+coverage==7.3.2
+
+# Static analysis and security
+pylint==3.0.3
+bandit==1.7.5
+
+# Robot Framework for end-to-end testing
+robotframework==6.1.1
+robotframework-seleniumlibrary==6.1.3
+robotframework-browser==17.5.2
+
+# Additional testing utilities
+faker==20.1.0  # For generating test data
+factory-boy==3.3.0  # For creating test fixtures
+freezegun==1.4.0  # For mocking datetime in tests
