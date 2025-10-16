@@ -70,11 +70,13 @@ def view_game_scores(game_id):
     """View scores for a specific game."""
     game = GameService.get_game_by_id(game_id)
     scores = ScoreService.get_scores_for_game(game_id, ordered=True)
+    active_game_night = GameNightService.get_active_game_night()
 
     return render_template(
         'public/view_scores.html',
         game=game,
-        scores=scores
+        scores=scores,
+        active_game_night=active_game_night
     )
 
 
@@ -174,6 +176,8 @@ def public_score_game(game_id):
             'notes': score.notes
         }
 
+    active_game_night = GameNightService.get_active_game_night()
+
     return render_template(
         'public/public_scoring.html',
         form=form,
@@ -182,7 +186,8 @@ def public_score_game(game_id):
         teams_json=teams_dict,
         existing_scores=existing_scores,
         existing_scores_json=existing_scores_dict,
-        penalties=penalties_dict
+        penalties=penalties_dict,
+        active_game_night=active_game_night
     )
 
 
@@ -228,7 +233,8 @@ def playground():
         completed_games=completed_games,
         upcoming_games=upcoming_games,
         upcoming_games_json=upcoming_games_json,
-        getScore=getScore
+        getScore=getScore,
+        active_game_night=active_game_night
     )
 
 
@@ -237,6 +243,7 @@ def view_tournament_public(game_id):
     """Public view of tournament bracket."""
     game = GameService.get_game_by_id(game_id)
     tournament = TournamentService.get_tournament_by_game(game_id)
+    active_game_night = GameNightService.get_active_game_night()
 
     if not tournament:
         from flask import flash, redirect, url_for
@@ -249,7 +256,8 @@ def view_tournament_public(game_id):
                          game=game,
                          tournament=tournament,
                          bracket=bracket_data['bracket'],
-                         rounds=bracket_data['rounds'])
+                         rounds=bracket_data['rounds'],
+                         active_game_night=active_game_night)
 
 
 @main_bp.route('/tournament/match/<int:match_id>/score', methods=['POST'])
@@ -282,10 +290,12 @@ def score_match_public(match_id):
 def history():
     """View all completed game night history."""
     game_nights = GameNightService.get_completed_game_nights()
+    active_game_night = GameNightService.get_active_game_night()
 
     return render_template(
         'public/history.html',
-        game_nights=game_nights
+        game_nights=game_nights,
+        active_game_night=active_game_night
     )
 
 
@@ -293,6 +303,7 @@ def history():
 def history_detail(game_night_id):
     """View detailed information about a specific game night."""
     details = GameNightService.get_game_night_details(game_night_id)
+    active_game_night = GameNightService.get_active_game_night()
 
     def getScore(team_id, game_id):
         """Helper function for templates to get score."""
@@ -306,5 +317,6 @@ def history_detail(game_night_id):
         completed_games=details['completed_games'],
         upcoming_games=details['upcoming_games'],
         winner=details['winner'],
-        getScore=getScore
+        getScore=getScore,
+        active_game_night=active_game_night
     )

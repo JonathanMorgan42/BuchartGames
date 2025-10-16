@@ -295,6 +295,7 @@ tbody tr:hover {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+        padding: 0.75rem 0.5rem;
     }
 
     .team-actions {
@@ -324,6 +325,11 @@ tbody tr:hover {
 }
 
 @media (max-width: 480px) {
+    .admin-header,
+    .page-header {
+        padding: 0.5rem 0.35rem;
+    }
+
     th, td {
         padding: 0.75rem 0.5rem;
         font-size: 0.875rem;

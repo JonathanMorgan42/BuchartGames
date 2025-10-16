@@ -1190,7 +1190,7 @@
     .page-header {
         flex-direction: column;
         align-items: flex-start;
-        padding: 0.75rem 0;
+        padding: 0.75rem 0.5rem;
         margin-bottom: 1rem;
     }
 
@@ -1368,7 +1368,7 @@
 
 @media (max-width: 480px) {
     .page-header {
-        padding: 0.5rem 0;
+        padding: 0.5rem 0.35rem;
         margin-bottom: 0.75rem;
     }
 
