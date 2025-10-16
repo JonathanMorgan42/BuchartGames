@@ -124,7 +124,7 @@
         {% endwith %}
 
         <!-- Login Form -->
-        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form" novalidate>
+        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
@@ -135,7 +135,8 @@
                     autocomplete="username",
                     autocapitalize="off",
                     autocorrect="off",
-                    spellcheck="false"
+                    spellcheck="false",
+                    required=true
                 ) }}
                 {% if form.username.errors %}
                     <div class="form-error">
@@ -151,7 +152,8 @@
                 {{ form.password(
                     class="form-control",
                     placeholder="Enter password",
-                    autocomplete="current-password"
+                    autocomplete="current-password",
+                    required=true
                 ) }}
                 {% if form.password.errors %}
                     <div class="form-error">
@@ -184,91 +186,85 @@
 
 {% block scripts %}
 <script>
-// Fix for iOS WebView (including Google Search App) form submission issues
+// Proper form handling for all browsers including iOS WebViews
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('.login-form');
     var submitBtn = form.querySelector('button[type="submit"]');
-    var usernameInput = form.querySelector('#username');
-    var passwordInput = form.querySelector('#password');
 
-    // Ensure inputs are properly recognized
-    if (usernameInput) {
-        usernameInput.setAttribute('name', 'username');
-        usernameInput.setAttribute('id', 'username');
-    }
-    if (passwordInput) {
-        passwordInput.setAttribute('name', 'password');
-        passwordInput.setAttribute('id', 'password');
-    }
+    // Track if form is currently submitting
+    var isSubmitting = false;
+    var submitEventFired = false;
 
-    // Validation function
-    function validateForm() {
-        // Clear any previous errors
-        var errorDivs = form.querySelectorAll('.form-error');
-        errorDivs.forEach(function(div) { div.remove(); });
-
-        var hasError = false;
-        var errors = [];
-
-        // Validate username
-        if (!usernameInput.value || usernameInput.value.trim() === '') {
-            hasError = true;
-            errors.push({ field: usernameInput, message: 'Username is required' });
+    // For iOS WebViews where button clicks may not trigger submit event,
+    // add explicit button click handler
+    submitBtn.addEventListener('click', function(e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return;
         }
 
-        // Validate password
-        if (!passwordInput.value || passwordInput.value.trim() === '') {
-            hasError = true;
-            errors.push({ field: passwordInput, message: 'Password is required' });
+        // Check if form is valid using HTML5 validation
+        if (!form.checkValidity()) {
+            // Let browser show validation messages
+            return;
         }
 
-        // If validation fails, show errors
-        if (hasError) {
-            errors.forEach(function(error) {
-                var errorDiv = document.createElement('div');
-                errorDiv.className = 'form-error';
-                errorDiv.innerHTML = '<span>' + error.message + '</span>';
-                error.field.parentElement.appendChild(errorDiv);
-            });
+        // Mark that we're starting submission
+        isSubmitting = true;
+        submitEventFired = false;
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.innerHTML = '⏳ Logging in...';
+
+        // If submit event doesn't fire in WebView, use requestSubmit or submit
+        setTimeout(function() {
+            if (!submitEventFired) {
+                // Use requestSubmit if available (triggers submit event properly)
+                // Falls back to submit() if not available
+                if (form.requestSubmit) {
+                    try {
+                        form.requestSubmit();
+                    } catch (err) {
+                        form.submit();
+                    }
+                } else {
+                    form.submit();
+                }
+            }
+        }, 50);
+    });
+
+    // Handle form submission event
+    form.addEventListener('submit', function(e) {
+        submitEventFired = true;
+
+        if (isSubmitting) {
+            // Already handled by button click, just let it through
+            return true;
+        }
+
+        // Check if form is valid
+        if (!form.checkValidity()) {
+            e.preventDefault();
             return false;
         }
 
+        // Show loading state
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.innerHTML = '⏳ Logging in...';
+
         return true;
-    }
-
-    // Handle button click directly (fixes iOS WebView submit event issues)
-    submitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        if (validateForm()) {
-            // Disable submit button to prevent double submission
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.6';
-            submitBtn.innerHTML = '⏳ Logging in...';
-
-            // Submit the form
-            form.submit();
-        }
-    });
-
-    // Fallback: handle form submission event (for Enter key)
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        if (validateForm()) {
-            // Disable submit button to prevent double submission
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.6';
-            submitBtn.innerHTML = '⏳ Logging in...';
-
-            // Submit the form
-            form.submit();
-        }
     });
 
     // Re-enable button if user goes back
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) {
+            isSubmitting = false;
+            submitEventFired = false;
             submitBtn.disabled = false;
             submitBtn.style.opacity = '1';
             submitBtn.innerHTML = '🔓 Login';
