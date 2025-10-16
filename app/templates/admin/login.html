@@ -121,12 +121,19 @@
         {% endwith %}
 
         <!-- Login Form -->
-        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
+        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form" novalidate>
             {{ form.hidden_tag() }}
 
             <div class="form-group">
                 <label for="username">Username</label>
-                {{ form.username(class="form-control", placeholder="Enter username", autocomplete="username") }}
+                {{ form.username(
+                    class="form-control",
+                    placeholder="Enter username",
+                    autocomplete="username",
+                    autocapitalize="off",
+                    autocorrect="off",
+                    spellcheck="false"
+                ) }}
                 {% if form.username.errors %}
                     <div class="form-error">
                         {% for error in form.username.errors %}
@@ -138,7 +145,11 @@
 
             <div class="form-group">
                 <label for="password">Password</label>
-                {{ form.password(class="form-control", placeholder="Enter password", autocomplete="current-password") }}
+                {{ form.password(
+                    class="form-control",
+                    placeholder="Enter password",
+                    autocomplete="current-password"
+                ) }}
                 {% if form.password.errors %}
                     <div class="form-error">
                         {% for error in form.password.errors %}
@@ -169,4 +180,71 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+// Fix for iOS Safari form submission issues
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.login-form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const usernameInput = form.querySelector('#username');
+    const passwordInput = form.querySelector('#password');
+
+    // Ensure inputs are properly recognized
+    if (usernameInput) {
+        usernameInput.setAttribute('name', 'username');
+        usernameInput.setAttribute('id', 'username');
+    }
+    if (passwordInput) {
+        passwordInput.setAttribute('name', 'password');
+        passwordInput.setAttribute('id', 'password');
+    }
+
+    // Handle form submission with explicit validation
+    form.addEventListener('submit', function(e) {
+        // Clear any previous errors
+        const errorDivs = form.querySelectorAll('.form-error');
+        errorDivs.forEach(div => div.remove());
+
+        let hasError = false;
+        const errors = [];
+
+        // Validate username
+        if (!usernameInput.value || usernameInput.value.trim() === '') {
+            hasError = true;
+            errors.push({ field: usernameInput, message: 'Username is required' });
+        }
+
+        // Validate password
+        if (!passwordInput.value || passwordInput.value.trim() === '') {
+            hasError = true;
+            errors.push({ field: passwordInput, message: 'Password is required' });
+        }
+
+        // If validation fails, show errors and prevent submission
+        if (hasError) {
+            e.preventDefault();
+            errors.forEach(error => {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error';
+                errorDiv.innerHTML = '<span>' + error.message + '</span>';
+                error.field.parentElement.appendChild(errorDiv);
+            });
+            return false;
+        }
+
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.innerHTML = '⏳ Logging in...';
+    });
+
+    // Re-enable button if user goes back
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.innerHTML = '🔓 Login';
+        }
+    });
+});
+</script>
 {% endblock %}
