@@ -1266,9 +1266,6 @@
     /* Prioritize score input on mobile - make it more prominent */
     .team-scoring-card {
         margin-bottom: 1rem;
-        position: sticky;
-        top: 0;
-        z-index: 100;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
