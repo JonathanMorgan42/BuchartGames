@@ -23,60 +23,62 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
+            #!/bin/bash
             set -e
-
-            echo "🚀 Starting deployment..."
-
+            
+            echo "Starting deployment..."
+            
             # Navigate to project directory
-            cd /opt/GameNight
-
+            cd /opt/BuchartGames
+            
             # Pull latest changes
-            echo "📥 Pulling latest code from GitHub..."
+            echo "Pulling latest code from GitHub..."
             git fetch origin
             git reset --hard origin/main
-
+            
             # Backup database before deployment
-            echo "💾 Creating database backup..."
+            echo "Creating database backup..."
             timestamp=$(date +%Y%m%d-%H%M%S)
             if [ -f instance/gamenight.db ]; then
               cp instance/gamenight.db instance/gamenight.db.backup-$timestamp
-              echo "✅ Database backed up to: gamenight.db.backup-$timestamp"
+              echo "Database backed up to: gamenight.db.backup-$timestamp"
             fi
-
+            
             # Build new image
-            echo "🏗️  Building Docker image..."
+            echo "Building Docker image..."
             docker compose build --no-cache web
-
+            
             # Run database migrations (before stopping old container)
-            echo "🔄 Running database migrations..."
-            docker compose run --rm web flask db upgrade || echo "⚠️  Migration warning (continuing)"
-
+            echo "Running database migrations..."
+            docker compose run --rm web flask db upgrade || echo "Migration warning (continuing)"
+            
             # Restart with zero-downtime (recreate only changed containers)
-            echo "♻️  Restarting application..."
+            echo "Restarting application..."
             docker compose up -d --no-deps --build web
-
+            
             # Wait for health check
-            echo "🏥 Waiting for application to be healthy..."
+            echo "Waiting for application to be healthy..."
             sleep 10
-
+            
             # Verify deployment
             if docker compose ps | grep -q "healthy"; then
-              echo "✅ Deployment successful!"
-
+              echo "Deployment successful!"
+            
               # Cleanup old images
-              echo "🧹 Cleaning up old Docker images..."
+              echo "Cleaning up old Docker images..."
               docker image prune -f
-
+            
               # Keep only last 7 database backups
               find instance/ -name "gamenight.db.backup-*" -mtime +7 -delete
-
-              echo "🎉 Deployment complete!"
+            
+              echo "Deployment complete!"
             else
-              echo "❌ Deployment failed - container not healthy"
-              echo "📋 Recent logs:"
+              echo "Deployment failed - container not healthy"
+              echo "Recent logs:"
               docker compose logs --tail=50 web
               exit 1
             fi
+
 
       - name: Notify on failure
         if: failure()
