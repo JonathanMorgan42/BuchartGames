@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=appuser:appuser . .
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /app/instance /app/logs && \
+RUN mkdir -p /app/instance /app/instance/flask_session /app/logs && \
     chown -R appuser:appuser /app/instance /app/logs
 
 # Switch to non-root user
