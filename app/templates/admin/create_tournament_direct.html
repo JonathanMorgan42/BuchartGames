@@ -8,12 +8,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="tournament-setup-container">
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-trophy header-icon"></i>
+        <h1>Create New Tournament</h1>
+    </div>
+    <p class="header-subtitle">Set up a tournament bracket for all teams</p>
+    <div class="header-actions">
+        <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
+    </div>
+</div>
+
+<div class="card">
     <div class="tournament-card">
-        <div class="tournament-header">
-            <h1>🏆 Create New Tournament</h1>
-            <div class="game-name">Set up a tournament bracket for all teams</div>
-        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

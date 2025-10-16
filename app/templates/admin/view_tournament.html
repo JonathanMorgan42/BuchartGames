@@ -8,36 +8,32 @@
 {% endblock %}
 
 {% block content %}
-<div class="tournament-container">
-    <div class="tournament-header">
-        <div class="header-content">
-            <h1>🏆 {{ game.name }}</h1>
-            <div class="tournament-info">
-                <span class="info-item">
-                    <strong>Type:</strong> Single Elimination
-                </span>
-                <span class="info-item">
-                    <strong>Style:</strong> {{ tournament.bracket_style|title }}
-                </span>
-                {% if tournament.is_completed %}
-                <span class="status-badge completed">Completed</span>
-                {% else %}
-                <span class="status-badge in-progress">In Progress</span>
-                {% endif %}
-            </div>
-        </div>
-        <div class="header-actions">
-            <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <form method="POST" action="{{ url_for('admin.reset_tournament', tournament_id=tournament.id) }}" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-warning" onclick="return confirm('Reset entire tournament? All match results will be cleared.')">
-                    <i class="fas fa-undo"></i> Reset
-                </button>
-            </form>
-        </div>
+<div class="page-header-detail">
+    <div class="page-header-detail-top">
+        <a href="{{ url_for('main.games') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('admin.reset_tournament', tournament_id=tournament.id) }}" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reset entire tournament? All match results will be cleared.')">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </form>
+        {% endif %}
     </div>
+    <h1>{{ game.name }}</h1>
+    <p class="context-info">
+        Single Elimination ({{ tournament.bracket_style|title }})
+        {% if tournament.is_completed %}
+        <span class="status-badge completed">Completed</span>
+        {% else %}
+        <span class="status-badge in-progress">In Progress</span>
+        {% endif %}
+    </p>
+</div>
+
+<div class="tournament-container">
 
     {% if tournament.is_completed and tournament.winner_team %}
     <div class="winner-banner">

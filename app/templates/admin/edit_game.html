@@ -10,14 +10,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-header-content">
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-edit header-icon"></i>
         <h1>Edit Game: {{ game.name }}</h1>
-        <p class="page-subtitle">Update game details and scoring settings</p>
     </div>
-    <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Games
-    </a>
+    <p class="header-subtitle">Update game details and scoring settings</p>
+    <div class="header-actions">
+        <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
+    </div>
 </div>
 
 <div class="card form-card">
@@ -74,7 +77,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                <p class="help-text">📝 Change this number to reorder the game. Lower numbers appear first.</p>
+                <p class="help-text">Change this number to reorder the game. Lower numbers appear first.</p>
 
                 {% if existing_games %}
                 <div class="game-order-preview">
@@ -127,13 +130,15 @@
             <div class="form-group">
                 <label>Scoring Direction</label>
                 <div class="scoring-direction-tiles">
-                    <div class="scoring-tile" data-value="higher_better" data-tooltip="Example: Most points wins">
-                        <div class="tile-icon">🏆</div>
+                    <div class="scoring-tile" data-value="higher_better">
+                        <div class="tile-icon"><i class="fas fa-trophy"></i></div>
                         <div class="tile-label">Higher Wins</div>
+                        <div class="tile-description">Example: Most points wins</div>
                     </div>
-                    <div class="scoring-tile" data-value="lower_better" data-tooltip="Example: Fastest time wins">
-                        <div class="tile-icon">⏱</div>
+                    <div class="scoring-tile" data-value="lower_better">
+                        <div class="tile-icon"><i class="fas fa-stopwatch"></i></div>
                         <div class="tile-label">Lower Wins</div>
+                        <div class="tile-description">Example: Fastest time wins</div>
                     </div>
                 </div>
                 {{ form.scoring_direction(id="scoring_direction", class="display-none") }}

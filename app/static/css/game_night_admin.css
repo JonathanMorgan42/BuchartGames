@@ -3,97 +3,28 @@
 .game-night-management-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem 0.5rem;
 }
 
-.page-header {
+/* Page Header - Uses standardized .page-header-main pattern with consistent spacing */
+.game-night-management-container .page-header-main {
+    padding: 2rem 1rem;
+}
+
+.page-header-main .header-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid rgba(251, 191, 36, 0.3);
+    justify-content: center;
+    margin-top: 1rem;
 }
 
-.page-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #fbbf24;
-    margin: 0;
-}
-
-.btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    text-align: center;
-    text-decoration: none;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-}
-
-.btn-success {
-    background: #10b981;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #059669;
-}
-
-.btn-warning {
-    background: #f59e0b;
-    color: white;
-}
-
-.btn-warning:hover {
-    background: #d97706;
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-.btn-secondary {
-    background: #64748b;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #475569;
-}
-
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-}
-
-/* Active Banner */
+/* Active Banner - Subtle style matching app theme */
 .active-game-night-banner {
     padding: 1.5rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border-radius: 12px;
+    background: var(--gradient-header);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent-green);
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .banner-content {
@@ -101,7 +32,6 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    color: white;
 }
 
 .banner-label {
@@ -109,33 +39,35 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    opacity: 0.9;
+    color: var(--accent-green);
 }
 
 .banner-content h2 {
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
+    color: var(--text-primary);
 }
 
 .banner-date {
     font-size: 1rem;
-    opacity: 0.9;
+    color: var(--text-muted);
 }
 
-/* No Active Banner */
+/* No Active Banner - Dark theme consistency */
 .no-active-banner {
     padding: 1.5rem;
-    background: #fef3c7;
-    border: 2px solid #fbbf24;
-    border-radius: 12px;
+    background: var(--gradient-header);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent-gold);
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     text-align: center;
 }
 
 .no-active-banner p {
-    color: #92400e;
-    font-weight: 600;
+    color: var(--text-muted);
+    font-weight: 500;
     margin: 0;
 }
 
@@ -153,37 +85,38 @@
 
 .game-nights-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
 }
 
 .game-night-card {
-    background: rgba(30, 41, 59, 0.5);
-    border: 2px solid rgba(100, 116, 139, 0.3);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+    border: 2px solid rgba(251, 191, 36, 0.3);
+    border-radius: 16px;
     padding: 1.5rem;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .game-night-card.active {
-    border-color: #10b981;
-    border-width: 3px;
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: var(--accent-green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.2) 100%);
 }
 
 .game-night-card.completed {
-    opacity: 0.8;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    opacity: 0.95;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.2) 100%);
     border-color: #fbbf24;
 }
 
 .game-night-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 .card-header {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .card-title-section h3 {
@@ -196,7 +129,7 @@
 .card-date {
     font-size: 0.95rem;
     color: #cbd5e1;
-    margin: 0;
+    margin: 0.25rem 0;
 }
 
 .card-status-badges {
@@ -208,31 +141,31 @@
 .status-badge {
     padding: 0.375rem 0.75rem;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-radius: 6px;
+    border-radius: var(--radius-full);
 }
 
 .status-badge.active {
-    background: #10b981;
-    color: white;
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
 }
 
 .status-badge.completed {
-    background: #f59e0b;
-    color: white;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fcd34d;
 }
 
-/* Card Stats */
+/* Card Stats - Matching history page style */
 .card-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
-    margin: 1.5rem 0;
+    margin-bottom: 1.5rem;
     padding: 1rem;
     background: rgba(15, 23, 42, 0.5);
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
@@ -260,9 +193,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 2px solid rgba(100, 116, 139, 0.3);
+    border-top: 1px solid rgba(100, 116, 139, 0.3);
 }
 
 .card-actions form {
@@ -273,43 +205,25 @@
 .empty-state {
     text-align: center;
     padding: 3rem;
-    background: rgba(30, 41, 59, 0.3);
-    border: 2px dashed rgba(203, 213, 225, 0.3);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-lg);
 }
 
 .empty-state p {
     font-size: 1.1rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin: 0;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .game-night-management-container {
-        padding: 1rem;
+        padding: 1rem 0.35rem;
     }
 
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-    }
-
-    .page-header h1 {
-        font-size: 1.75rem;
-    }
-
-    .btn {
-        padding: 0.625rem 1.25rem;
-        font-size: 0.95rem;
-    }
-
-    .btn-sm {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
+    .game-night-management-container .page-header-main {
+        padding: 1.5rem 0.75rem;
     }
 
     .active-game-night-banner,
@@ -332,7 +246,7 @@
 
     .game-nights-list h2 {
         font-size: 1.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
     .game-nights-grid {
@@ -341,7 +255,8 @@
     }
 
     .game-night-card {
-        padding: 1rem;
+        padding: 1.25rem;
+        border-radius: 12px;
     }
 
     .card-title-section h3 {
@@ -366,7 +281,7 @@
     .card-stats {
         gap: 0.5rem;
         padding: 0.75rem;
-        margin: 1rem 0;
+        margin-bottom: 1rem;
     }
 
     .stat-value {
@@ -398,11 +313,11 @@
 
 @media (max-width: 480px) {
     .game-night-management-container {
-        padding: 0.75rem;
+        padding: 0.75rem 0.25rem;
     }
 
-    .page-header h1 {
-        font-size: 1.5rem;
+    .game-night-management-container .page-header-main {
+        padding: 1.25rem 0.5rem;
     }
 
     .active-game-night-banner,
@@ -419,7 +334,7 @@
     }
 
     .game-night-card {
-        padding: 0.75rem;
+        padding: 1rem;
     }
 
     .card-title-section h3 {
@@ -427,6 +342,7 @@
     }
 
     .card-stats {
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.35rem;
         padding: 0.5rem;
     }

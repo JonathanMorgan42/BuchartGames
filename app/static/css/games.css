@@ -1,20 +1,13 @@
-/* Games Page - Consistent with Teams Style */
+/* Games Page - Uses standardized header from base.css */
 
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
+.header-icon {
+    color: var(--accent-gold);
 }
 
-.admin-header h1 {
-    margin: 0;
-    color: var(--primary);
-}
-
-.header-buttons {
+.header-actions {
+    margin-top: 1rem;
     display: flex;
+    justify-content: center;
     gap: 0.75rem;
     flex-wrap: wrap;
 }
@@ -858,15 +851,16 @@ tbody tr:hover {
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
+    min-height: var(--touch-target-lg);
 }
 
 .btn-mobile i {
     font-size: 1.2rem;
 }
 
-/* Score Button - Bright Green for Maximum Visibility */
+/* Score Button - Use standardized btn-action-primary from base.css */
 .btn-mobile-score {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: var(--gradient-green);
     color: white;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
@@ -877,6 +871,7 @@ tbody tr:hover {
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
 }
 
+/* View Button - Use standardized btn-action-view from base.css */
 .btn-mobile-primary {
     background: var(--accent-blue);
     color: white;

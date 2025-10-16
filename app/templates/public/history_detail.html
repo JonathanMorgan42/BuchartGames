@@ -5,30 +5,32 @@
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="history-detail-container">
-    <div class="back-link">
-        <a href="{{ url_for('main.history') }}">← Back to History</a>
-    </div>
-
-    <div class="detail-header archived">
+    <div class="page-header-detail history-header-gold-detail">
+        <div class="page-header-detail-top">
+            <a href="{{ url_for('main.history') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back to History
+            </a>
+        </div>
         <div class="header-top">
             <h1>{{ game_night.name }}</h1>
             {% if game_night.is_completed %}
             <span class="archived-badge">Archived</span>
             {% endif %}
         </div>
-        <p class="detail-date">{{ game_night.date.strftime('%A, %B %d, %Y') }}</p>
+        <p class="context-info">{{ game_night.date.strftime('%A, %B %d, %Y') }}</p>
         {% if game_night.ended_at %}
-        <p class="detail-ended">Ended at {{ game_night.ended_at.strftime('%I:%M %p') }}</p>
+        <p class="context-info-secondary">Ended at {{ game_night.ended_at.strftime('%I:%M %p') }}</p>
         {% endif %}
     </div>
 
     {% if winner %}
     <div class="winner-showcase">
-        <div class="winner-trophy">🏆</div>
+        <i class="fas fa-trophy winner-trophy"></i>
         <div class="winner-content">
             <h2>Champion</h2>
             <div class="winner-team">
@@ -46,15 +48,7 @@
             {% for team in teams %}
             <div class="standing-item {% if loop.index == 1 %}winner{% endif %}">
                 <div class="standing-rank">
-                    {% if loop.index == 1 %}
-                    🥇
-                    {% elif loop.index == 2 %}
-                    🥈
-                    {% elif loop.index == 3 %}
-                    🥉
-                    {% else %}
                     {{ loop.index }}
-                    {% endif %}
                 </div>
                 <div class="team-color-dot" style="background-color: {{ team.color }};"></div>
                 <div class="standing-team-name">{{ team.name }}</div>

@@ -28,48 +28,10 @@
     opacity: 0.9;
 }
 
-.leaderboard-header {
-    padding: 2rem 1rem;
-    text-align: center;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-    border-bottom: 1px solid var(--border-light);
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-
+/* Header now uses standardized .page-header-main from base.css */
+/* Icon styling for Font Awesome */
 .header-icon {
-    font-size: 1.75rem;
-}
-
-.header-title-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.leaderboard-header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: white;
-    margin: 0;
-}
-
-.header-date {
-    color: #94a3b8;
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-.leaderboard-header > p {
-    color: #94a3b8;
-    margin: 0;
-    font-size: 0.95rem;
+    color: var(--accent-gold);
 }
 
 .view-controls {
@@ -93,23 +55,33 @@
     flex: 1;
     padding: 0.75rem 1rem;
     background: transparent;
-    color: #94a3b8;
+    color: var(--text-muted);
     border: none;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
     font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-height: var(--touch-target-sm);
+}
+
+.view-btn i {
+    font-size: 1rem;
 }
 
 .view-btn:hover {
     background: rgba(71, 85, 105, 0.3);
-    color: white;
+    color: var(--text-primary);
 }
 
 .view-btn.active {
-    background: rgba(251, 191, 36, 0.1);
-    color: #fbbf24;
+    background: var(--accent-gold-dim);
+    color: var(--accent-gold);
     box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
 }
 
@@ -571,16 +543,23 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .leaderboard-header {
-        padding: 1.5rem 0.75rem;
-    }
-
-    .leaderboard-header h1 {
-        font-size: 1.5rem;
-    }
+    /* Header styles handled by base.css .page-header-main */
 
     .view-controls {
         padding: 0.5rem 0.35rem;
+    }
+
+    .view-toggles {
+        max-width: 100%;
+    }
+
+    .view-btn {
+        font-size: 0.85rem;
+        padding: 0.65rem 0.75rem;
+    }
+
+    .view-btn i {
+        font-size: 0.9rem;
     }
 
     /* Card view mobile optimizations */

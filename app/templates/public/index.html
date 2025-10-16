@@ -8,23 +8,29 @@
 
 {% block content %}
 <div class="leaderboard-container">
-    <div class="leaderboard-header">
+    <div class="page-header-main">
         <div class="header-content">
-            <div class="header-icon">🏆</div>
+            <i class="fas fa-trophy header-icon"></i>
             <h1>Leaderboard</h1>
         </div>
         {% if active_game_night %}
-        <p>Live team standings</p>
+        <p class="header-subtitle">Live team standings</p>
         {% else %}
-        <p>No active game night. Admin: activate a game night to begin!</p>
+        <p class="header-subtitle">No active game night. Admin: activate a game night to begin!</p>
         {% endif %}
     </div>
 
     <div class="view-controls">
         <div class="view-toggles">
-            <button id="tableViewBtn" class="view-btn active">📊 Table</button>
-            <button id="cardViewBtn" class="view-btn">🎴 Cards</button>
-            <a href="{{ url_for('main.playground') }}" class="view-btn playground-btn">🎮 Playground</a>
+            <button id="tableViewBtn" class="view-btn active">
+                <i class="fas fa-table"></i> Table
+            </button>
+            <button id="cardViewBtn" class="view-btn">
+                <i class="fas fa-th-large"></i> Cards
+            </button>
+            <a href="{{ url_for('main.playground') }}" class="view-btn playground-btn">
+                <i class="fas fa-gamepad"></i> Playground
+            </a>
         </div>
     </div>
 

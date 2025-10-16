@@ -8,9 +8,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="live-scoring-header card">
+<div class="page-header-detail">
+    <div class="page-header-detail-top">
+        <a href="{{ url_for('main.games') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
+    </div>
     <h1>Game Scores: {{ game.name }}</h1>
-    <p>Game #{{ game.sequence_number }} - {{ game.type|title }}</p>
+    <p class="context-info">Game #{{ game.sequence_number }} - {{ game.type|title }}</p>
 </div>
 
 {% with messages = get_flashed_messages() %}

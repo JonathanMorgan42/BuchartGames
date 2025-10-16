@@ -8,14 +8,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-header-content">
-        <h1>Live Scoring</h1>
-        <p class="page-subtitle">{{ game.name }}</p>
+<div class="page-header-detail">
+    <div class="page-header-detail-top">
+        <a href="{{ url_for('main.games') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
     </div>
-    <a href="{{ url_for('main.games') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Games
-    </a>
+    <h1>Live Scoring: {{ game.name }}</h1>
+    <p class="context-info">Enter scores for all teams</p>
 </div>
 
 <!-- Game Info Card -->

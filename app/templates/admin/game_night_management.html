@@ -4,15 +4,22 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/game_night_admin.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="game-night-management-container">
-    <div class="page-header">
-        <h1>Game Night Management</h1>
-        <a href="{{ url_for('admin.create_game_night') }}" class="btn btn-primary">
-            + Create New Game Night
-        </a>
+    <div class="page-header-main">
+        <div class="header-content">
+            <i class="fas fa-calendar-alt header-icon"></i>
+            <h1>Game Night Management</h1>
+        </div>
+        <p class="header-subtitle">Create and manage your game nights</p>
+        <div class="header-actions">
+            <a href="{{ url_for('admin.create_game_night') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Game Night
+            </a>
+        </div>
     </div>
 
     {% if active_game_night %}

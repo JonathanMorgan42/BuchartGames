@@ -8,12 +8,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="admin-header">
-    <h1>Team Management</h1>
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-users header-icon"></i>
+        <h1>Teams</h1>
+    </div>
+    <p class="header-subtitle">Manage your game night teams and participants</p>
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('admin.add_team') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Add New Team
-    </a>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.add_team') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Team
+        </a>
+    </div>
     {% endif %}
 </div>
 
@@ -37,6 +43,47 @@
         {% endif %}
     {% endwith %}
 
+    <!-- Mobile Card Layout -->
+    <div class="teams-mobile-cards">
+        {% for team in teams %}
+        <div class="team-card-mobile">
+            <div class="team-card-header">
+                <div class="team-color-circle" style="background-color: {{ team.color or '#3b82f6' }};"></div>
+                <div class="team-info">
+                    <h3 class="team-name">{{ team.name }}</h3>
+                    <div class="team-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-trophy"></i> {{ team.totalPoints }} pts
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-gamepad"></i> {{ team.games_played }} games
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="team-participants">
+                <div class="participants-label">Team Members:</div>
+                {% for participant in team.participants %}
+                <div class="participant-chip">
+                    <i class="fas fa-user"></i> {{ participant.getFullName() }}
+                </div>
+                {% endfor %}
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="team-card-actions">
+                <a href="{{ url_for('admin.edit_team', team_id=team.id) }}" class="btn-mobile-secondary">
+                    <i class="fas fa-edit"></i> Edit Team
+                </a>
+                <button class="btn-mobile-danger delete-team-btn" data-team-id="{{ team.id }}" data-team-name="{{ team.name }}">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop Table Layout -->
     <div class="team-table">
         <table id="teamsTable">
             <thead>

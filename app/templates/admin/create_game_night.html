@@ -7,13 +7,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-calendar-plus header-icon"></i>
         <h1>Create New Game Night</h1>
-        <p>Set up a new game night session</p>
     </div>
+    <p class="header-subtitle">Set up a new game night session</p>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.game_night_management') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Management
+        </a>
+    </div>
+</div>
 
-    <form method="POST" action="{{ url_for('admin.create_game_night') }}" class="modern-form">
+<div class="card form-card">
+    <form method="POST" action="{{ url_for('admin.create_game_night') }}">
         {{ form.hidden_tag() }}
 
         <div class="form-group">

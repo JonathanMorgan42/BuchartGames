@@ -8,10 +8,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="admin-header">
-    <h1>Games Management</h1>
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-gamepad header-icon"></i>
+        <h1>Games</h1>
+    </div>
+    <p class="header-subtitle">Manage and score all your game night games</p>
     {% if current_user.is_authenticated %}
-    <div class="header-buttons">
+    <div class="header-actions">
         <a href="{{ url_for('admin.add_game') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add New Game
         </a>

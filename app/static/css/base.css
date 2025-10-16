@@ -24,9 +24,30 @@
     --accent-red: #ef4444;
     --accent-purple: #8b5cf6;
 
+    /* Accent Color Variations */
+    --accent-gold-dim: rgba(251, 191, 36, 0.1);
+    --accent-gold-hover: #fcd34d;
+    --accent-blue-dim: rgba(59, 130, 246, 0.1);
+    --accent-green-dim: rgba(16, 185, 129, 0.1);
+    --accent-red-dim: rgba(239, 68, 68, 0.1);
+    --accent-purple-dim: rgba(139, 92, 246, 0.1);
+
     /* Border Colors */
     --border-light: rgba(71, 85, 105, 0.5);
     --border-dark: rgba(15, 23, 42, 0.8);
+
+    /* Overlay Opacity Levels */
+    --overlay-light: rgba(15, 23, 42, 0.3);
+    --overlay-medium: rgba(15, 23, 42, 0.5);
+    --overlay-dark: rgba(15, 23, 42, 0.8);
+    --overlay-darker: rgba(15, 23, 42, 0.95);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
+    --gradient-header: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+    --gradient-gold: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15));
+    --gradient-purple: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    --gradient-green: linear-gradient(135deg, #10b981, #059669);
 
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -34,6 +55,7 @@
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
 
     /* Border Radius */
     --radius-sm: 0.5rem;
@@ -41,6 +63,11 @@
     --radius-lg: 1rem;
     --radius-xl: 1.5rem;
     --radius-full: 9999px;
+
+    /* Touch Targets (Mobile-first) */
+    --touch-target-sm: 44px;
+    --touch-target-md: 48px;
+    --touch-target-lg: 56px;
 }
 
 /* Reset & Base */
@@ -179,7 +206,11 @@ p {
     line-height: 1.6;
 }
 
-/* Buttons */
+/* ================================================================================
+   3-TIER BUTTON HIERARCHY SYSTEM
+   ================================================================================ */
+
+/* Base Button Style */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -196,6 +227,7 @@ p {
     white-space: nowrap;
     background: var(--accent-blue);
     color: white;
+    min-height: var(--touch-target-sm);
 }
 
 .btn:hover {
@@ -207,12 +239,47 @@ p {
     transform: translateY(0);
 }
 
+/* TIER 1: Primary Actions - What users do most often (Score, View) */
+.btn-action-primary {
+    background: var(--gradient-green);
+    color: white;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    min-height: var(--touch-target-md);
+}
+
+.btn-action-primary:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn-action-view {
+    background: var(--accent-blue);
+    color: white;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    min-height: var(--touch-target-md);
+}
+
+.btn-action-view:hover {
+    background: #2563eb;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+    transform: translateY(-2px);
+}
+
+/* TIER 2: Secondary Actions - Navigation, standard operations */
 .btn-primary {
     background: var(--accent-gold);
     color: var(--bg-primary);
 }
 
 .btn-primary:hover {
+    background: var(--accent-gold-hover);
     box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
@@ -226,28 +293,54 @@ p {
     box-shadow: none;
 }
 
+.btn-success {
+    background: var(--accent-green);
+    color: white;
+}
+
+.btn-success:hover {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* TIER 3: Admin/Destructive Actions - Edit, Delete, Admin tools */
 .btn-danger {
     background: var(--accent-red);
     color: white;
 }
 
 .btn-danger:hover {
+    background: #dc2626;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-.btn-success {
-    background: var(--accent-green);
-    color: white;
-}
-
+/* Size Modifiers */
 .btn-sm {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+    min-height: var(--touch-target-sm);
 }
 
 .btn-lg {
     padding: 1rem 2rem;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    min-height: var(--touch-target-lg);
+}
+
+.btn-xl {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    min-height: var(--touch-target-lg);
 }
 
 /* Button Groups */
@@ -579,7 +672,136 @@ footer p {
     }
 }
 
-/* Page Header Styles */
+/* ================================================================================
+   STANDARDIZED PAGE HEADER PATTERNS
+   ================================================================================ */
+
+/* Pattern A: Main Navigation Pages (Home, Teams, Games, History List) */
+.page-header-main {
+    padding: 2rem 1rem;
+    text-align: center;
+    background: var(--gradient-header);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-header-main .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.page-header-main .header-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.page-header-main h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.page-header-main .header-subtitle {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Pattern B: Detail/View Pages (with back button) */
+.page-header-detail {
+    padding: 1.5rem 1rem;
+    background: var(--gradient-header);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-header-detail-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.page-header-detail .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(100, 116, 139, 0.3);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    min-height: var(--touch-target-sm);
+}
+
+.page-header-detail .back-button:hover {
+    background: rgba(100, 116, 139, 0.5);
+    transform: translateY(-1px);
+}
+
+.page-header-detail h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.page-header-detail .context-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Pattern C: Form/Edit Pages */
+.page-header-form {
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-header-form .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(100, 116, 139, 0.3);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+    min-height: var(--touch-target-sm);
+}
+
+.page-header-form .back-button:hover {
+    background: rgba(100, 116, 139, 0.5);
+    transform: translateY(-1px);
+}
+
+.page-header-form h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.page-header-form .help-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Legacy support - will be phased out */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -587,7 +809,7 @@ footer p {
     margin-bottom: 2rem;
     gap: 1.5rem;
     padding: 1rem 0.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
+    background: var(--gradient-primary);
     border-radius: var(--radius-lg);
     border: 1px solid rgba(139, 92, 246, 0.15);
 }
@@ -609,6 +831,32 @@ footer p {
 }
 
 @media (max-width: 768px) {
+    .page-header-main {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .page-header-main h1 {
+        font-size: 1.5rem;
+    }
+
+    .page-header-detail {
+        padding: 1rem 0.75rem;
+    }
+
+    .page-header-detail-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header-detail h1 {
+        font-size: 1.25rem;
+    }
+
+    .page-header-form h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Legacy */
     .page-header {
         flex-direction: column;
         align-items: flex-start;
@@ -618,6 +866,23 @@ footer p {
 }
 
 @media (max-width: 480px) {
+    .page-header-main {
+        padding: 1.25rem 0.5rem;
+    }
+
+    .page-header-main h1 {
+        font-size: 1.35rem;
+    }
+
+    .page-header-detail {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .page-header-form h1 {
+        font-size: 1.35rem;
+    }
+
+    /* Legacy */
     .page-header {
         padding: 0.5rem 0.35rem;
     }

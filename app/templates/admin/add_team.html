@@ -8,14 +8,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-header-content">
+<div class="page-header-main">
+    <div class="header-content">
+        <i class="fas fa-user-plus header-icon"></i>
         <h1>Add New Team</h1>
-        <p class="page-subtitle">Create a new team and add participants</p>
     </div>
-    <a href="{{ url_for('main.teams') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Teams
-    </a>
+    <p class="header-subtitle">Create a new team and add participants</p>
+    <div class="header-actions">
+        <a href="{{ url_for('main.teams') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Teams
+        </a>
+    </div>
 </div>
 
 <div class="card form-card">
@@ -41,7 +44,6 @@
                 <label for="color">Team Color</label>
                 <div class="color-picker-container">
                     {{ form.color(class="form-control color-input", type="color") }}
-                    <span class="color-preview" id="colorPreview"></span>
                     <span class="color-value" id="colorValue">{{ form.color.data or '#3b82f6' }}</span>
                 </div>
                 {% if form.color.errors %}

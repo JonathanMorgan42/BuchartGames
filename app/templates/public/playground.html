@@ -4,6 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/playground.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
 {% block content %}
@@ -11,14 +12,14 @@
     <!-- Header with Team Selection and Win Possibility -->
     <div class="playground-header">
         <div class="playground-header-top">
-            <div class="header-content">
-                <div class="header-icon">🎮</div>
-                <h1>Simulation Playground</h1>
-            </div>
             <a href="{{ url_for('main.index') }}" class="btn-back">
-                ← Back to Home
+                <i class="fas fa-arrow-left"></i> Back to Home
             </a>
+            <div class="page-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
         </div>
+        <h1>Simulation Playground</h1>
         <p>Explore hypothetical game outcomes and find your path to victory</p>
     </div>
 
@@ -39,7 +40,7 @@
 
     <!-- Current Standings -->
     <div class="standings-section">
-        <h2 class="section-title">📊 Current Standings</h2>
+        <h2 class="section-title"><i class="fas fa-list-ol"></i> Current Standings</h2>
         <div class="standings-list" id="currentStandings">
             <!-- Populated by JavaScript -->
         </div>
@@ -48,7 +49,7 @@
     <!-- Game Simulations -->
     <div class="games-section">
         <div class="section-header">
-            <h2 class="section-title">🎯 Upcoming Games</h2>
+            <h2 class="section-title"><i class="fas fa-gamepad"></i> Upcoming Games</h2>
             <button class="btn-reset-all" id="resetAllBtn">Reset All</button>
         </div>
         <div id="gamePlacementContainer">
@@ -58,7 +59,7 @@
 
     <!-- Simulated Standings -->
     <div class="standings-section">
-        <h2 class="section-title">🔮 Projected Results</h2>
+        <h2 class="section-title"><i class="fas fa-crystal-ball"></i> Projected Results</h2>
         <div id="outcomeSummaryContainer" class="outcome-summary-wrapper"></div>
         <div class="standings-list" id="simulatedStandings">
             <!-- Populated by JavaScript -->
