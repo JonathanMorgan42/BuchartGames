@@ -6,6 +6,7 @@
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
+    margin: 0;
 }
 
 .game-night-banner {
@@ -14,6 +15,7 @@
     text-align: center;
     color: white;
     border-bottom: 3px solid #047857;
+    margin-bottom: 2rem;
 }
 
 .game-night-banner h2 {
@@ -544,6 +546,10 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     /* Header styles handled by base.css .page-header-main */
+
+    .game-night-banner {
+        margin-bottom: 1.5rem;
+    }
 
     .view-controls {
         padding: 0.5rem 0.35rem;

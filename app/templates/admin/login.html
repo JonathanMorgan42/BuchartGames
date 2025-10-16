@@ -83,6 +83,9 @@
 
     .login-actions .btn {
         width: 100%;
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        touch-action: manipulation;
     }
 
     @media (max-width: 480px) {
@@ -181,12 +184,12 @@
 
 {% block scripts %}
 <script>
-// Fix for iOS Safari form submission issues
+// Fix for iOS WebView (including Google Search App) form submission issues
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.login-form');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const usernameInput = form.querySelector('#username');
-    const passwordInput = form.querySelector('#password');
+    var form = document.querySelector('.login-form');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var usernameInput = form.querySelector('#username');
+    var passwordInput = form.querySelector('#password');
 
     // Ensure inputs are properly recognized
     if (usernameInput) {
@@ -198,14 +201,14 @@ document.addEventListener('DOMContentLoaded', function() {
         passwordInput.setAttribute('id', 'password');
     }
 
-    // Handle form submission with explicit validation
-    form.addEventListener('submit', function(e) {
+    // Validation function
+    function validateForm() {
         // Clear any previous errors
-        const errorDivs = form.querySelectorAll('.form-error');
-        errorDivs.forEach(div => div.remove());
+        var errorDivs = form.querySelectorAll('.form-error');
+        errorDivs.forEach(function(div) { div.remove(); });
 
-        let hasError = false;
-        const errors = [];
+        var hasError = false;
+        var errors = [];
 
         // Validate username
         if (!usernameInput.value || usernameInput.value.trim() === '') {
@@ -219,11 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
             errors.push({ field: passwordInput, message: 'Password is required' });
         }
 
-        // If validation fails, show errors and prevent submission
+        // If validation fails, show errors
         if (hasError) {
-            e.preventDefault();
-            errors.forEach(error => {
-                const errorDiv = document.createElement('div');
+            errors.forEach(function(error) {
+                var errorDiv = document.createElement('div');
                 errorDiv.className = 'form-error';
                 errorDiv.innerHTML = '<span>' + error.message + '</span>';
                 error.field.parentElement.appendChild(errorDiv);
@@ -231,10 +233,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Disable submit button to prevent double submission
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.6';
-        submitBtn.innerHTML = '⏳ Logging in...';
+        return true;
+    }
+
+    // Handle button click directly (fixes iOS WebView submit event issues)
+    submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (validateForm()) {
+            // Disable submit button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.innerHTML = '⏳ Logging in...';
+
+            // Submit the form
+            form.submit();
+        }
+    });
+
+    // Fallback: handle form submission event (for Enter key)
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (validateForm()) {
+            // Disable submit button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.innerHTML = '⏳ Logging in...';
+
+            // Submit the form
+            form.submit();
+        }
     });
 
     // Re-enable button if user goes back
