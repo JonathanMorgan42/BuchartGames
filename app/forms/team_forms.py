@@ -1,17 +1,14 @@
-"""Team forms."""
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, FieldList, FormField
 from wtforms.validators import DataRequired, Regexp, Optional
 
 
 class ParticipantForm(FlaskForm):
-    """Participant sub-form."""
     firstName = StringField('First Name')
     lastName = StringField('Last Name')
 
 
 class TeamForm(FlaskForm):
-    """Team form with dynamic participants (minimum 2)."""
     name = StringField('Team Name', validators=[DataRequired()])
     color = StringField('Team Color', validators=[
         DataRequired(), Regexp(r'^#[0-9A-Fa-f]{6}$', message='Must be a valid hex color code')

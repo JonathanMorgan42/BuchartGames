@@ -1,9 +1,7 @@
-"""Team model."""
 from app import db
 
 
 class Team(db.Model):
-    """Team model."""
     __tablename__ = 'team'
 
     id = db.Column(db.Integer, primary_key=True)

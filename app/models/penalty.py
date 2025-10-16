@@ -1,9 +1,7 @@
-"""Penalty model."""
 from app import db
 
 
 class Penalty(db.Model):
-    """Penalty model for game scoring adjustments."""
     __tablename__ = 'penalty'
 
     id = db.Column(db.Integer, primary_key=True)

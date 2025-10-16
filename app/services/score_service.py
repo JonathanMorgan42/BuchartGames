@@ -1,10 +1,8 @@
-"""Score service - business logic for scores."""
 from app import db
 from app.models import Score, Game, Team
 
 
 class ScoreService:
-    """Service class for score operations."""
 
     @staticmethod
     def get_scores_for_game(game_id, ordered=True):

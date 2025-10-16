@@ -1,10 +1,8 @@
-"""Team service - business logic for teams."""
 from app import db
 from app.models import Team, Participant, Score
 
 
 class TeamService:
-    """Service class for team operations."""
 
     @staticmethod
     def get_all_teams(sort_by_points=True, game_night_id=None):

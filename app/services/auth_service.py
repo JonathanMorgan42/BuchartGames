@@ -1,10 +1,8 @@
-"""Authentication service - business logic for authentication."""
 from app import db
 from app.models import Admin
 
 
 class AuthService:
-    """Service class for authentication operations."""
 
     @staticmethod
     def authenticate(username, password):

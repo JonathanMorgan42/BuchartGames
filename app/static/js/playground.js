@@ -929,12 +929,6 @@ window.initPlayground = initPlayground;
 // Auto-initialize when DOM is ready if data is available
 document.addEventListener('DOMContentLoaded', () => {
     if (window.playgroundTeams && window.playgroundGames) {
-        console.log('DOM loaded, initializing playground...');
-        console.log('Teams data:', window.playgroundTeams);
-        console.log('Upcoming games data:', window.playgroundGames);
         initPlayground(window.playgroundTeams, window.playgroundGames);
-        console.log('Playground initialized');
-    } else {
-        console.error('Playground data not found!');
     }
 });

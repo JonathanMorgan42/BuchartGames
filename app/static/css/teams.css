@@ -37,34 +37,6 @@
     color: var(--primary);
 }
 
-/* Page Header - Middle Ground Styling */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    gap: 1.5rem;
-    padding: 1rem 0.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-}
-
-.page-header-content {
-    flex: 1;
-}
-
-.page-header h1 {
-    margin: 0 0 0.5rem 0;
-    color: var(--text-primary);
-    font-size: 1.75rem;
-}
-
-.page-subtitle {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-}
 
 /* Team Actions Bar */
 .team-actions {
@@ -309,79 +281,6 @@ tbody tr:hover {
     gap: 0.75rem;
 }
 
-/* Modal - TOP-DOWN style like logout */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    background: var(--bg-secondary);
-    margin: 15% auto;
-    padding: 1rem 0.75rem;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    max-width: 500px;
-    width: 90%;
-    border: 1px solid var(--border-light);
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modal-content h2 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-}
-
-.modal-content p {
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-}
-
-.warning {
-    color: var(--accent-red);
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 2rem;
-}
-
-.close {
-    color: var(--text-muted);
-    float: right;
-    font-size: 1.75rem;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
-}
-
-.close:hover {
-    color: var(--text-primary);
-}
 
 /* Responsive Adjustments */
 @media (min-width: 640px) {
@@ -422,19 +321,9 @@ tbody tr:hover {
         flex-direction: row;
         gap: 0.5rem;
     }
-
-    .modal-content {
-        margin: 20% auto;
-        width: 95%;
-    }
 }
 
 @media (max-width: 480px) {
-    .btn-sm {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
-    }
-
     th, td {
         padding: 0.75rem 0.5rem;
         font-size: 0.875rem;

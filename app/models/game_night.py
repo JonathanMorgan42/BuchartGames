@@ -1,10 +1,8 @@
-"""Game Night model."""
 from datetime import datetime
 from app import db
 
 
 class GameNight(db.Model):
-    """Game Night model - represents a complete game night session."""
     __tablename__ = 'game_night'
 
     id = db.Column(db.Integer, primary_key=True)

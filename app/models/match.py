@@ -1,9 +1,7 @@
-"""Match model for tournament brackets."""
 from app import db
 
 
 class Match(db.Model):
-    """Match model representing individual games within a tournament bracket."""
     __tablename__ = 'match'
 
     id = db.Column(db.Integer, primary_key=True)

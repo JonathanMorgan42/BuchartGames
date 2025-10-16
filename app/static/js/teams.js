@@ -31,7 +31,7 @@ function filterTeams() {
 function confirmDelete(teamId, teamName) {
     const modal = document.getElementById('deleteModal');
     if (!modal) {
-        console.error('Delete modal not found');
+        alert('Error: Delete modal not found. Please refresh the page.');
         return;
     }
 
@@ -45,7 +45,6 @@ function confirmDelete(teamId, teamName) {
     const deleteForm = document.getElementById('deleteForm');
     if (deleteForm) {
         deleteForm.action = `/admin/teams/delete/${teamId}`;
-        console.log('Delete form action set to:', deleteForm.action);
     }
 
     // Show modal
@@ -126,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (deleteForm) {
         deleteForm.addEventListener('submit', function(e) {
             // Let the form submit naturally
-            console.log('Deleting team...');
         });
     }
 });

@@ -1,4 +1,3 @@
-"""Game management forms."""
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, SelectField, IntegerField,
@@ -8,7 +7,6 @@ from wtforms.validators import DataRequired, NumberRange
 
 
 class GameForm(FlaskForm):
-    """Game creation/editing form."""
     name = StringField('Game Name', validators=[DataRequired()])
     type = SelectField(
         'Game Type',
@@ -53,7 +51,6 @@ class GameForm(FlaskForm):
 
 
 class LiveScoringForm(FlaskForm):
-    """Live scoring form."""
     game_id = StringField('Game ID', validators=[DataRequired()])
     game_notes = TextAreaField('Game Notes')
     is_completed = BooleanField('Mark game as completed', default=True)

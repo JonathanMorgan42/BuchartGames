@@ -1,4 +1,3 @@
-"""Forms for game night management."""
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField
 from wtforms.validators import DataRequired, Length
@@ -6,7 +5,6 @@ from datetime import date
 
 
 class GameNightForm(FlaskForm):
-    """Form for creating/editing game nights."""
 
     name = StringField(
         'Game Night Name',

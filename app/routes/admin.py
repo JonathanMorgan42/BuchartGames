@@ -285,7 +285,16 @@ def delete_game(game_id):
 def edit_scores(game_id):
     """Live scoring page."""
     game = GameService.get_game_by_id(game_id)
-    teams = Team.query.all()
+    # Get teams from the same game night as the game
+    if game.game_night_id:
+        teams = Team.query.filter_by(game_night_id=game.game_night_id).all()
+    else:
+        # Fallback to active game night teams
+        active_gn = GameNightService.get_active_game_night()
+        if active_gn:
+            teams = Team.query.filter_by(game_night_id=active_gn.id).all()
+        else:
+            teams = Team.query.all()
     existing_scores = ScoreService.get_existing_scores_dict(game_id)
 
     form = LiveScoringForm()
@@ -441,7 +450,12 @@ def create_tournament_direct():
 
     # GET request - show form
     form = TournamentSetupForm()
-    teams = Team.query.all()
+    # Get teams from active game night
+    active_gn = GameNightService.get_active_game_night()
+    if active_gn:
+        teams = Team.query.filter_by(game_night_id=active_gn.id).all()
+    else:
+        teams = Team.query.all()
     return render_template('admin/create_tournament_direct.html', form=form, teams=teams)
 
 
@@ -493,7 +507,16 @@ def setup_tournament(game_id):
             import traceback
             traceback.print_exc()
 
-    teams = Team.query.all()
+    # Get teams from the same game night as the game
+    if game.game_night_id:
+        teams = Team.query.filter_by(game_night_id=game.game_night_id).all()
+    else:
+        # Fallback to active game night teams
+        active_gn = GameNightService.get_active_game_night()
+        if active_gn:
+            teams = Team.query.filter_by(game_night_id=active_gn.id).all()
+        else:
+            teams = Team.query.all()
     return render_template('admin/setup_tournament.html', form=form, game=game, teams=teams)
 
 

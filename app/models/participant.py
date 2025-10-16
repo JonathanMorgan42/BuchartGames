@@ -1,9 +1,7 @@
-"""Participant model."""
 from app import db
 
 
 class Participant(db.Model):
-    """Participant model."""
     __tablename__ = 'participant'
     
     id = db.Column(db.Integer, primary_key=True)

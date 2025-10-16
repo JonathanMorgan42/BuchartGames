@@ -1,9 +1,7 @@
-"""Tournament model."""
 from app import db
 
 
 class Tournament(db.Model):
-    """Tournament model for bracket-style competitions."""
     __tablename__ = 'tournament'
 
     id = db.Column(db.Integer, primary_key=True)

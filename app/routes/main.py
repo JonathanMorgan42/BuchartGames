@@ -92,7 +92,16 @@ def public_score_game(game_id):
         flash('Public scoring is not enabled for this game.', 'error')
         return redirect(url_for('main.games'))
 
-    teams = Team.query.all()
+    # Get teams from the same game night as the game
+    if game.game_night_id:
+        teams = Team.query.filter_by(game_night_id=game.game_night_id).all()
+    else:
+        # Fallback to active game night teams
+        active_gn = GameNightService.get_active_game_night()
+        if active_gn:
+            teams = Team.query.filter_by(game_night_id=active_gn.id).all()
+        else:
+            teams = Team.query.all()
     existing_scores = ScoreService.get_existing_scores_dict(game_id)
 
     form = LiveScoringForm()

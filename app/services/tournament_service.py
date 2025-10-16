@@ -1,4 +1,3 @@
-"""Tournament service for bracket generation and management."""
 import math
 import random
 from typing import List, Dict, Optional, Tuple
@@ -7,7 +6,6 @@ from app.models import Tournament, Match, Team, Game, Score
 
 
 class TournamentService:
-    """Service for managing tournament brackets."""
 
     @staticmethod
     def create_tournament(game_id: int, pairing_type: str = 'random',

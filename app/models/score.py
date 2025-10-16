@@ -1,9 +1,7 @@
-"""Score model."""
 from app import db
 
 
 class Score(db.Model):
-    """Score model."""
     __tablename__ = 'score'
     
     id = db.Column(db.Integer, primary_key=True)

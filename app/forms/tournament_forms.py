@@ -1,4 +1,3 @@
-"""Tournament management forms."""
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, SelectField, IntegerField,
@@ -9,7 +8,6 @@ from wtforms.validators import DataRequired, Optional
 
 
 class TournamentSetupForm(FlaskForm):
-    """Tournament setup form."""
     game_id = HiddenField('Game ID', validators=[DataRequired()])
 
     pairing_type = SelectField(
@@ -41,7 +39,6 @@ class TournamentSetupForm(FlaskForm):
 
 
 class MatchScoreForm(FlaskForm):
-    """Form for scoring a single match."""
     match_id = HiddenField('Match ID', validators=[DataRequired()])
     team1_score = FloatField('Team 1 Score', validators=[Optional()])
     team2_score = FloatField('Team 2 Score', validators=[Optional()])

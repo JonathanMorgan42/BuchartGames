@@ -1,11 +1,9 @@
-"""Game Night service - Business logic for game night sessions."""
 from datetime import datetime, date
 from app import db
 from app.models import GameNight, Team, Game
 
 
 class GameNightService:
-    """Service for managing game night sessions."""
 
     @staticmethod
     def create_game_night(name, game_date=None):
