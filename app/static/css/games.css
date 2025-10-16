@@ -778,3 +778,178 @@ tbody tr:hover {
 .game-mode-toggle input:checked + label {
     color: #8b5cf6;
 }
+
+/* Mobile Card Layout Styles */
+.games-mobile-cards {
+    display: none; /* Hidden on desktop */
+}
+
+.game-card-mobile {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.game-card-mobile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.game-card-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+    border-bottom: 1px solid var(--border-light);
+}
+
+.game-number {
+    display: inline-block;
+    background: rgba(251, 191, 36, 0.2);
+    color: var(--accent-gold);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 0.5rem;
+}
+
+.game-title {
+    margin: 0.5rem 0;
+    color: var(--primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.game-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    flex-wrap: wrap;
+}
+
+.game-points {
+    color: var(--accent-gold);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.game-card-actions {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Mobile Buttons - Large and Prominent */
+.btn-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-mobile i {
+    font-size: 1.2rem;
+}
+
+/* Score Button - Bright Green for Maximum Visibility */
+.btn-mobile-score {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-mobile-score:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+
+.btn-mobile-primary {
+    background: var(--accent-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-mobile-primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+/* Admin Actions - Smaller, Secondary Buttons */
+.admin-actions-mobile {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.btn-mobile-small {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-mobile-secondary {
+    background: rgba(100, 116, 139, 0.3);
+    color: var(--text-primary);
+}
+
+.btn-mobile-secondary:hover {
+    background: rgba(100, 116, 139, 0.5);
+}
+
+.btn-mobile-danger {
+    background: var(--accent-red);
+    color: white;
+}
+
+.btn-mobile-danger:hover {
+    background: #dc2626;
+}
+
+/* Responsive: Show cards on mobile, hide table */
+@media (max-width: 768px) {
+    .games-mobile-cards {
+        display: block;
+    }
+
+    .game-table {
+        display: none;
+    }
+}
+
+/* Ensure table is shown on desktop */
+@media (min-width: 769px) {
+    .games-mobile-cards {
+        display: none;
+    }
+
+    .game-table {
+        display: block;
+    }
+}

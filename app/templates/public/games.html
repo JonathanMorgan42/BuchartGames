@@ -29,6 +29,65 @@
         </div>
     </div>
 
+    <!-- Mobile Card Layout -->
+    <div class="games-mobile-cards">
+        {% for game in games %}
+        <div class="game-card-mobile">
+            <div class="game-card-header">
+                <div class="game-number">#{{ game.sequence_number }}</div>
+                <h3 class="game-title">{{ game.name }}</h3>
+                <div class="game-meta">
+                    <span class="game-badge {{ game.type }}">{{ game.type }}</span>
+                    {% if game.isCompleted %}
+                    <span class="status-badge completed">Completed</span>
+                    {% else %}
+                    <span class="status-badge upcoming">Upcoming</span>
+                    {% endif %}
+                </div>
+                <div class="game-points">×{{ game.point_scheme }} Points</div>
+            </div>
+
+            <div class="game-card-actions">
+                {% if game.type == 'tournament' %}
+                    <a href="{{ url_for('main.view_tournament_public', game_id=game.id) }}" class="btn-mobile btn-mobile-primary">
+                        <i class="fas fa-trophy"></i> View Tournament Bracket
+                    </a>
+                {% else %}
+                    {% if game.isCompleted %}
+                        <a href="{{ url_for('main.view_game_scores', game_id=game.id) }}" class="btn-mobile btn-mobile-primary">
+                            <i class="fas fa-eye"></i> View Scores
+                        </a>
+                    {% elif game.public_input %}
+                        <a href="{{ url_for('main.public_score_game', game_id=game.id) }}" class="btn-mobile btn-mobile-score">
+                            <i class="fas fa-edit"></i> Score This Game
+                        </a>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated %}
+                        {% if not game.isCompleted and not game.public_input %}
+                            <a href="{{ url_for('admin.edit_scores', game_id=game.id) }}" class="btn-mobile btn-mobile-score">
+                                <i class="fas fa-edit"></i> Score This Game
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                {% if current_user.is_authenticated %}
+                <div class="admin-actions-mobile">
+                    <a href="{{ url_for('admin.edit_game', game_id=game.id) }}" class="btn-mobile-small btn-mobile-secondary">
+                        <i class="fas fa-cog"></i> Edit
+                    </a>
+                    <button class="btn-mobile-small btn-mobile-danger delete-game-btn" data-game-id="{{ game.id }}" data-game-name="{{ game.name }}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop Table Layout -->
     <div class="game-table">
         <table id="gamesTable">
             <thead>
