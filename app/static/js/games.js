@@ -79,9 +79,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Delete confirmation modal
 function confirmDelete(gameId, gameName) {
+    console.log('confirmDelete called with:', gameId, gameName);
+
     const modal = document.getElementById('deleteModal');
     if (!modal) {
         console.error('Delete modal not found');
+        alert('Error: Delete modal not found. Please refresh the page.');
         return;
     }
 
@@ -89,6 +92,8 @@ function confirmDelete(gameId, gameName) {
     const gameToDeleteSpan = document.getElementById('gameToDelete');
     if (gameToDeleteSpan) {
         gameToDeleteSpan.textContent = gameName;
+    } else {
+        console.warn('gameToDelete span not found');
     }
 
     // Update form action with correct game ID
@@ -96,10 +101,15 @@ function confirmDelete(gameId, gameName) {
     if (deleteForm) {
         deleteForm.action = `/admin/games/delete/${gameId}`;
         console.log('Delete form action set to:', deleteForm.action);
+    } else {
+        console.error('Delete form not found');
+        alert('Error: Delete form not found. Please refresh the page.');
+        return;
     }
 
     // Show modal
     modal.style.display = 'block';
+    console.log('Modal display set to block');
 
     // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
@@ -304,14 +314,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set up delete button click handlers using event delegation
     const deleteButtons = document.querySelectorAll('.delete-game-btn');
+    console.log('Found delete buttons:', deleteButtons.length);
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             const gameId = this.dataset.gameId;
             const gameName = this.dataset.gameName;
+            console.log('Delete button clicked:', gameId, gameName);
             confirmDelete(gameId, gameName);
         });
     });
+
+    // Also use event delegation on the table as a fallback
+    const gamesTable = document.getElementById('gamesTable');
+    if (gamesTable) {
+        gamesTable.addEventListener('click', function(e) {
+            // Check if the clicked element or its parent is a delete button
+            const deleteBtn = e.target.closest('.delete-game-btn');
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const gameId = deleteBtn.dataset.gameId;
+                const gameName = deleteBtn.dataset.gameName;
+                console.log('Delete button clicked via delegation:', gameId, gameName);
+                confirmDelete(gameId, gameName);
+            }
+        });
+    }
 
     // Modal initialization
     const modal = document.getElementById('deleteModal');
@@ -353,6 +383,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (deleteForm) {
             deleteForm.addEventListener('submit', function(e) {
                 console.log('Deleting game...');
+                console.log('Form action:', this.action);
+                console.log('Form method:', this.method);
+                // Form will submit naturally
             });
         }
     }
@@ -377,3 +410,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize game form if on add/edit page
     initializeGameForm();
+});
