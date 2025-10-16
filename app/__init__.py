@@ -53,6 +53,16 @@ def create_app(config_name='development'):
         from app.models.admin import Admin
         return Admin.query.get(int(user_id))
     
+    # Force HTTPS in production
+    @app.before_request
+    def force_https():
+        """Redirect HTTP to HTTPS in production."""
+        if config_name == 'production':
+            from flask import request, redirect
+            if request.headers.get('X-Forwarded-Proto') == 'http':
+                url = request.url.replace('http://', 'https://', 1)
+                return redirect(url, code=301)
+
     # Add security headers
     @app.after_request
     def set_security_headers(response):
