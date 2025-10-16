@@ -65,15 +65,31 @@ class ProductionConfig(Config):
     # Requires Secure=True (HTTPS) to work
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_DOMAIN = None  # Don't restrict to a specific domain (critical for mobile)
+
+    # Prevent large session cookies (mobile browsers reject them)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_TYPE = 'filesystem'  # Store sessions on disk instead of cookies
+    SESSION_FILE_DIR = INSTANCE_DIR / 'flask_session'  # Store in instance directory
+    SESSION_PERMANENT = True  # Use PERMANENT_SESSION_LIFETIME
+    SESSION_USE_SIGNER = True  # Sign session cookie for extra security
 
     # CSRF cookie settings - must match session cookie settings
     WTF_CSRF_SSL_STRICT = False  # Flask receives HTTP from Cloudflare Tunnel
     WTF_CSRF_COOKIE_SECURE = True
     WTF_CSRF_COOKIE_SAMESITE = 'None'
-    WTF_CSRF_COOKIE_HTTPONLY = False  # JS doesn't need access, but form needs to read it
+    WTF_CSRF_COOKIE_HTTPONLY = False  # Must be False so JS can't read it but form can submit it
+    WTF_CSRF_COOKIE_DOMAIN = None  # Match session cookie domain
+
+    # Additional CSRF settings for mobile/in-app browsers
+    WTF_CSRF_TIME_LIMIT = 3600  # 1 hour (instead of None) to reduce cookie size
+    WTF_CSRF_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']  # Don't check GET requests
 
     # Tell Flask to trust proxy headers from Cloudflare Tunnel
     PREFERRED_URL_SCHEME = 'https'
+
+    # Application root for proper URL generation behind proxy
+    APPLICATION_ROOT = '/'
 
 
 config_by_name = {

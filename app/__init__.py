@@ -6,12 +6,14 @@ from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 migrate = Migrate()
+session = Session()
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"],
@@ -31,9 +33,14 @@ def create_app(config_name='development'):
         app.wsgi_app = ProxyFix(
             app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
         )
-    
+
     db.init_app(app)
     login_manager.init_app(app)
+
+    # Initialize session before CSRF (CSRF needs session)
+    if config_name == 'production':
+        session.init_app(app)
+
     csrf.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
