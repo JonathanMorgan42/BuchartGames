@@ -13,6 +13,9 @@ def index():
     # Get active game night
     active_game_night = GameNightService.get_active_game_night()
 
+    # Get working context for workflow progress
+    working_context = GameNightService.get_working_context_game_night()
+
     # Filter teams and games by active game night
     game_night_id = active_game_night.id if active_game_night else None
     teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
@@ -21,6 +24,22 @@ def index():
     # Separate completed and upcoming games
     completed_games = [g for g in games if g.isCompleted]
     upcoming_games = [g for g in games if not g.isCompleted]
+
+    # Calculate workflow progress
+    workflow_progress = {
+        'game_night_created': working_context is not None,
+        'teams_added': False,
+        'games_added': False,
+        'ready_to_activate': False
+    }
+
+    if working_context:
+        team_count = working_context.teams.count()
+        game_count = working_context.games.count()
+
+        workflow_progress['teams_added'] = team_count >= 2
+        workflow_progress['games_added'] = game_count >= 1
+        workflow_progress['ready_to_activate'] = team_count >= 2 and game_count >= 1
 
     def getScore(team_id, game_id):
         """Helper function for templates to get score."""
@@ -33,7 +52,9 @@ def index():
         completed_games=completed_games,
         upcoming_games=upcoming_games,
         getScore=getScore,
-        active_game_night=active_game_night
+        active_game_night=active_game_night,
+        working_context=working_context,
+        workflow_progress=workflow_progress
     )
 
 

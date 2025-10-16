@@ -22,19 +22,110 @@
         </div>
     </div>
 
+    <!-- Status Banners -->
+    {% if working_context %}
+    <div class="working-context-banner">
+        <div class="banner-content">
+            <span class="banner-label"><i class="fas fa-tools"></i> Currently Building:</span>
+            <h2>{{ working_context.name }}</h2>
+            <span class="banner-date">{{ working_context.date.strftime('%B %d, %Y') }}</span>
+            <span class="banner-info">Teams and games will be added to this game night</span>
+        </div>
+    </div>
+    {% endif %}
+
     {% if active_game_night %}
     <div class="active-game-night-banner">
         <div class="banner-content">
-            <span class="banner-label">Currently Active:</span>
+            <span class="banner-label"><i class="fas fa-broadcast-tower"></i> Live for Players:</span>
             <h2>{{ active_game_night.name }}</h2>
             <span class="banner-date">{{ active_game_night.date.strftime('%B %d, %Y') }}</span>
+            <span class="banner-info">Visible on public leaderboard</span>
         </div>
     </div>
-    {% else %}
+    {% endif %}
+
+    {% if not working_context and not active_game_night %}
     <div class="no-active-banner">
-        <p>No active game night. Create one or activate an existing game night to begin.</p>
+        <p><i class="fas fa-info-circle"></i> No game night in progress. Create a new game night to get started!</p>
     </div>
     {% endif %}
+
+    <!-- Workflow Guide -->
+    <div class="workflow-help-section">
+        <button type="button" class="workflow-toggle-btn" id="workflowToggleBtn">
+            <i class="fas fa-question-circle"></i> How It Works
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </button>
+        <div class="workflow-content" id="workflowContent">
+            <h3><i class="fas fa-route"></i> Game Night Workflow</h3>
+
+            <div class="workflow-explanation">
+                <div class="workflow-concept">
+                    <h4><i class="fas fa-tools"></i> Building Phase (Private)</h4>
+                    <p>When you create or "Set as Working Context", you're in <strong>building mode</strong>. Teams and games you add will go to this game night. It remains <strong>private</strong> until you activate it.</p>
+                </div>
+                <div class="workflow-concept">
+                    <h4><i class="fas fa-broadcast-tower"></i> Active Phase (Public)</h4>
+                    <p>When you "Activate for Public", the game night becomes <strong>immediately visible</strong> to all players on the leaderboard. Only activate when you're ready for players to see it!</p>
+                </div>
+            </div>
+
+            <div class="workflow-steps-horizontal">
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">1</div>
+                    <div class="workflow-step-info">
+                        <strong>Create</strong>
+                        <p>Set name and date. Becomes your working context automatically.</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow-right"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">2</div>
+                    <div class="workflow-step-info">
+                        <strong>Add Teams</strong>
+                        <p>Teams go to your working context game night (not yet visible to players).</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow-right"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">3</div>
+                    <div class="workflow-step-info">
+                        <strong>Add Games</strong>
+                        <p>Games go to your working context game night (still private).</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow-right"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">4</div>
+                    <div class="workflow-step-info">
+                        <strong>Activate for Public</strong>
+                        <p>Makes game night immediately visible to all players on leaderboard.</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow-right"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">5</div>
+                    <div class="workflow-step-info">
+                        <strong>Score</strong>
+                        <p>Track scores during event (players can see live updates).</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow-right"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step-item">
+                    <div class="workflow-step-number">6</div>
+                    <div class="workflow-step-info">
+                        <strong>End</strong>
+                        <p>Finalize results and archive.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-tips">
+                <p><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> You can prepare multiple game nights in advance! Use "Set as Working Context" to switch which one you're building. Only the active one is visible to players.</p>
+            </div>
+        </div>
+    </div>
 
     <div class="game-nights-list">
         <h2>All Game Nights</h2>
@@ -42,18 +133,21 @@
         {% if game_nights %}
         <div class="game-nights-grid">
             {% for gn in game_nights %}
-            <div class="game-night-card {% if gn.is_active %}active{% endif %} {% if gn.is_completed %}completed{% endif %}">
+            <div class="game-night-card {% if gn.is_active %}active{% endif %} {% if gn.is_completed %}completed{% endif %} {% if gn.is_working_context %}working{% endif %}">
                 <div class="card-header">
                     <div class="card-title-section">
                         <h3>{{ gn.name }}</h3>
                         <p class="card-date">{{ gn.date.strftime('%B %d, %Y') }}</p>
                     </div>
                     <div class="card-status-badges">
+                        {% if gn.is_working_context and not gn.is_active and not gn.is_completed %}
+                        <span class="status-badge building"><i class="fas fa-tools"></i> Building</span>
+                        {% endif %}
                         {% if gn.is_active %}
-                        <span class="status-badge active">Active</span>
+                        <span class="status-badge active"><i class="fas fa-broadcast-tower"></i> Active</span>
                         {% endif %}
                         {% if gn.is_completed %}
-                        <span class="status-badge completed">Completed</span>
+                        <span class="status-badge completed"><i class="fas fa-check-circle"></i> Completed</span>
                         {% endif %}
                     </div>
                 </div>
@@ -73,12 +167,49 @@
                     </div>
                 </div>
 
+                <!-- Readiness Checklist -->
+                {% if not gn.is_completed and not gn.is_active %}
+                <div class="readiness-checklist">
+                    <div class="checklist-item {% if gn.teams.count() >= 2 %}complete{% endif %}">
+                        <i class="fas {% if gn.teams.count() >= 2 %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                        <span>{% if gn.teams.count() >= 2 %}{{ gn.teams.count() }} teams added{% else %}Add at least 2 teams{% endif %}</span>
+                    </div>
+                    <div class="checklist-item {% if gn.total_games >= 1 %}complete{% endif %}">
+                        <i class="fas {% if gn.total_games >= 1 %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                        <span>{% if gn.total_games >= 1 %}{{ gn.total_games }} game(s) added{% else %}Add at least 1 game{% endif %}</span>
+                    </div>
+                    {% if gn.teams.count() >= 2 and gn.total_games >= 1 %}
+                    <div class="checklist-ready">
+                        <i class="fas fa-thumbs-up"></i> Ready to activate!
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <div class="card-actions">
                     {% if not gn.is_completed %}
-                        {% if not gn.is_active %}
-                        <form method="POST" action="{{ url_for('admin.activate_game_night', game_night_id=gn.id) }}" class="display-inline">
+                        <!-- Edit Button -->
+                        <a href="{{ url_for('admin.edit_game_night', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm" title="Edit game night name and date">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+
+                        <!-- Set as Working Context Button (only for non-active, non-completed) -->
+                        {% if not gn.is_active and not gn.is_working_context %}
+                        <form method="POST" action="{{ url_for('admin.set_working_context', game_night_id=gn.id) }}" class="display-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-success btn-sm">Set Active</button>
+                            <button type="submit" class="btn btn-info btn-sm" title="Set as your working context - teams and games will be added to this game night">
+                                <i class="fas fa-tools"></i> Set as Working Context
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <!-- Activate for Public Button (only for non-active) -->
+                        {% if not gn.is_active %}
+                        <form method="POST" action="{{ url_for('admin.activate_game_night', game_night_id=gn.id) }}" class="display-inline confirm-form" data-confirm-message="This will make '{{ gn.name }}' immediately visible to all players on the public leaderboard. Are you sure you're ready?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-success btn-sm" title="Make this game night immediately visible to all players on the public leaderboard">
+                                <i class="fas fa-broadcast-tower"></i> Activate for Public
+                            </button>
                         </form>
                         {% endif %}
 
@@ -87,7 +218,9 @@
                               class="display-inline confirm-form"
                               data-confirm-message="Are you sure you want to end this game night? This will finalize all data and lock edits.">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-warning btn-sm">End Game Night</button>
+                            <button type="submit" class="btn btn-warning btn-sm" title="Finalize results and move to history (locks all data)">
+                                <i class="fas fa-stop-circle"></i> End Game Night
+                            </button>
                         </form>
                         {% endif %}
 
@@ -95,17 +228,23 @@
                               class="display-inline confirm-form"
                               data-confirm-message="Are you sure you want to wipe all data from this game night? This cannot be undone!">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-danger btn-sm">Wipe Data</button>
+                            <button type="submit" class="btn btn-danger btn-sm" title="Remove all teams and games but keep the game night container">
+                                <i class="fas fa-eraser"></i> Wipe Data
+                            </button>
                         </form>
                     {% endif %}
 
-                    <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm">View Details</a>
+                    <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm" title="View full details and history">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
 
                     <form method="POST" action="{{ url_for('admin.delete_game_night', game_night_id=gn.id) }}"
                           class="display-inline confirm-form"
                           data-confirm-message="Are you sure you want to permanently delete this game night? This cannot be undone!">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm" title="Permanently delete everything (cannot be undone)">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
                     </form>
                 </div>
             </div>
@@ -134,6 +273,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Workflow guide toggle
+    const workflowToggleBtn = document.getElementById('workflowToggleBtn');
+    const workflowContent = document.getElementById('workflowContent');
+    const toggleIcon = workflowToggleBtn.querySelector('.toggle-icon');
+
+    if (workflowToggleBtn && workflowContent) {
+        workflowToggleBtn.addEventListener('click', function() {
+            const isHidden = workflowContent.style.display === 'none' || !workflowContent.style.display;
+
+            if (isHidden) {
+                workflowContent.style.display = 'block';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            } else {
+                workflowContent.style.display = 'none';
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            }
+        });
+
+        // Start collapsed
+        workflowContent.style.display = 'none';
+    }
 });
 </script>
 {% endblock %}

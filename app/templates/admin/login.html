@@ -53,6 +53,7 @@
     .login-icon {
         font-size: 3rem;
         margin-bottom: 1rem;
+        color: var(--accent-gold);
     }
 
     .login-header h1 {
@@ -64,6 +65,29 @@
         color: var(--text-muted);
         font-size: 0.9rem;
         margin-bottom: 0;
+    }
+
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: var(--radius-full);
+        color: #6ee7b7;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 1rem;
+    }
+
+    .session-info {
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-align: center;
     }
 
     .login-card .flash-messages {
@@ -83,9 +107,6 @@
 
     .login-actions .btn {
         width: 100%;
-        cursor: pointer;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-        touch-action: manipulation;
     }
 
     @media (max-width: 480px) {
@@ -104,9 +125,14 @@
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <div class="login-icon">🔐</div>
+            <div class="login-icon">
+                <i class="fas fa-lock"></i>
+            </div>
             <h1>Admin Login</h1>
             <p>Enter your credentials to continue</p>
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i> Secure Connection
+            </div>
         </div>
 
         <!-- Flash Messages (errors) -->
@@ -114,9 +140,16 @@
             {% if messages %}
                 <div class="flash-messages">
                     {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">
-                            {% if category == 'error' %}❌{% endif %}
-                            <span>{{ message }}</span>
+                        <div class="flash-message {{ category }}" role="alert">
+                            <div class="flash-icon">
+                                {% if category == 'error' %}<i class="fas fa-times-circle"></i>{% endif %}
+                                {% if category == 'warning' %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
+                                {% if category == 'info' %}<i class="fas fa-info-circle"></i>{% endif %}
+                            </div>
+                            <span class="flash-text">{{ message }}</span>
+                            <button type="button" class="flash-dismiss" aria-label="Dismiss message">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     {% endfor %}
                 </div>
@@ -124,7 +157,7 @@
         {% endwith %}
 
         <!-- Login Form -->
-        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
+        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form" novalidate>
             {{ form.hidden_tag() }}
 
             <div class="form-group">
@@ -135,8 +168,7 @@
                     autocomplete="username",
                     autocapitalize="off",
                     autocorrect="off",
-                    spellcheck="false",
-                    required=true
+                    spellcheck="false"
                 ) }}
                 {% if form.username.errors %}
                     <div class="form-error">
@@ -152,8 +184,7 @@
                 {{ form.password(
                     class="form-control",
                     placeholder="Enter password",
-                    autocomplete="current-password",
-                    required=true
+                    autocomplete="current-password"
                 ) }}
                 {% if form.password.errors %}
                     <div class="form-error">
@@ -166,10 +197,10 @@
 
             <div class="login-actions">
                 <button type="submit" class="btn btn-primary btn-lg">
-                    🔓 Login
+                    <i class="fas fa-unlock"></i> Login
                 </button>
                 <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-lg">
-                    🏠 Back to Home
+                    <i class="fas fa-home"></i> Back to Home
                 </a>
             </div>
         </form>
@@ -177,8 +208,11 @@
         <!-- Additional Info -->
         <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-light); text-align: center;">
             <p style="font-size: 0.85rem; color: var(--text-muted);">
-                🎮 Game Night Tracker Admin Portal
+                <i class="fas fa-gamepad"></i> Game Night Tracker Admin Portal
             </p>
+            <div class="session-info">
+                Sessions expire after 24 hours of inactivity for security.
+            </div>
         </div>
     </div>
 </div>
@@ -186,88 +220,29 @@
 
 {% block scripts %}
 <script>
-// Proper form handling for all browsers including iOS WebViews
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('.login-form');
     var submitBtn = form.querySelector('button[type="submit"]');
-
-    // Track if form is currently submitting
     var isSubmitting = false;
-    var submitEventFired = false;
 
-    // For iOS WebViews where button clicks may not trigger submit event,
-    // add explicit button click handler
-    submitBtn.addEventListener('click', function(e) {
-        if (isSubmitting) {
-            e.preventDefault();
-            return;
-        }
-
-        // Check if form is valid using HTML5 validation
-        if (!form.checkValidity()) {
-            // Let browser show validation messages
-            return;
-        }
-
-        // Mark that we're starting submission
-        isSubmitting = true;
-        submitEventFired = false;
-
-        // Show loading state
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.6';
-        submitBtn.innerHTML = '⏳ Logging in...';
-
-        // If submit event doesn't fire in WebView, use requestSubmit or submit
-        setTimeout(function() {
-            if (!submitEventFired) {
-                // Use requestSubmit if available (triggers submit event properly)
-                // Falls back to submit() if not available
-                if (form.requestSubmit) {
-                    try {
-                        form.requestSubmit();
-                    } catch (err) {
-                        form.submit();
-                    }
-                } else {
-                    form.submit();
-                }
-            }
-        }, 50);
-    });
-
-    // Handle form submission event
     form.addEventListener('submit', function(e) {
-        submitEventFired = true;
-
         if (isSubmitting) {
-            // Already handled by button click, just let it through
             return true;
         }
 
-        // Check if form is valid
-        if (!form.checkValidity()) {
-            e.preventDefault();
-            return false;
-        }
-
-        // Show loading state
         isSubmitting = true;
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.6';
-        submitBtn.innerHTML = '⏳ Logging in...';
-
-        return true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
     });
 
     // Re-enable button if user goes back
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) {
             isSubmitting = false;
-            submitEventFired = false;
             submitBtn.disabled = false;
             submitBtn.style.opacity = '1';
-            submitBtn.innerHTML = '🔓 Login';
+            submitBtn.innerHTML = '<i class="fas fa-unlock"></i> Login';
         }
     });
 });

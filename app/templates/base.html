@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <!-- Base Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     {% block head %}{% endblock %}
@@ -20,7 +23,7 @@
     {% if current_user.is_authenticated %}
     <div id="logoutConfirmBar" class="notification-bar display-none">
         <div class="notification-content">
-            <span>⚠️ Are you sure you want to log out?</span>
+            <span><i class="fas fa-exclamation-triangle"></i> Are you sure you want to log out?</span>
             <div class="notification-actions">
                 <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-danger">Yes, Logout</a>
                 <button type="button" class="btn btn-sm btn-secondary" id="cancelLogout">Cancel</button>
@@ -34,58 +37,58 @@
         <div class="header-container">
             <a href="{{ url_for('main.index') }}" class="logo">
                 {% if active_game_night %}
-                🏆 {{ active_game_night.name }}
+                <i class="fas fa-trophy"></i> {{ active_game_night.name }}
                 <span class="logo-date">{{ active_game_night.date.strftime('%B %d, %Y') }}</span>
                 {% else %}
-                🏆 Game Night Tracker
+                <i class="fas fa-trophy"></i> Game Night Tracker
                 {% endif %}
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
-                ☰
+                <i class="fas fa-bars"></i>
             </button>
             <nav class="nav-menu" id="navMenu">
                 <ul>
                     <li>
                         <a href="{{ url_for('main.index') }}"
                            class="{{ 'active' if request.endpoint == 'main.index' else '' }}">
-                            Home
+                            <i class="fas fa-home"></i> Home
                         </a>
                     </li>
                     <li>
                         <a href="{{ url_for('main.teams') }}"
                            class="{{ 'active' if request.endpoint == 'main.teams' else '' }}">
-                            Teams
+                            <i class="fas fa-users"></i> Teams
                         </a>
                     </li>
                     <li>
                         <a href="{{ url_for('main.games') }}"
                            class="{{ 'active' if request.endpoint == 'main.games' else '' }}">
-                            Games
+                            <i class="fas fa-gamepad"></i> Games
                         </a>
                     </li>
                     <li>
                         <a href="{{ url_for('main.history') }}"
                            class="{{ 'active' if request.endpoint == 'main.history' or request.endpoint == 'main.history_detail' else '' }}">
-                            History
+                            <i class="fas fa-history"></i> History
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li>
                         <a href="{{ url_for('admin.game_night_management') }}"
                            class="{{ 'active' if 'game_night' in request.endpoint else '' }}">
-                            Admin
+                            <i class="fas fa-shield-alt"></i> Management
                         </a>
                     </li>
                     <li>
                         <a href="#" id="logoutLink">
-                            Logout
+                            <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </li>
                     {% else %}
                     <li>
                         <a href="{{ url_for('auth.login') }}"
                            class="{{ 'active' if request.endpoint == 'auth.login' else '' }}">
-                            Login
+                            <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                     </li>
                     {% endif %}
@@ -101,12 +104,17 @@
             {% if messages %}
                 <div class="flash-messages">
                     {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">
-                            {% if category == 'success' %}✅{% endif %}
-                            {% if category == 'error' %}❌{% endif %}
-                            {% if category == 'warning' %}⚠️{% endif %}
-                            {% if category == 'info' %}ℹ️{% endif %}
-                            <span>{{ message }}</span>
+                        <div class="flash-message {{ category }}" role="alert">
+                            <div class="flash-icon">
+                                {% if category == 'success' %}<i class="fas fa-check-circle"></i>{% endif %}
+                                {% if category == 'error' %}<i class="fas fa-times-circle"></i>{% endif %}
+                                {% if category == 'warning' %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
+                                {% if category == 'info' %}<i class="fas fa-info-circle"></i>{% endif %}
+                            </div>
+                            <span class="flash-text">{{ message }}</span>
+                            <button type="button" class="flash-dismiss" aria-label="Dismiss message">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     {% endfor %}
                 </div>
@@ -119,8 +127,16 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 Game Night Tracker | Built for epic game nights 🎮</p>
+        <p>&copy; 2025 Game Night Tracker | Built for epic game nights <i class="fas fa-gamepad"></i></p>
     </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

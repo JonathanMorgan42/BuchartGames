@@ -45,12 +45,12 @@ class TeamService:
         Returns:
             Created Team object
         """
-        # Auto-associate with active game night if not specified
+        # Auto-associate with working context game night if not specified
         if game_night_id is None:
             from app.services.game_night_service import GameNightService
-            active_gn = GameNightService.get_active_game_night()
-            if active_gn:
-                game_night_id = active_gn.id
+            working_context = GameNightService.get_working_context_game_night()
+            if working_context:
+                game_night_id = working_context.id
 
         team = Team(name=name, color=color, game_night_id=game_night_id)
         db.session.add(team)

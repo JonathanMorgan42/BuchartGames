@@ -9,6 +9,7 @@ class GameNightService:
     def create_game_night(name, game_date=None):
         """
         Create a new game night session.
+        Automatically sets as working context if no other working context exists.
 
         Args:
             name: Name of the game night
@@ -24,10 +25,14 @@ class GameNightService:
         if isinstance(game_date, str):
             game_date = datetime.strptime(game_date, '%Y-%m-%d').date()
 
+        # Check if there's already a working context
+        has_working_context = GameNight.query.filter_by(is_working_context=True).first() is not None
+
         game_night = GameNight(
             name=name,
             date=game_date,
             is_active=False,  # Don't automatically activate
+            is_working_context=not has_working_context,  # Set as working context if none exists
             is_completed=False
         )
 
@@ -61,12 +66,46 @@ class GameNightService:
     @staticmethod
     def get_active_game_night():
         """
-        Get the currently active game night.
+        Get the currently active game night (visible to public).
 
         Returns:
             The active GameNight object or None if no active session
         """
         return GameNight.query.filter_by(is_active=True).first()
+
+    @staticmethod
+    def get_working_context_game_night():
+        """
+        Get the game night currently being worked on (admin context).
+        This is the game night that teams and games will be added to.
+
+        Returns:
+            The working context GameNight object or None if no working context
+        """
+        return GameNight.query.filter_by(is_working_context=True).first()
+
+    @staticmethod
+    def set_working_context(game_night_id):
+        """
+        Set a game night as the working context.
+        Only one game night can be the working context at a time.
+
+        Args:
+            game_night_id: ID of the game night to set as working context
+
+        Returns:
+            The updated GameNight object
+        """
+        # Deactivate all working contexts
+        GameNight.query.update({'is_working_context': False})
+
+        # Set the selected one as working context
+        game_night = GameNight.query.get_or_404(game_night_id)
+        game_night.is_working_context = True
+
+        db.session.commit()
+
+        return game_night
 
     @staticmethod
     def get_all_game_nights(order='desc'):

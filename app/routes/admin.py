@@ -20,6 +20,14 @@ admin_bp = Blueprint('admin', __name__)
 @login_required
 def add_team():
     """Add new team."""
+    # Validation: Check if there's a working context game night
+    working_context = GameNightService.get_working_context_game_night()
+
+    # If no working context exists, redirect with error
+    if not working_context:
+        flash('You need to create a game night before adding teams.', 'error')
+        return redirect(url_for('admin.create_game_night'))
+
     form = TeamForm()
 
     if form.validate_on_submit():
@@ -54,7 +62,7 @@ def add_team():
         flash('Team created successfully!', 'success')
         return redirect(url_for('main.teams'))
 
-    return render_template('admin/add_team.html', form=form)
+    return render_template('admin/add_team.html', form=form, working_context=working_context)
 
 
 @admin_bp.route('/teams/edit/<int:team_id>', methods=['GET', 'POST'])
@@ -135,6 +143,20 @@ def delete_team(team_id):
 @login_required
 def add_game():
     """Add new game."""
+    # Validation: Check if there's a working context game night
+    working_context = GameNightService.get_working_context_game_night()
+
+    # If no working context exists, redirect with error
+    if not working_context:
+        flash('You need to create a game night before adding games.', 'error')
+        return redirect(url_for('admin.create_game_night'))
+
+    # Validation: Check if there are teams
+    team_count = Team.query.filter_by(game_night_id=working_context.id).count()
+    if team_count == 0:
+        flash('You need to add at least one team before adding games.', 'warning')
+        return redirect(url_for('admin.add_team'))
+
     form = GameForm()
 
     if form.validate_on_submit():
@@ -184,20 +206,26 @@ def add_game():
 
         return redirect(url_for('main.games'))
 
-    # Get next available sequence number
-    max_sequence = Game.query.with_entities(func.max(Game.sequence_number)).scalar()
-    next_sequence = (max_sequence or 0) + 1
+    # Get working context game night to filter games
+    working_gn = working_context
 
-    # Get existing games for reference
-    existing_games = Game.query.order_by(Game.sequence_number).all()
+    # Get next available sequence number for current game night
+    if working_gn:
+        max_sequence = Game.query.filter_by(game_night_id=working_gn.id).with_entities(func.max(Game.sequence_number)).scalar()
+        existing_games = Game.query.filter_by(game_night_id=working_gn.id).order_by(Game.sequence_number).all()
+    else:
+        max_sequence = Game.query.with_entities(func.max(Game.sequence_number)).scalar()
+        existing_games = Game.query.order_by(Game.sequence_number).all()
+
+    next_sequence = (max_sequence or 0) + 1
 
     # Set default sequence number if not already set
     if not form.sequence_number.data:
         form.sequence_number.data = next_sequence
 
-    team_count = Team.query.count()
+    team_count = Team.query.filter_by(game_night_id=working_gn.id).count() if working_gn else 0
     return render_template('admin/add_game.html', form=form, team_count=team_count,
-                         next_sequence=next_sequence, existing_games=existing_games)
+                         next_sequence=next_sequence, existing_games=existing_games, working_context=working_context)
 
 
 @admin_bp.route('/games/edit/<int:game_id>', methods=['GET', 'POST'])
@@ -254,7 +282,11 @@ def edit_game(game_id):
     } for p in penalties]
 
     # Get existing games for reference (excluding current game)
-    existing_games = Game.query.filter(Game.id != game_id).order_by(Game.sequence_number).all()
+    # Filter by same game night if game has one
+    if game.game_night_id:
+        existing_games = Game.query.filter(Game.id != game_id, Game.game_night_id == game.game_night_id).order_by(Game.sequence_number).all()
+    else:
+        existing_games = Game.query.filter(Game.id != game_id).order_by(Game.sequence_number).all()
 
     team_count = Team.query.count()
     return render_template('admin/edit_game.html', form=form, game=game, penalties_json=penalties_dict,
@@ -412,7 +444,13 @@ def create_tournament_direct():
         if form.validate_on_submit():
             # Create the game first
             game_name = request.form.get('game_name', 'Tournament')
-            sequence_number = Game.query.with_entities(func.max(Game.sequence_number)).scalar() or 0
+
+            # Get active game night to filter games
+            active_gn = GameNightService.get_active_game_night()
+            if active_gn:
+                sequence_number = Game.query.filter_by(game_night_id=active_gn.id).with_entities(func.max(Game.sequence_number)).scalar() or 0
+            else:
+                sequence_number = Game.query.with_entities(func.max(Game.sequence_number)).scalar() or 0
             sequence_number += 1
 
             game_data = {
@@ -582,11 +620,13 @@ def game_night_management():
     """Game night management dashboard."""
     game_nights = GameNightService.get_all_game_nights(order='desc')
     active_game_night = GameNightService.get_active_game_night()
+    working_context = GameNightService.get_working_context_game_night()
 
     return render_template(
         'admin/game_night_management.html',
         game_nights=game_nights,
-        active_game_night=active_game_night
+        active_game_night=active_game_night,
+        working_context=working_context
     )
 
 
@@ -610,13 +650,71 @@ def create_game_night():
     return render_template('admin/create_game_night.html', form=form)
 
 
+@admin_bp.route('/game-nights/<int:game_night_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_game_night(game_night_id):
+    """Edit a game night."""
+    game_night = GameNightService.get_game_night_by_id(game_night_id)
+
+    # Cannot edit if completed
+    if game_night.is_completed:
+        flash('Cannot edit a completed game night.', 'error')
+        return redirect(url_for('admin.game_night_management'))
+
+    form = GameNightForm()
+
+    if form.validate_on_submit():
+        try:
+            GameNightService.update_game_night(
+                game_night_id,
+                name=form.name.data,
+                game_date=form.date.data
+            )
+            flash(f'Game Night "{form.name.data}" updated successfully!', 'success')
+            return redirect(url_for('admin.game_night_management'))
+        except Exception as e:
+            flash(f'Error updating game night: {str(e)}', 'error')
+    elif request.method == 'GET':
+        # Populate form with existing data
+        form.name.data = game_night.name
+        form.date.data = game_night.date
+
+    return render_template('admin/edit_game_night.html', form=form, game_night=game_night)
+
+
+@admin_bp.route('/game-nights/<int:game_night_id>/set-working', methods=['POST'])
+@login_required
+def set_working_context(game_night_id):
+    """Set a game night as the working context."""
+    try:
+        game_night = GameNightService.set_working_context(game_night_id)
+        flash(f'Now working on "{game_night.name}". Teams and games will be added to this game night.', 'info')
+    except Exception as e:
+        flash(f'Error setting working context: {str(e)}', 'error')
+
+    return redirect(url_for('admin.game_night_management'))
+
+
 @admin_bp.route('/game-nights/<int:game_night_id>/activate', methods=['POST'])
 @login_required
 def activate_game_night(game_night_id):
-    """Set a game night as active."""
+    """Set a game night as active (visible to public)."""
     try:
+        # Validation: Check if game night has teams and games
+        game_night = GameNightService.get_game_night_by_id(game_night_id)
+        team_count = game_night.teams.count()
+        game_count = game_night.games.count()
+
+        if team_count < 2:
+            flash(f'Cannot activate: Add at least 2 teams before activating. Currently has {team_count} team(s).', 'warning')
+            return redirect(url_for('admin.game_night_management'))
+
+        if game_count < 1:
+            flash('Cannot activate: Add at least 1 game before activating.', 'warning')
+            return redirect(url_for('admin.game_night_management'))
+
         game_night = GameNightService.set_active_game_night(game_night_id)
-        flash(f'"{game_night.name}" is now the active game night!', 'success')
+        flash(f'"{game_night.name}" is now ACTIVE and visible to all players on the public leaderboard!', 'success')
     except Exception as e:
         flash(f'Error activating game night: {str(e)}', 'error')
 

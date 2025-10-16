@@ -16,9 +16,137 @@
         {% if active_game_night %}
         <p class="header-subtitle">Live team standings</p>
         {% else %}
-        <p class="header-subtitle">No active game night. Admin: activate a game night to begin!</p>
+        <p class="header-subtitle">No active game night</p>
         {% endif %}
     </div>
+
+    {% if not active_game_night %}
+    <div class="empty-state-onboarding">
+        <div class="empty-state-icon"><i class="fas fa-gamepad"></i></div>
+        <h2>Welcome to Game Night Tracker!</h2>
+        <p class="empty-state-description">
+            No game night is currently active. To get started, follow these steps:
+        </p>
+        {% if current_user.is_authenticated %}
+
+        <!-- Workflow Visual Guide -->
+        <div class="workflow-guide">
+            <div class="workflow-step">
+                <i class="fas fa-calendar-plus workflow-icon"></i>
+                <div class="workflow-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+            <div class="workflow-step">
+                <i class="fas fa-users workflow-icon"></i>
+                <div class="workflow-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+            <div class="workflow-step">
+                <i class="fas fa-gamepad workflow-icon"></i>
+                <div class="workflow-arrow"><i class="fas fa-arrow-right"></i></div>
+            </div>
+            <div class="workflow-step">
+                <i class="fas fa-play-circle workflow-icon"></i>
+            </div>
+        </div>
+
+        <div class="onboarding-steps">
+            <!-- Step 1: Create Game Night -->
+            <div class="onboarding-step {% if workflow_progress.game_night_created %}onboarding-step-disabled{% endif %}">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Create Game Night</h3>
+                    <p>First, create a game night container with a name and date. This is the foundation that will hold your teams and games.</p>
+                    {% if not workflow_progress.game_night_created %}
+                    <a href="{{ url_for('admin.create_game_night') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calendar-plus"></i> Create Game Night
+                    </a>
+                    {% else %}
+                    <div class="btn btn-success btn-sm">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Step 2: Add Teams -->
+            <div class="onboarding-step {% if not workflow_progress.game_night_created or workflow_progress.teams_added %}onboarding-step-disabled{% endif %}">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Add Teams</h3>
+                    <p>After creating a game night, add the teams that will compete (minimum 2 teams required).</p>
+                    {% if workflow_progress.game_night_created and not workflow_progress.teams_added %}
+                    <a href="{{ url_for('admin.add_team') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-users"></i> Add Teams
+                    </a>
+                    {% elif workflow_progress.teams_added %}
+                    <div class="btn btn-success btn-sm">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </div>
+                    {% else %}
+                    <div class="btn btn-secondary btn-sm disabled-btn">
+                        <i class="fas fa-users"></i> Add Teams
+                    </div>
+                    <p class="step-requirement"><i class="fas fa-info-circle"></i> Available after Step 1</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Step 3: Add Games -->
+            <div class="onboarding-step {% if not workflow_progress.teams_added or workflow_progress.games_added %}onboarding-step-disabled{% endif %}">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Add Games</h3>
+                    <p>Define the games you'll play during the event (minimum 1 game required).</p>
+                    {% if workflow_progress.teams_added and not workflow_progress.games_added %}
+                    <a href="{{ url_for('admin.add_game') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-gamepad"></i> Add Games
+                    </a>
+                    {% elif workflow_progress.games_added %}
+                    <div class="btn btn-success btn-sm">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </div>
+                    {% else %}
+                    <div class="btn btn-secondary btn-sm disabled-btn">
+                        <i class="fas fa-gamepad"></i> Add Games
+                    </div>
+                    <p class="step-requirement"><i class="fas fa-info-circle"></i> Available after Step 2</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Step 4: Activate Game Night -->
+            <div class="onboarding-step {% if not workflow_progress.ready_to_activate %}onboarding-step-disabled{% endif %}">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Activate Game Night</h3>
+                    <p>When ready, activate your game night to make it <strong>immediately visible to all players</strong> on this leaderboard.</p>
+                    {% if workflow_progress.ready_to_activate %}
+                    <a href="{{ url_for('admin.game_night_management') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-broadcast-tower"></i> Go to Activation
+                    </a>
+                    <p class="step-requirement"><i class="fas fa-lightbulb"></i> Click "Activate for Public" in Game Night Management</p>
+                    {% else %}
+                    <div class="btn btn-secondary btn-sm disabled-btn">
+                        <i class="fas fa-play-circle"></i> Activate
+                    </div>
+                    <p class="step-requirement"><i class="fas fa-info-circle"></i> Available after Steps 1-3</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Help -->
+        <div class="onboarding-help">
+            <p><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> You can manage all your game nights from the <a href="{{ url_for('admin.game_night_management') }}">Game Night Management</a> page.</p>
+        </div>
+        {% else %}
+        <p class="empty-state-description">
+            Please contact an administrator to set up the game night. <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Admin Login
+            </a>
+        </p>
+        {% endif %}
+    </div>
+    {% else %}
 
     <div class="view-controls">
         <div class="view-toggles">
@@ -148,5 +276,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

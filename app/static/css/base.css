@@ -153,6 +153,12 @@ nav a.active {
     background: rgba(251, 191, 36, 0.1);
 }
 
+/* Navigation icons */
+nav a i {
+    font-size: 0.9em;
+    margin-right: 0.35rem;
+}
+
 /* Main Content */
 main {
     max-width: 1400px;
@@ -425,6 +431,55 @@ textarea {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    position: relative;
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.flash-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.flash-text {
+    flex: 1;
+}
+
+.flash-dismiss {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.flash-dismiss:hover {
+    opacity: 1;
 }
 
 .flash-message.success {
@@ -555,25 +610,31 @@ tbody tr:hover {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
+    border: 2px solid;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .game-badge.trivia {
-    background-color: #818CF8;
+    background-color: #6366F1;
+    border-color: #818CF8;
     color: white;
 }
 
 .game-badge.physical {
-    background-color: #F472B6;
+    background-color: #EC4899;
+    border-color: #F472B6;
     color: white;
 }
 
 .game-badge.strategy {
-    background-color: #34D399;
+    background-color: #10B981;
+    border-color: #34D399;
     color: white;
 }
 
 .game-badge.tournament {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, #7C3AED, #6D28D9);
+    border-color: #8B5CF6;
     color: white;
 }
 
@@ -982,6 +1043,246 @@ footer p {
     body { background: white; color: black; }
 }
 
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+.spinner-ring {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(251, 191, 36, 0.2);
+    border-top-color: var(--accent-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.loading-spinner p {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Empty State Onboarding */
+.empty-state-onboarding {
+    max-width: 600px;
+    margin: 3rem auto;
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state-description {
+    color: var(--text-secondary);
+    margin: 1rem 0;
+}
+
+.onboarding-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.onboarding-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-purple);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.step-content p {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Micro-interactions */
+.btn:active {
+    transform: scale(0.98);
+}
+
+.card {
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1),
+                0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.fa-trophy:hover {
+    animation: trophyPulse 0.5s ease-in-out;
+}
+
+@keyframes trophyPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Info Tooltip */
+.info-tooltip-trigger {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    cursor: help;
+    padding: 0;
+    margin-left: 0.5rem;
+    transition: color 0.2s;
+    vertical-align: middle;
+}
+
+.info-tooltip-trigger:hover {
+    color: var(--accent-gold);
+}
+
+.info-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-blue);
+    border-radius: var(--radius-md);
+    padding: 0;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.info-tooltip.active {
+    display: block;
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-bottom: 1px solid var(--border-light);
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1rem;
+}
+
+.tooltip-close:hover {
+    color: var(--text-primary);
+}
+
+.tooltip-body {
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.tooltip-body ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.tooltip-body li {
+    margin: 0.25rem 0;
+    color: var(--text-secondary);
+}
+
+.tooltip-tip {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(251, 191, 36, 0.1);
+    border-left: 3px solid var(--accent-gold);
+    border-radius: var(--radius-sm);
+    color: var(--accent-gold);
+    font-size: 0.85rem;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 /* Mobile Menu */
 .menu-toggle {
@@ -1035,7 +1336,26 @@ footer p {
 
     .nav-menu li {
         width: 100%;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    .nav-menu.active li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Stagger animation delay */
+    .nav-menu.active li:nth-child(1) { transition-delay: 0.05s; }
+    .nav-menu.active li:nth-child(2) { transition-delay: 0.1s; }
+    .nav-menu.active li:nth-child(3) { transition-delay: 0.15s; }
+    .nav-menu.active li:nth-child(4) { transition-delay: 0.2s; }
+    .nav-menu.active li:nth-child(5) { transition-delay: 0.25s; }
+    .nav-menu.active li:nth-child(6) { transition-delay: 0.3s; }
+    .nav-menu.active li:nth-child(7) { transition-delay: 0.35s; }
+    .nav-menu.active li:nth-child(8) { transition-delay: 0.4s; }
+    .nav-menu.active li:nth-child(9) { transition-delay: 0.45s; }
 
     .nav-menu a {
         display: block;
@@ -1056,5 +1376,501 @@ footer p {
 
     .header-container {
         position: relative;
+    }
+}
+
+/* ================================================================================
+   NEW UI COMPONENTS FOR GAME NIGHT WORKFLOW
+   ================================================================================ */
+
+/* Workflow Visual Guide (Empty State) */
+.workflow-guide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.workflow-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.workflow-icon {
+    font-size: 2rem;
+    color: var(--accent-blue);
+    opacity: 0.5;
+}
+
+.workflow-arrow {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+}
+
+/* Onboarding Step Variants */
+.onboarding-step-disabled {
+    opacity: 0.6;
+}
+
+.onboarding-step-disabled .step-number {
+    background: var(--bg-tertiary);
+}
+
+.disabled-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.step-requirement {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.onboarding-help {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--accent-blue-dim);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.onboarding-help a {
+    color: var(--accent-blue);
+    text-decoration: underline;
+}
+
+/* Game Night Management - Workflow Toggle Section */
+.workflow-help-section {
+    margin: 2rem auto;
+    max-width: 1200px;
+}
+
+.workflow-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.workflow-toggle-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-blue);
+}
+
+.workflow-toggle-btn .toggle-icon {
+    transition: transform 0.3s;
+}
+
+.workflow-content {
+    margin-top: 1rem;
+    padding: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+}
+
+.workflow-content h3 {
+    color: var(--accent-gold);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.workflow-steps-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.workflow-step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.workflow-step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-purple);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.workflow-step-info {
+    max-width: 120px;
+}
+
+.workflow-step-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.workflow-step-info p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.workflow-arrow-right {
+    color: var(--accent-blue);
+    font-size: 1.5rem;
+}
+
+/* Readiness Checklist */
+.readiness-checklist {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.checklist-item i {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.checklist-item.complete i {
+    color: var(--accent-green);
+}
+
+.checklist-ready {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--accent-green);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Context Banner (Add Team/Game Pages) */
+.context-banner {
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-blue);
+    border-radius: var(--radius-lg);
+    max-width: 1200px;
+}
+
+.context-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.context-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.context-info i {
+    font-size: 2rem;
+    color: var(--accent-gold);
+}
+
+.context-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.context-text strong {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.context-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.context-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: var(--radius-full);
+    color: #60a5fa;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.context-stats {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.stat-pill {
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius-full);
+    color: var(--accent-blue);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.context-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.context-help {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.context-help i {
+    color: var(--accent-blue);
+    margin-right: 0.5rem;
+}
+
+/* Info Banner (Create Game Night) */
+.info-banner {
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    background: var(--accent-blue-dim);
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius-lg);
+    display: flex;
+    gap: 1rem;
+    max-width: 1200px;
+}
+
+.info-banner-icon {
+    font-size: 2rem;
+    color: var(--accent-blue);
+    flex-shrink: 0;
+}
+
+.info-banner-content {
+    flex: 1;
+}
+
+.info-banner-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--accent-blue);
+    font-size: 1.1rem;
+}
+
+.info-banner-content p {
+    margin: 0 0 1rem 0;
+    color: var(--text-secondary);
+}
+
+.workflow-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.workflow-mini-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.workflow-mini-step.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.workflow-mini i {
+    font-size: 0.9rem;
+}
+
+/* What's Next Section */
+.whats-next-section {
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    max-width: 1200px;
+}
+
+.whats-next-section h3 {
+    text-align: center;
+    color: var(--accent-gold);
+    margin-bottom: 1.5rem;
+}
+
+.next-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.next-step-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.next-step-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.next-step-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-purple);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.next-step-content h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.next-step-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .workflow-steps-horizontal {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .workflow-arrow-right {
+        transform: rotate(90deg);
+    }
+
+    .workflow-mini {
+        justify-content: center;
+    }
+
+    .context-banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .context-stats {
+        width: 100%;
+    }
+
+    .info-banner {
+        flex-direction: column;
+    }
+
+    .next-steps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .workflow-guide {
+        gap: 0.25rem;
+    }
+
+    .workflow-icon {
+        font-size: 1.5rem;
+    }
+
+    .workflow-arrow {
+        font-size: 1rem;
+    }
+
+    .context-banner {
+        padding: 1rem;
+    }
+
+    .info-banner {
+        padding: 1rem;
+    }
+
+    .workflow-toggle-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .workflow-content {
+        padding: 1rem;
+    }
+
+    .next-step-card {
+        padding: 1rem;
     }
 }

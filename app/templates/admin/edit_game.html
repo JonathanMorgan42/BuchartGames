@@ -87,7 +87,7 @@
                         <li>
                             <span class="game-seq">{{ existing_game.sequence_number }}.</span>
                             <span class="game-name-preview">{{ existing_game.name }}</span>
-                            <span class="game-status-mini">{{ '✓' if existing_game.isCompleted else '○' }}</span>
+                            <span class="game-status-mini">{% if existing_game.isCompleted %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}</span>
                         </li>
                         {% endfor %}
                     </ol>

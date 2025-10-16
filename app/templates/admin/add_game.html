@@ -23,6 +23,42 @@
     </div>
 </div>
 
+<!-- Game Night Context Banner -->
+{% if working_context %}
+<div class="context-banner working-context-banner">
+    <div class="context-banner-content">
+        <div class="context-info">
+            <i class="fas fa-tools"></i>
+            <div class="context-text">
+                <strong><i class="fas fa-tools"></i> Building for:</strong> {{ working_context.name }}
+                <span class="context-date">{{ working_context.date.strftime('%B %d, %Y') }}</span>
+                {% if not working_context.is_active %}
+                <span class="context-status-badge"><i class="fas fa-lock"></i> Private (not yet visible to players)</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="context-stats">
+            <span class="stat-pill">
+                <i class="fas fa-users"></i> {{ team_count }} team{{ 's' if team_count != 1 else '' }}
+            </span>
+        </div>
+        <div class="context-actions">
+            <a href="{{ url_for('admin.game_night_management') }}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-exchange-alt"></i> Switch Game Night
+            </a>
+        </div>
+    </div>
+    <p class="context-help">
+        <i class="fas fa-info-circle"></i> This game will be added to <strong>{{ working_context.name }}</strong> (your current working context).
+        {% if not working_context.is_active %}
+        This game night is <strong>not yet public</strong> - players won't see it until you activate it.
+        {% else %}
+        This game night is <strong>already active</strong> and visible to players on the leaderboard.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+
 <div class="card form-card">
     <form method="POST" action="{{ url_for('admin.add_game') }}">
         {{ form.hidden_tag() }}
@@ -87,7 +123,7 @@
                         <li>
                             <span class="game-seq">{{ existing_game.sequence_number }}.</span>
                             <span class="game-name-preview">{{ existing_game.name }}</span>
-                            <span class="game-status-mini">{{ '✓' if existing_game.isCompleted else '○' }}</span>
+                            <span class="game-status-mini">{% if existing_game.isCompleted %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}</span>
                         </li>
                         {% endfor %}
                     </ol>
@@ -112,8 +148,13 @@
             <h2>Scoring Settings</h2>
 
             <div class="form-row">
-                <div class="form-group">
-                    {{ form.point_scheme.label }}
+                <div class="form-group" style="position: relative;">
+                    <label for="point_scheme">
+                        Point Scheme Multiplier
+                        <button type="button" class="info-tooltip-trigger" aria-label="Learn about point schemes">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                    </label>
                     {{ form.point_scheme(class="form-control") }}
                     {% if form.point_scheme.errors %}
                         <div class="form-error">
@@ -122,6 +163,32 @@
                             {% endfor %}
                         </div>
                     {% endif %}
+
+                    <!-- Tooltip content -->
+                    <div class="info-tooltip" role="tooltip">
+                        <div class="tooltip-header">
+                            <span>How Point Schemes Work</span>
+                            <button type="button" class="tooltip-close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tooltip-body">
+                            <p><strong>Formula:</strong><br>
+                            Points = (Teams - Place + 1) × Point Scheme</p>
+                            <p><strong>Example with 4 teams, 2× multiplier:</strong></p>
+                            <ul>
+                                <li>1st place: (4 - 1 + 1) × 2 = <strong>8 points</strong></li>
+                                <li>2nd place: (4 - 2 + 1) × 2 = <strong>6 points</strong></li>
+                                <li>3rd place: (4 - 3 + 1) × 2 = <strong>4 points</strong></li>
+                                <li>4th place: (4 - 4 + 1) × 2 = <strong>2 points</strong></li>
+                            </ul>
+                            <p class="tooltip-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                Higher multipliers make this game more valuable!
+                            </p>
+                        </div>
+                    </div>
+
                     <p class="help-text">Points awarded between each place</p>
                 </div>
 

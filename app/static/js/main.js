@@ -57,6 +57,61 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Flash message dismiss functionality
+    const dismissButtons = document.querySelectorAll('.flash-dismiss');
+    dismissButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const flashMessage = this.closest('.flash-message');
+            flashMessage.style.animation = 'slideOutUp 0.3s ease-out';
+            setTimeout(() => {
+                flashMessage.remove();
+            }, 300);
+        });
+    });
+
+    // Auto-dismiss success messages after 5 seconds
+    const successMessages = document.querySelectorAll('.flash-message.success');
+    successMessages.forEach(message => {
+        setTimeout(() => {
+            const dismissBtn = message.querySelector('.flash-dismiss');
+            if (dismissBtn) dismissBtn.click();
+        }, 5000);
+    });
+
+    // Info tooltip functionality
+    const tooltipTriggers = document.querySelectorAll('.info-tooltip-trigger');
+    tooltipTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tooltip = this.parentElement.parentElement.querySelector('.info-tooltip');
+            if (tooltip) {
+                tooltip.classList.toggle('active');
+            }
+        });
+    });
+
+    // Close tooltip when clicking close button
+    const tooltipCloseButtons = document.querySelectorAll('.tooltip-close');
+    tooltipCloseButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tooltip = this.closest('.info-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('active');
+            }
+        });
+    });
+
+    // Close tooltip when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.info-tooltip') && !e.target.closest('.info-tooltip-trigger')) {
+            const activeTooltips = document.querySelectorAll('.info-tooltip.active');
+            activeTooltips.forEach(tooltip => {
+                tooltip.classList.remove('active');
+            });
+        }
+    });
 });
 
 // Logout confirmation

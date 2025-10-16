@@ -345,4 +345,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize game form if on add/edit page
     initializeGameForm();
+
+    // Info tooltip functionality
+    initializeInfoTooltips();
 });
+
+// Initialize info tooltips (for help icons)
+function initializeInfoTooltips() {
+    const tooltipTriggers = document.querySelectorAll('.info-tooltip-trigger');
+
+    tooltipTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Find the associated tooltip (next sibling after the input)
+            const formGroup = this.closest('.form-group');
+            const tooltip = formGroup.querySelector('.info-tooltip');
+
+            if (tooltip) {
+                // Toggle active class
+                tooltip.classList.toggle('active');
+
+                // Close tooltip when clicking outside
+                if (tooltip.classList.contains('active')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', function closeTooltip(event) {
+                            if (!tooltip.contains(event.target) && event.target !== trigger) {
+                                tooltip.classList.remove('active');
+                                document.removeEventListener('click', closeTooltip);
+                            }
+                        });
+                    }, 0);
+                }
+            }
+        });
+    });
+
+    // Close button in tooltips
+    const tooltipCloseButtons = document.querySelectorAll('.tooltip-close');
+    tooltipCloseButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const tooltip = this.closest('.info-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('active');
+            }
+        });
+    });
+}

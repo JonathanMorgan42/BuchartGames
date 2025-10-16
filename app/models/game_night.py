@@ -9,6 +9,7 @@ class GameNight(db.Model):
     name = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
     is_active = db.Column(db.Boolean, default=False, index=True)
+    is_working_context = db.Column(db.Boolean, default=False, index=True)
     is_completed = db.Column(db.Boolean, default=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     ended_at = db.Column(db.DateTime, nullable=True)

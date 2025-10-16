@@ -43,17 +43,24 @@ class GameService:
         Returns:
             Created Game object
         """
-        # Auto-associate with active game night if not specified
+        # Auto-associate with working context game night if not specified
         if game_night_id is None:
             from app.services.game_night_service import GameNightService
-            active_gn = GameNightService.get_active_game_night()
-            if active_gn:
-                game_night_id = active_gn.id
+            working_context = GameNightService.get_working_context_game_night()
+            if working_context:
+                game_night_id = working_context.id
 
         new_sequence = form_data['sequence_number']
 
         # Shift existing games to make room for the new game
-        existing_games = Game.query.filter(Game.sequence_number >= new_sequence).all()
+        # Only shift games within the same game night
+        if game_night_id:
+            existing_games = Game.query.filter(
+                Game.sequence_number >= new_sequence,
+                Game.game_night_id == game_night_id
+            ).all()
+        else:
+            existing_games = Game.query.filter(Game.sequence_number >= new_sequence).all()
         for existing_game in existing_games:
             existing_game.sequence_number += 1
 
@@ -101,10 +108,14 @@ class GameService:
 
         # If sequence number changed, handle reordering
         if old_sequence != new_sequence:
+            # Only shift games within the same game night
+            base_query = Game.query.filter(Game.id != game_id)
+            if game.game_night_id:
+                base_query = base_query.filter(Game.game_night_id == game.game_night_id)
+
             if new_sequence < old_sequence:
                 # Moving up (lower number): shift games between new and old position down
-                games_to_shift = Game.query.filter(
-                    Game.id != game_id,
+                games_to_shift = base_query.filter(
                     Game.sequence_number >= new_sequence,
                     Game.sequence_number < old_sequence
                 ).all()
@@ -112,8 +123,7 @@ class GameService:
                     g.sequence_number += 1
             else:
                 # Moving down (higher number): shift games between old and new position up
-                games_to_shift = Game.query.filter(
-                    Game.id != game_id,
+                games_to_shift = base_query.filter(
                     Game.sequence_number > old_sequence,
                     Game.sequence_number <= new_sequence
                 ).all()
