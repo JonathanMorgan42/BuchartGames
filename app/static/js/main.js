@@ -41,12 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
         menuToggle.addEventListener('click', function(e) {
             e.stopPropagation();
             navMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
                 navMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
             }
         });
 
@@ -54,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         navMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 navMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
             });
         });
     }

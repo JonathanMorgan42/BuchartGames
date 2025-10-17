@@ -10,14 +10,22 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def index():
     """Homepage with comprehensive leaderboard."""
-    # Get active game night
+    from flask_login import current_user
+
+    # Get active game night (for public)
     active_game_night = GameNightService.get_active_game_night()
 
-    # Get working context for workflow progress
+    # Get working context (for admins)
     working_context = GameNightService.get_working_context_game_night()
 
-    # Filter teams and games by active game night
-    game_night_id = active_game_night.id if active_game_night else None
+    # Admins see working context, public sees active game night
+    if current_user.is_authenticated and working_context:
+        display_game_night = working_context
+    else:
+        display_game_night = active_game_night
+
+    # Filter teams and games by appropriate game night
+    game_night_id = display_game_night.id if display_game_night else None
     teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
     games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
 
@@ -54,6 +62,7 @@ def index():
         getScore=getScore,
         active_game_night=active_game_night,
         working_context=working_context,
+        display_game_night=display_game_night,
         workflow_progress=workflow_progress
     )
 
@@ -61,18 +70,45 @@ def index():
 @main_bp.route('/teams')
 def teams():
     """Teams listing page."""
+    from flask_login import current_user
+
+    # Get active game night (for public)
     active_game_night = GameNightService.get_active_game_night()
-    game_night_id = active_game_night.id if active_game_night else None
+
+    # Get working context (for admins)
+    working_context = GameNightService.get_working_context_game_night()
+
+    # Admins see working context, public sees active game night
+    if current_user.is_authenticated and working_context:
+        display_game_night = working_context
+    else:
+        display_game_night = active_game_night
+
+    game_night_id = display_game_night.id if display_game_night else None
 
     teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
-    return render_template('public/teams.html', teams=teams, active_game_night=active_game_night)
+    return render_template('public/teams.html', teams=teams, active_game_night=active_game_night,
+                         working_context=working_context, display_game_night=display_game_night)
 
 
 @main_bp.route('/games')
 def games():
     """Games listing page."""
+    from flask_login import current_user
+
+    # Get active game night (for public)
     active_game_night = GameNightService.get_active_game_night()
-    game_night_id = active_game_night.id if active_game_night else None
+
+    # Get working context (for admins)
+    working_context = GameNightService.get_working_context_game_night()
+
+    # Admins see working context, public sees active game night
+    if current_user.is_authenticated and working_context:
+        display_game_night = working_context
+    else:
+        display_game_night = active_game_night
+
+    game_night_id = display_game_night.id if display_game_night else None
 
     games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
     teams = TeamService.get_all_teams(sort_by_points=False, game_night_id=game_night_id)
@@ -82,7 +118,9 @@ def games():
         games=games,
         teams=teams,
         Score=Score,
-        active_game_night=active_game_night
+        active_game_night=active_game_night,
+        working_context=working_context,
+        display_game_night=display_game_night
     )
 
 
@@ -215,9 +253,21 @@ def public_score_game(game_id):
 @main_bp.route('/playground')
 def playground():
     """Simulation playground for exploring hypothetical game outcomes."""
-    # Get active game night to filter teams and games
+    from flask_login import current_user
+
+    # Get active game night (for public)
     active_game_night = GameNightService.get_active_game_night()
-    game_night_id = active_game_night.id if active_game_night else None
+
+    # Get working context (for admins)
+    working_context = GameNightService.get_working_context_game_night()
+
+    # Admins see working context, public sees active game night
+    if current_user.is_authenticated and working_context:
+        display_game_night = working_context
+    else:
+        display_game_night = active_game_night
+
+    game_night_id = display_game_night.id if display_game_night else None
 
     teams = TeamService.get_all_teams(sort_by_points=True, game_night_id=game_night_id)
     games = GameService.get_all_games(ordered=True, game_night_id=game_night_id)
@@ -231,7 +281,7 @@ def playground():
         'id': team.id,
         'name': team.name,
         'color': team.color,
-        'totalPoints': team.totalPoints or 0
+        'totalPoints': team.get_points_for_game_night(game_night_id) if game_night_id else (team.totalPoints or 0)
     } for team in teams]
 
     upcoming_games_json = [{
@@ -255,7 +305,9 @@ def playground():
         upcoming_games=upcoming_games,
         upcoming_games_json=upcoming_games_json,
         getScore=getScore,
-        active_game_night=active_game_night
+        active_game_night=active_game_night,
+        working_context=working_context,
+        display_game_night=display_game_night
     )
 
 

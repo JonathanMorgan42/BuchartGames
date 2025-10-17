@@ -31,7 +31,15 @@ function filterTeams() {
 function confirmDelete(teamId, teamName) {
     const modal = document.getElementById('deleteModal');
     if (!modal) {
-        alert('Error: Delete modal not found. Please refresh the page.');
+        if (window.showAlertModal) {
+            showAlertModal({
+                title: 'Error',
+                message: 'Delete modal not found. Please refresh the page.',
+                type: 'error'
+            });
+        } else {
+            alert('Error: Delete modal not found. Please refresh the page.');
+        }
         return;
     }
 

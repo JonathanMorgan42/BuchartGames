@@ -45,18 +45,55 @@ class GameNightService:
     def set_active_game_night(game_night_id):
         """
         Set a game night as active. Deactivates all other game nights.
+        Automatically archives (marks as completed) the previously active game night.
 
         Args:
             game_night_id: ID of the game night to activate
 
         Returns:
             The activated GameNight object
+
+        Raises:
+            ValueError: If validation fails (incomplete games, multiple active nights, etc.)
         """
-        # Deactivate all game nights
+        game_night = GameNight.query.get_or_404(game_night_id)
+
+        # Validation: Check that the game night being activated has required data
+        if game_night.teams.count() < 2:
+            raise ValueError(f'Cannot activate: Game night must have at least 2 teams. Currently has {game_night.teams.count()}.')
+
+        if game_night.games.count() < 1:
+            raise ValueError('Cannot activate: Game night must have at least 1 game.')
+
+        # Get the currently active game night (if any)
+        old_active = GameNight.query.filter_by(is_active=True).first()
+
+        # Validation: If there's an active game night, ensure all its games are completed
+        if old_active and old_active.id != game_night_id:
+            incomplete_games = old_active.games.filter_by(isCompleted=False).count()
+            if incomplete_games > 0:
+                raise ValueError(
+                    f'Cannot activate new game night: The currently active game night "{old_active.name}" '
+                    f'has {incomplete_games} incomplete game(s). Please complete or end all games before activating a new game night.'
+                )
+            # Archive the old active game night
+            old_active.finalize()  # This sets is_completed=True and is_active=False
+
+        # Validation: Check for any other active game nights (belt and suspenders)
+        other_active = GameNight.query.filter(
+            GameNight.is_active == True,
+            GameNight.id != game_night_id
+        ).first()
+        if other_active:
+            raise ValueError(
+                f'Cannot activate: Another game night "{other_active.name}" is currently active. '
+                f'Only one game night can be active at a time.'
+            )
+
+        # Deactivate all game nights (in case there are multiple active, which shouldn't happen)
         GameNight.query.update({'is_active': False})
 
         # Activate the selected one
-        game_night = GameNight.query.get_or_404(game_night_id)
         game_night.is_active = True
 
         db.session.commit()

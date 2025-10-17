@@ -662,6 +662,7 @@
 .team-selector {
     width: 100%;
     padding: 0.875rem;
+    padding-right: 2.5rem;
     font-size: 1rem;
     border: 2px solid var(--border-light);
     border-radius: var(--radius-md);
@@ -669,6 +670,13 @@
     color: var(--text-primary);
     transition: all 0.2s;
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23fbbf24' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 12px 8px;
 }
 
 .team-selector:focus {
@@ -706,6 +714,7 @@
 .team-selector-prominent {
     width: 100%;
     padding: 1rem 1.25rem;
+    padding-right: 3rem;
     font-size: 1.1rem;
     font-weight: 600;
     border: 2px solid var(--accent-blue);
@@ -715,6 +724,13 @@
     transition: all 0.2s;
     cursor: pointer;
     min-height: var(--touch-target-lg);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath fill='%23fbbf24' d='M7 10L0 0h14z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    background-size: 14px 10px;
 }
 
 .team-selector-prominent:focus {
@@ -1367,7 +1383,9 @@
 
     .team-selector {
         padding: 0.75rem;
+        padding-right: 2.5rem;
         font-size: 0.95rem;
+        background-position: right 0.75rem center;
     }
 
     /* Prioritize score input on mobile - make it more prominent */
@@ -1556,7 +1574,9 @@
 
     .team-selector {
         padding: 0.625rem;
+        padding-right: 2.5rem;
         font-size: 0.9rem;
+        background-position: right 0.625rem center;
     }
 
     /* Keep scoring card sticky and compact */

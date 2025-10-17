@@ -32,7 +32,15 @@ function filterGames() {
 function confirmDelete(gameId, gameName) {
     const modal = document.getElementById('deleteModal');
     if (!modal) {
-        alert('Error: Delete modal not found. Please refresh the page.');
+        if (window.showAlertModal) {
+            showAlertModal({
+                title: 'Error',
+                message: 'Delete modal not found. Please refresh the page.',
+                type: 'error'
+            });
+        } else {
+            alert('Error: Delete modal not found. Please refresh the page.');
+        }
         return;
     }
 
@@ -47,7 +55,15 @@ function confirmDelete(gameId, gameName) {
     if (deleteForm) {
         deleteForm.action = `/admin/games/delete/${gameId}`;
     } else {
-        alert('Error: Delete form not found. Please refresh the page.');
+        if (window.showAlertModal) {
+            showAlertModal({
+                title: 'Error',
+                message: 'Delete form not found. Please refresh the page.',
+                type: 'error'
+            });
+        } else {
+            alert('Error: Delete form not found. Please refresh the page.');
+        }
         return;
     }
 

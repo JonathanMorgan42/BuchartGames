@@ -15,11 +15,71 @@ class Team(db.Model):
     
     @property
     def totalPoints(self):
+        """
+        Get total points across ALL game nights.
+        Note: For game-night-specific points, use get_points_for_game_night()
+        """
         return sum(score.points for score in self.scores)
-    
+
+    def get_points_for_game_night(self, game_night_id=None):
+        """
+        Get total points for a specific game night.
+
+        Args:
+            game_night_id: ID of the game night to filter by.
+                          If None, uses this team's game_night_id.
+
+        Returns:
+            Total points for the specified game night
+        """
+        if game_night_id is None:
+            game_night_id = self.game_night_id
+
+        if game_night_id is None:
+            return 0
+
+        # Import here to avoid circular imports
+        from app.models.game import Game
+
+        # Join scores with games and filter by game_night_id
+        total = 0
+        for score in self.scores:
+            if score.game and score.game.game_night_id == game_night_id:
+                total += score.points
+
+        return total
+
+    @property
+    def abbreviation(self):
+        """
+        Generate a short abbreviation from the team name for mobile displays.
+
+        Logic:
+        - Multi-word names: First letter of each word (e.g., "Super Team" → "ST")
+        - Single-word names: First 2-3 characters (e.g., "Titans" → "TIT")
+
+        Returns:
+            Uppercase abbreviation string
+        """
+        if not self.name:
+            return ""
+
+        words = self.name.strip().split()
+
+        if len(words) >= 2:
+            # Multi-word: use first letter of each word
+            return ''.join(word[0].upper() for word in words if word)
+        else:
+            # Single word: use first 2-3 characters
+            single_word = words[0]
+            if len(single_word) <= 3:
+                return single_word.upper()
+            else:
+                return single_word[:3].upper()
+
     @property
     def games_played(self):
         return self.scores.count()
-    
+
     def __repr__(self):
         return f'<Team {self.name}>'

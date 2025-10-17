@@ -700,22 +700,14 @@ def set_working_context(game_night_id):
 def activate_game_night(game_night_id):
     """Set a game night as active (visible to public)."""
     try:
-        # Validation: Check if game night has teams and games
-        game_night = GameNightService.get_game_night_by_id(game_night_id)
-        team_count = game_night.teams.count()
-        game_count = game_night.games.count()
-
-        if team_count < 2:
-            flash(f'Cannot activate: Add at least 2 teams before activating. Currently has {team_count} team(s).', 'warning')
-            return redirect(url_for('admin.game_night_management'))
-
-        if game_count < 1:
-            flash('Cannot activate: Add at least 1 game before activating.', 'warning')
-            return redirect(url_for('admin.game_night_management'))
-
+        # All validation is now handled in the service layer
         game_night = GameNightService.set_active_game_night(game_night_id)
         flash(f'"{game_night.name}" is now ACTIVE and visible to all players on the public leaderboard!', 'success')
+    except ValueError as e:
+        # Validation errors from the service layer
+        flash(str(e), 'warning')
     except Exception as e:
+        # Other unexpected errors
         flash(f'Error activating game night: {str(e)}', 'error')
 
     return redirect(url_for('admin.game_night_management'))

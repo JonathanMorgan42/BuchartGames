@@ -27,7 +27,15 @@ let visibleParticipants = [1, 2]; // Track which participants are visible
 
 function addParticipant() {
     if (nextParticipantIndex > 6) {
-        alert('Maximum of 6 team members allowed');
+        if (window.showAlertModal) {
+            showAlertModal({
+                title: 'Maximum Reached',
+                message: 'Maximum of 6 team members allowed.',
+                type: 'info'
+            });
+        } else {
+            alert('Maximum of 6 team members allowed');
+        }
         return;
     }
 

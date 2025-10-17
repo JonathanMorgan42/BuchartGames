@@ -23,7 +23,12 @@ class TeamService:
 
         teams = query.all()
         if sort_by_points:
-            teams = sorted(teams, key=lambda t: t.totalPoints, reverse=True)
+            if game_night_id:
+                # Sort by game-night-specific points
+                teams = sorted(teams, key=lambda t: t.get_points_for_game_night(game_night_id), reverse=True)
+            else:
+                # Sort by total points across all game nights
+                teams = sorted(teams, key=lambda t: t.totalPoints, reverse=True)
         return teams
 
     @staticmethod

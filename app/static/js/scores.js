@@ -482,9 +482,27 @@ function saveToHiddenInputs() {
 function clearCurrentTeam() {
     if (!currentTeamId) return;
 
-    if (!confirm('Are you sure you want to clear this team\'s score and penalties?')) {
-        return;
+    if (window.showConfirmModal) {
+        showConfirmModal({
+            title: 'Clear Team Data',
+            message: 'Are you sure you want to clear this team\'s score and penalties?',
+            warning: 'This cannot be undone!',
+            confirmText: 'Clear',
+            cancelText: 'Cancel',
+            onConfirm: function() {
+                performClearTeam();
+            }
+        });
+    } else {
+        if (!confirm('Are you sure you want to clear this team\'s score and penalties?')) {
+            return;
+        }
+        performClearTeam();
     }
+}
+
+function performClearTeam() {
+    if (!currentTeamId) return;
 
     // Reset score
     document.getElementById('score-input').value = '';
@@ -507,7 +525,15 @@ function clearCurrentTeam() {
 // Stopwatch functions (for time-based games)
 function startStopwatch() {
     if (!currentTeamId) {
-        alert('Please select a team first');
+        if (window.showAlertModal) {
+            showAlertModal({
+                title: 'Team Required',
+                message: 'Please select a team first before starting the stopwatch.',
+                type: 'warning'
+            });
+        } else {
+            alert('Please select a team first');
+        }
         return;
     }
 

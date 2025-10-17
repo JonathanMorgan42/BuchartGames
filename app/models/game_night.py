@@ -31,11 +31,11 @@ class GameNight(db.Model):
     def get_leaderboard(self):
         """Get sorted leaderboard for this game night."""
         teams = self.teams.all()
-        # Sort by total points descending
-        return sorted(teams, key=lambda t: t.totalPoints or 0, reverse=True)
+        # Sort by total points descending, using game-night-specific points
+        return sorted(teams, key=lambda t: t.get_points_for_game_night(self.id) or 0, reverse=True)
 
     def get_winner(self):
-        """Get the winning team (team with highest points)."""
+        """Get the winning team (team with highest points) for this game night."""
         leaderboard = self.get_leaderboard()
         return leaderboard[0] if leaderboard else None
 

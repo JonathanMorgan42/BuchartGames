@@ -852,10 +852,26 @@ class ShareScenario {
 
         // Copy to clipboard
         navigator.clipboard.writeText(scenarioText).then(() => {
-            alert('Scenario copied to clipboard!');
+            if (window.showAlertModal) {
+                showAlertModal({
+                    title: 'Success',
+                    message: 'Scenario copied to clipboard!',
+                    type: 'success'
+                });
+            } else {
+                alert('Scenario copied to clipboard!');
+            }
         }).catch(() => {
-            // Fallback: show in alert
-            alert(scenarioText);
+            // Fallback: show in modal or alert
+            if (window.showAlertModal) {
+                showAlertModal({
+                    title: 'Scenario Details',
+                    message: `<pre style="white-space: pre-wrap; font-size: 0.85rem;">${scenarioText}</pre>`,
+                    type: 'info'
+                });
+            } else {
+                alert(scenarioText);
+            }
         });
     }
 }

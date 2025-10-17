@@ -926,6 +926,31 @@ footer p {
     }
 }
 
+@media (max-width: 768px) {
+    /* Onboarding mobile layout - center-left aligned */
+    .onboarding-step {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .onboarding-step-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        width: 100%;
+    }
+
+    .onboarding-step-header h3 {
+        font-size: 1.1rem;
+        flex: 1;
+    }
+
+    .step-content {
+        width: 100%;
+    }
+}
+
 @media (max-width: 480px) {
     .page-header-main {
         padding: 1.25rem 0.5rem;
@@ -946,6 +971,45 @@ footer p {
     /* Legacy */
     .page-header {
         padding: 0.5rem 0.35rem;
+    }
+
+    /* Onboarding steps - extra compact for tiny screens */
+    .onboarding-steps {
+        gap: 1rem;
+    }
+
+    .onboarding-step {
+        padding: 1rem 0.75rem;
+        gap: 0;
+    }
+
+    .onboarding-step-header {
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+    }
+
+    .onboarding-step-header h3 {
+        font-size: 1rem;
+    }
+
+    .step-content p {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .step-content .btn {
+        font-size: 0.85rem;
+        padding: 0.65rem 1rem;
+    }
+
+    .step-requirement {
+        font-size: 0.75rem;
     }
 }
 
@@ -1021,6 +1085,45 @@ footer p {
     color: var(--accent-red);
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+.modal-message {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+/* Modal Type Variants */
+.modal-content.modal-error {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.modal-content.modal-error h2 {
+    color: var(--accent-red);
+}
+
+.modal-content.modal-success {
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.modal-content.modal-success h2 {
+    color: var(--accent-green);
+}
+
+.modal-content.modal-warning {
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+.modal-content.modal-warning h2 {
+    color: var(--accent-gold);
+}
+
+.modal-content.modal-info {
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.modal-content.modal-info h2 {
+    color: var(--accent-blue);
 }
 
 @media (max-width: 768px) {
@@ -1128,6 +1231,19 @@ footer p {
     border: 1px solid var(--border-light);
 }
 
+/* Desktop: step number and content side by side */
+.onboarding-step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.onboarding-step-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
 .step-number {
     width: 40px;
     height: 40px;
@@ -1144,18 +1260,18 @@ footer p {
 
 .step-content {
     flex: 1;
-}
-
-.step-content h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
-    color: var(--text-primary);
+    min-width: 0;
 }
 
 .step-content p {
     margin: 0 0 1rem 0;
     font-size: 0.9rem;
     color: var(--text-muted);
+}
+
+.step-content .btn {
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Micro-interactions */
@@ -1287,12 +1403,6 @@ input:focus, select:focus, textarea:focus {
 /* Mobile Menu */
 .menu-toggle {
     display: none;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
 }
 
 .nav-menu {
@@ -1301,7 +1411,63 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 768px) {
     .menu-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        min-width: 44px;
+        min-height: 44px;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    /* Hide the Font Awesome icon on mobile */
+    .menu-toggle i {
+        display: none;
+    }
+
+    /* Create CSS hamburger icon */
+    .menu-toggle::before {
+        content: '';
+        position: relative;
         display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text-primary);
+        box-shadow:
+            0 7px 0 var(--text-primary),
+            0 14px 0 var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    /* Hover effect */
+    .menu-toggle:hover::before {
+        background: var(--accent-gold);
+        box-shadow:
+            0 7px 0 var(--accent-gold),
+            0 14px 0 var(--accent-gold);
+    }
+
+    /* Active state - animate to X */
+    .nav-menu.active ~ .menu-toggle::before,
+    .menu-toggle.active::before {
+        background: var(--accent-gold);
+        transform: rotate(45deg) translateY(10px);
+        box-shadow: 0 0 0 var(--accent-gold);
+    }
+
+    .nav-menu.active ~ .menu-toggle::after,
+    .menu-toggle.active::after {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 2px;
+        background: var(--accent-gold);
+        transform: rotate(-45deg) translateY(-10px);
     }
 
     .nav-menu {
@@ -1336,26 +1502,7 @@ input:focus, select:focus, textarea:focus {
 
     .nav-menu li {
         width: 100%;
-        opacity: 0;
-        transform: translateX(-20px);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .nav-menu.active li {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    /* Stagger animation delay */
-    .nav-menu.active li:nth-child(1) { transition-delay: 0.05s; }
-    .nav-menu.active li:nth-child(2) { transition-delay: 0.1s; }
-    .nav-menu.active li:nth-child(3) { transition-delay: 0.15s; }
-    .nav-menu.active li:nth-child(4) { transition-delay: 0.2s; }
-    .nav-menu.active li:nth-child(5) { transition-delay: 0.25s; }
-    .nav-menu.active li:nth-child(6) { transition-delay: 0.3s; }
-    .nav-menu.active li:nth-child(7) { transition-delay: 0.35s; }
-    .nav-menu.active li:nth-child(8) { transition-delay: 0.4s; }
-    .nav-menu.active li:nth-child(9) { transition-delay: 0.45s; }
 
     .nav-menu a {
         display: block;
