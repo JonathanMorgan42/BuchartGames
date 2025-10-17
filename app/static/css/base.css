@@ -382,6 +382,12 @@ p {
     font-size: 0.9rem;
 }
 
+.required {
+    color: var(--accent-red);
+    font-weight: 700;
+    margin-left: 0.25rem;
+}
+
 .form-control,
 input[type="text"],
 input[type="email"],
@@ -407,6 +413,23 @@ textarea:focus {
     outline: none;
     border-color: var(--accent-gold);
     box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+}
+
+/* Error state for form fields */
+.form-group:has(.form-error) .form-control,
+.form-group:has(.form-error) input,
+.form-group:has(.form-error) select,
+.form-group:has(.form-error) textarea {
+    border-color: var(--accent-red);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.form-group:has(.form-error) .form-control:focus,
+.form-group:has(.form-error) input:focus,
+.form-group:has(.form-error) select:focus,
+.form-group:has(.form-error) textarea:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 select {
@@ -1034,6 +1057,7 @@ footer p {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     max-width: 500px;
     width: 90%;
+    min-width: 300px;
     border: 1px solid var(--border-light);
     animation: slideDown 0.3s ease-out;
 }
@@ -1248,7 +1272,7 @@ footer p {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gradient-purple);
+    background: var(--accent-purple);
     color: white;
     display: flex;
     align-items: center;
@@ -1547,7 +1571,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .workflow-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: var(--accent-blue);
     opacity: 0.5;
 }

@@ -37,10 +37,10 @@
         <div class="header-container">
             <a href="{{ url_for('main.index') }}" class="logo">
                 {% if active_game_night %}
-                <i class="fas fa-trophy"></i> {{ active_game_night.name }}
+                {{ active_game_night.name }}
                 <span class="logo-date">{{ active_game_night.date.strftime('%B %d, %Y') }}</span>
                 {% else %}
-                <i class="fas fa-trophy"></i> Game Night Tracker
+                Game Night Tracker
                 {% endif %}
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">

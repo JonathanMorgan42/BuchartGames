@@ -61,8 +61,8 @@
     font-style: italic;
 }
 
-/* Working Context Banner - Blue theme for building phase */
-.working-context-banner {
+/* Currently Building Banner - Blue theme for building phase */
+.currently-building-banner {
     padding: 1.5rem;
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.2) 100%);
     border: 1px solid rgba(59, 130, 246, 0.3);
@@ -223,10 +223,91 @@
     gap: 0.5rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(100, 116, 139, 0.3);
+    align-items: center;
 }
 
 .card-actions form {
     display: inline;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.25rem;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    min-width: 220px;
+    z-index: 1000;
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item-form {
+    display: block;
+    margin: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.dropdown-item i {
+    width: 1.25rem;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.dropdown-item-success {
+    color: var(--accent-green);
+}
+
+.dropdown-item-success:hover {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent-green);
+}
+
+.dropdown-item-danger {
+    color: var(--accent-red);
+}
+
+.dropdown-item-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
 }
 
 /* Empty State */

@@ -25,37 +25,26 @@
 
 <!-- Game Night Context Banner -->
 {% if working_context %}
-<div class="context-banner working-context-banner">
+<div class="context-banner currently-building-banner">
     <div class="context-banner-content">
         <div class="context-info">
-            <i class="fas fa-tools"></i>
+            <i class="fas fa-hammer"></i>
             <div class="context-text">
-                <strong><i class="fas fa-tools"></i> Building for:</strong> {{ working_context.name }}
+                <strong>Currently Building:</strong> {{ working_context.name }}
                 <span class="context-date">{{ working_context.date.strftime('%B %d, %Y') }}</span>
                 {% if not working_context.is_active %}
-                <span class="context-status-badge"><i class="fas fa-lock"></i> Private (not yet visible to players)</span>
+                <span class="context-status-badge"><i class="fas fa-lock"></i> Private</span>
+                {% else %}
+                <span class="context-status-badge"><i class="fas fa-broadcast-tower"></i> Live</span>
                 {% endif %}
             </div>
         </div>
-        <div class="context-stats">
-            <span class="stat-pill">
-                <i class="fas fa-users"></i> {{ team_count }} team{{ 's' if team_count != 1 else '' }}
-            </span>
-        </div>
         <div class="context-actions">
             <a href="{{ url_for('admin.game_night_management') }}" class="btn btn-sm btn-secondary">
-                <i class="fas fa-exchange-alt"></i> Switch Game Night
+                <i class="fas fa-exchange-alt"></i> Switch
             </a>
         </div>
     </div>
-    <p class="context-help">
-        <i class="fas fa-info-circle"></i> This game will be added to <strong>{{ working_context.name }}</strong> (your current working context).
-        {% if not working_context.is_active %}
-        This game night is <strong>not yet public</strong> - players won't see it until you activate it.
-        {% else %}
-        This game night is <strong>already active</strong> and visible to players on the leaderboard.
-        {% endif %}
-    </p>
 </div>
 {% endif %}
 
@@ -68,7 +57,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    {{ form.name.label }}
+                    <label for="name">Game Name <span class="required">*</span></label>
                     {{ form.name(class="form-control", placeholder="Enter game name") }}
                     {% if form.name.errors %}
                         <div class="form-error">
@@ -80,7 +69,7 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form.type.label }}
+                    <label for="type">Game Type <span class="required">*</span></label>
                     {{ form.type(class="form-control", id="game-type-select", onchange="toggleCustomType()") }}
                     {% if form.type.errors %}
                         <div class="form-error">
@@ -99,7 +88,7 @@
             </div>
 
             <div class="form-group">
-                {{ form.sequence_number.label }}
+                <label for="sequence_number">Game Order <span class="required">*</span></label>
                 <div class="sequence-input-wrapper">
                     {{ form.sequence_number(class="form-control", placeholder=next_sequence) }}
                     <div class="sequence-helper">
@@ -150,7 +139,7 @@
             <div class="form-row">
                 <div class="form-group" style="position: relative;">
                     <label for="point_scheme">
-                        Point Scheme Multiplier
+                        Point Scheme Multiplier <span class="required">*</span>
                         <button type="button" class="info-tooltip-trigger" aria-label="Learn about point schemes">
                             <i class="fas fa-question-circle"></i>
                         </button>
@@ -193,7 +182,7 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form.metric_type.label }}
+                    <label for="metric_type">Score Method <span class="required">*</span></label>
                     {{ form.metric_type(class="form-control") }}
                     {% if form.metric_type.errors %}
                         <div class="form-error">
@@ -207,7 +196,7 @@
             </div>
 
             <div class="form-group">
-                <label>Scoring Direction</label>
+                <label>Winning Condition <span class="required">*</span></label>
                 <div class="scoring-direction-tiles">
                     <div class="scoring-tile" data-value="higher_better">
                         <div class="tile-icon"><i class="fas fa-trophy"></i></div>

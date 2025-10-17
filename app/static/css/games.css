@@ -144,52 +144,7 @@ tbody tr:hover {
     color: var(--primary);
 }
 
-.game-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.game-badge.trivia {
-    background-color: #818CF8;
-    color: white;
-}
-
-.game-badge.physical {
-    background-color: #F472B6;
-    color: white;
-}
-
-.game-badge.strategy {
-    background-color: #34D399;
-    color: white;
-}
-
-.game-badge.tournament {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    color: white;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.status-badge.completed {
-    background-color: #D1FAE5;
-    color: #065F46;
-}
-
-.status-badge.upcoming {
-    background-color: #E0E7FF;
-    color: #3730A3;
-}
+/* Badge styles now centralized in base.css */
 
 .points-cell {
     font-weight: 700;

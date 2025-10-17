@@ -23,32 +23,26 @@
 
 <!-- Game Night Context Banner -->
 {% if working_context %}
-<div class="context-banner working-context-banner">
+<div class="context-banner currently-building-banner">
     <div class="context-banner-content">
         <div class="context-info">
-            <i class="fas fa-tools"></i>
+            <i class="fas fa-hammer"></i>
             <div class="context-text">
-                <strong><i class="fas fa-tools"></i> Building for:</strong> {{ working_context.name }}
+                <strong>Currently Building:</strong> {{ working_context.name }}
                 <span class="context-date">{{ working_context.date.strftime('%B %d, %Y') }}</span>
                 {% if not working_context.is_active %}
-                <span class="context-status-badge"><i class="fas fa-lock"></i> Private (not yet visible to players)</span>
+                <span class="context-status-badge"><i class="fas fa-lock"></i> Private</span>
+                {% else %}
+                <span class="context-status-badge"><i class="fas fa-broadcast-tower"></i> Live</span>
                 {% endif %}
             </div>
         </div>
         <div class="context-actions">
             <a href="{{ url_for('admin.game_night_management') }}" class="btn btn-sm btn-secondary">
-                <i class="fas fa-exchange-alt"></i> Switch Game Night
+                <i class="fas fa-exchange-alt"></i> Switch
             </a>
         </div>
     </div>
-    <p class="context-help">
-        <i class="fas fa-info-circle"></i> This team will be added to <strong>{{ working_context.name }}</strong> (your current working context).
-        {% if not working_context.is_active %}
-        This game night is <strong>not yet public</strong> - players won't see it until you activate it.
-        {% else %}
-        This game night is <strong>already active</strong> and visible to players on the leaderboard.
-        {% endif %}
-    </p>
 </div>
 {% endif %}
 
