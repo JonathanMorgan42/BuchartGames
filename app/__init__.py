@@ -80,9 +80,9 @@ def create_app(config_name='development'):
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
             "img-src 'self' data:; "
-            "font-src 'self'; "
+            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
             "connect-src 'self'; "
             "frame-ancestors 'none';"
         )
