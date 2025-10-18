@@ -113,7 +113,7 @@
     padding: 1.5rem;
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .game-night-card.active {
@@ -227,7 +227,27 @@
 }
 
 .card-actions form {
-    display: inline;
+    display: block;
+    flex: 1;
+    margin: 0;
+}
+
+.card-actions form button {
+    width: 100%;
+}
+
+.card-actions > a.btn {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-actions .dropdown-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-actions .dropdown-toggle {
+    width: 100%;
 }
 
 /* Dropdown Menu Styles */
@@ -238,14 +258,14 @@
 
 .dropdown-toggle {
     cursor: pointer;
+    position: relative;
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
     right: 0;
-    top: 100%;
-    margin-top: 0.25rem;
+    top: calc(100% + 0.25rem);
     background: rgba(15, 23, 42, 0.98);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-light);
@@ -257,7 +277,7 @@
 }
 
 .dropdown-menu.show {
-    display: block;
+    display: block !important;
 }
 
 .dropdown-item-form {
@@ -409,6 +429,32 @@
     .card-actions button,
     .card-actions a {
         width: 100%;
+    }
+
+    .card-actions .dropdown-container {
+        width: 100%;
+    }
+
+    .card-actions .dropdown-toggle {
+        width: 100%;
+    }
+
+    /* Mobile dropdown menu - full width and better spacing */
+    .dropdown-menu {
+        left: 0;
+        right: 0;
+        min-width: auto;
+        width: 100%;
+    }
+
+    .dropdown-item {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .dropdown-item i {
+        width: 1.5rem;
+        font-size: 1rem;
     }
 
     .empty-state {

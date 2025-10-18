@@ -8,8 +8,21 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 db = SQLAlchemy()
+
+
+# Enable foreign key constraints for SQLite
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_conn, connection_record):
+    """Enable foreign key constraints for SQLite."""
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+
 login_manager = LoginManager()
 csrf = CSRFProtect()
 migrate = Migrate()

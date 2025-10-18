@@ -8,6 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / 'instance'
 INSTANCE_DIR.mkdir(exist_ok=True)
 
+# Create feedback directory
+FEEDBACK_DIR = INSTANCE_DIR / 'feedback'
+FEEDBACK_DIR.mkdir(exist_ok=True)
+
 
 class Config:
     """Base configuration."""
@@ -31,6 +35,10 @@ class Config:
 
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
 
+    # Feedback settings
+    FEEDBACK_DIR = FEEDBACK_DIR
+    FEEDBACK_RATE_LIMIT = '5 per hour'  # Max 5 feedback submissions per hour per IP
+
 
 class DevelopmentConfig(Config):
     """Development configuration."""
@@ -51,6 +59,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_ECHO = False
     WTF_CSRF_ENABLED = False
+    RATELIMIT_ENABLED = False  # Disable rate limiting in tests
 
 
 class ProductionConfig(Config):

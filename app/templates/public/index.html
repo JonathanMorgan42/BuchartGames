@@ -4,6 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feedback.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -306,5 +307,15 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Feedback Section -->
+    <div class="feedback-section">
+        <div class="feedback-button-container">
+            <a href="{{ url_for('main.feedback') }}" class="feedback-cta-btn">
+                <i class="fas fa-comment-dots"></i>
+                Please Give Me Your Feedback
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

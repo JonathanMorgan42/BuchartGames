@@ -160,11 +160,16 @@
 
                 <div class="card-actions">
                     <!-- Primary Actions - Always visible -->
-                    <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm" title="View full details and history">
-                        <i class="fas fa-eye"></i> View
-                    </a>
-
                     {% if not gn.is_completed %}
+                        {% if gn.is_active %}
+                        <form method="POST" action="{{ url_for('admin.end_game_night', game_night_id=gn.id) }}" class="dropdown-item-form confirm-form" data-confirm-message="End this game night? This will finalize all data and lock edits.">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-warning btn-sm">
+                                <i class="fas fa-stop-circle"></i> End Game Night
+                            </button>
+                        </form>
+                        {% endif %}
+
                         <a href="{{ url_for('admin.edit_game_night', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm" title="Edit game night name and date">
                             <i class="fas fa-edit"></i> Edit
                         </a>
@@ -175,6 +180,10 @@
                                 <i class="fas fa-ellipsis-h"></i> More
                             </button>
                             <div class="dropdown-menu">
+                                <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="dropdown-item">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+
                                 {% if not gn.is_active and not gn.is_working_context %}
                                 <form method="POST" action="{{ url_for('admin.set_working_context', game_night_id=gn.id) }}" class="dropdown-item-form">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -189,15 +198,6 @@
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="dropdown-item dropdown-item-success">
                                         <i class="fas fa-broadcast-tower"></i> Go Live
-                                    </button>
-                                </form>
-                                {% endif %}
-
-                                {% if gn.is_active %}
-                                <form method="POST" action="{{ url_for('admin.end_game_night', game_night_id=gn.id) }}" class="dropdown-item-form confirm-form" data-confirm-message="End this game night? This will finalize all data and lock edits.">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-stop-circle"></i> End Game Night
                                     </button>
                                 </form>
                                 {% endif %}
@@ -217,6 +217,11 @@
                                 </form>
                             </div>
                         </div>
+                    {% else %}
+                        <!-- For completed game nights, only show View -->
+                        <a href="{{ url_for('main.history_detail', game_night_id=gn.id) }}" class="btn btn-secondary btn-sm" title="View full details and history">
+                            <i class="fas fa-eye"></i> View
+                        </a>
                     {% endif %}
                 </div>
             </div>

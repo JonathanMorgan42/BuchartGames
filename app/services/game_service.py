@@ -159,25 +159,14 @@ class GameService:
     def delete_game(game_id):
         """
         Delete game and all associated data (scores, penalties, tournaments).
+        Uses SQLAlchemy cascade to automatically delete related data.
 
         Args:
             game_id: Game ID to delete
         """
         game = Game.query.get_or_404(game_id)
 
-        # Delete associated tournament and matches if exists
-        from app.models.tournament import Tournament
-        tournament = Tournament.query.filter_by(game_id=game_id).first()
-        if tournament:
-            db.session.delete(tournament)
-
-        # Delete associated scores
-        Score.query.filter_by(game_id=game_id).delete()
-
-        # Delete associated penalties (if not already handled by cascade)
-        Penalty.query.filter_by(game_id=game_id).delete()
-
-        # Delete game
+        # Simply delete the game - cascade will handle scores, penalties, tournaments, and matches
         db.session.delete(game)
         db.session.commit()
 

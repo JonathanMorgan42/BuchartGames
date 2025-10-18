@@ -1,10 +1,18 @@
 """Public routes."""
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
+import json
+import hashlib
+from datetime import datetime
+from collections import defaultdict
 
 from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
 from app.models import Score, Tournament
+from app.forms.feedback_forms import FeedbackForm
 
 main_bp = Blueprint('main', __name__)
+
+# Simple in-memory rate limiting for feedback submissions
+feedback_submissions = defaultdict(list)
 
 
 @main_bp.route('/')
@@ -393,3 +401,76 @@ def history_detail(game_night_id):
         getScore=getScore,
         active_game_night=active_game_night
     )
+
+
+@main_bp.route('/feedback', methods=['GET'])
+def feedback():
+    """Display feedback form page."""
+    form = FeedbackForm()
+    active_game_night = GameNightService.get_active_game_night()
+
+    return render_template('public/feedback.html', form=form, active_game_night=active_game_night)
+
+
+@main_bp.route('/submit-feedback', methods=['POST'])
+def submit_feedback():
+    """Handle feedback form submission."""
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        # Get user IP for rate limiting (hash for privacy)
+        user_ip = request.remote_addr or 'unknown'
+        ip_hash = hashlib.sha256(user_ip.encode()).hexdigest()[:16]
+
+        # Check rate limit (5 submissions per hour per IP)
+        now = datetime.now()
+        hour_ago = now.timestamp() - 3600
+
+        # Clean old submissions
+        feedback_submissions[ip_hash] = [
+            ts for ts in feedback_submissions[ip_hash] if ts > hour_ago
+        ]
+
+        # Check if limit exceeded
+        if len(feedback_submissions[ip_hash]) >= 5:
+            flash('You have submitted feedback recently. Please try again later.', 'warning')
+            return redirect(url_for('main.feedback'))
+
+        # Record this submission
+        feedback_submissions[ip_hash].append(now.timestamp())
+
+        # Prepare feedback data
+        feedback_data = {
+            'timestamp': now.isoformat(),
+            'scoring_clarity': int(form.scoring_clarity.data),
+            'overall_clarity': int(form.overall_clarity.data),
+            'mobile_usability': int(form.mobile_usability.data),
+            'navigation_ease': int(form.navigation_ease.data),
+            'visual_design': int(form.visual_design.data),
+            'feature_satisfaction': int(form.feature_satisfaction.data),
+            'suggestions': form.suggestions.data or '',
+            'ip_hash': ip_hash
+        }
+
+        # Save to JSON file
+        try:
+            feedback_dir = current_app.config['FEEDBACK_DIR']
+            filename = f"feedback_{now.strftime('%Y%m%d_%H%M%S')}_{ip_hash[:8]}.json"
+            filepath = feedback_dir / filename
+
+            with open(filepath, 'w') as f:
+                json.dump(feedback_data, f, indent=2)
+
+            flash('Thank you for your feedback! We appreciate your input.', 'success')
+        except Exception as e:
+            current_app.logger.error(f'Error saving feedback: {str(e)}')
+            flash('There was an error submitting your feedback. Please try again.', 'error')
+
+        return redirect(url_for('main.index'))
+
+    # If validation failed, show errors
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f'{error}', 'error')
+
+    return redirect(url_for('main.feedback'))

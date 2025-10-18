@@ -240,6 +240,7 @@ class GameNightService:
         """
         Wipe all data from a game night (teams and games).
         Useful for resetting the active session.
+        Uses proper deletion to trigger cascades.
 
         Args:
             game_night_id: ID of the game night to wipe
@@ -249,11 +250,15 @@ class GameNightService:
         """
         game_night = GameNight.query.get_or_404(game_night_id)
 
-        # Delete all games (which will cascade delete scores and penalties)
-        Game.query.filter_by(game_night_id=game_night_id).delete()
+        # Delete all games individually to trigger cascade (scores, penalties, tournaments, matches)
+        games = Game.query.filter_by(game_night_id=game_night_id).all()
+        for game in games:
+            db.session.delete(game)
 
-        # Delete all teams (which will cascade delete participants)
-        Team.query.filter_by(game_night_id=game_night_id).delete()
+        # Delete all teams individually to trigger cascade (participants, scores)
+        teams = Team.query.filter_by(game_night_id=game_night_id).all()
+        for team in teams:
+            db.session.delete(team)
 
         db.session.commit()
 

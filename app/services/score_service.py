@@ -149,9 +149,10 @@ class ScoreService:
         game = Game.query.get_or_404(game_id)
 
         # Rank teams
+        lower_is_better = (game.scoring_direction == 'lower_better')
         ranked_teams = ScoreService.rank_teams_by_scores(
             raw_scores,
-            game.lower_is_better
+            lower_is_better
         )
 
         # Calculate points for each team

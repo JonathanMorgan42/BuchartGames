@@ -100,18 +100,13 @@ class TeamService:
     def delete_team(team_id):
         """
         Delete team and all associated data.
+        Uses SQLAlchemy cascade to automatically delete related participants and scores.
 
         Args:
             team_id: Team ID to delete
         """
         team = Team.query.get_or_404(team_id)
 
-        # Delete scores
-        Score.query.filter_by(team_id=team_id).delete()
-
-        # Delete participants
-        Participant.query.filter_by(team_id=team_id).delete()
-
-        # Delete team
+        # Simply delete the team - cascade will handle participants and scores
         db.session.delete(team)
         db.session.commit()
