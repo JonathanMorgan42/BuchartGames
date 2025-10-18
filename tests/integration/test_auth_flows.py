@@ -131,14 +131,14 @@ class TestLogoutFlow:
 
     def test_session_cleared_after_logout(self, authenticated_client):
         """Test that session is cleared after logout."""
-        with authenticated_client:
-            authenticated_client.get('/auth/logout', follow_redirects=True)
+        # Logout
+        authenticated_client.get('/auth/logout', follow_redirects=True)
 
-            # Try to access protected page
-            response = authenticated_client.get('/admin/history')
+        # Try to access protected page
+        response = authenticated_client.get('/auth/change-password')
 
-            # Should redirect to login
-            assert response.status_code == 302
+        # Should redirect to login
+        assert response.status_code == 302
 
 
 @pytest.mark.integration

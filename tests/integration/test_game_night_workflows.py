@@ -158,7 +158,7 @@ class TestGameNightWorkflow:
             score = Score(
                 game_id=game.id,
                 team_id=team.id,
-                metric_value=100 - (i * 10),
+                score_value=100 - (i * 10),
                 points=10 - i
             )
             db_session.add(score)
@@ -182,7 +182,7 @@ class TestGameNightWorkflow:
             score = Score(
                 game_id=game.id,
                 team_id=team.id,
-                metric_value=100,
+                score_value=100,
                 points=30 - (i * 10)
             )
             db_session.add(score)
@@ -220,8 +220,8 @@ class TestGameNightWorkflow:
         db_session.add(game1)
         db_session.commit()
 
-        score1 = Score(game_id=game1.id, team_id=teams[0].id, metric_value=100, points=10)
-        score2 = Score(game_id=game1.id, team_id=teams[1].id, metric_value=90, points=8)
+        score1 = Score(game_id=game1.id, team_id=teams[0].id, score_value=100, points=10)
+        score2 = Score(game_id=game1.id, team_id=teams[1].id, score_value=90, points=8)
         db_session.add_all([score1, score2])
         db_session.commit()
 
@@ -238,8 +238,8 @@ class TestGameNightWorkflow:
         db_session.add(game2)
         db_session.commit()
 
-        score3 = Score(game_id=game2.id, team_id=teams[0].id, metric_value=50, points=5)
-        score4 = Score(game_id=game2.id, team_id=teams[1].id, metric_value=100, points=15)
+        score3 = Score(game_id=game2.id, team_id=teams[0].id, score_value=50, points=5)
+        score4 = Score(game_id=game2.id, team_id=teams[1].id, score_value=100, points=15)
         db_session.add_all([score3, score4])
         db_session.commit()
 

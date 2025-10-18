@@ -39,10 +39,27 @@ class TestGameNightService:
 
     def test_set_active_game_night(self, db_session):
         """Test setting a game night as active."""
+        from app.services.team_service import TeamService
+        from app.services.game_service import GameService
+
         # Create multiple game nights
         gn1 = GameNightService.create_game_night('Night 1', date.today())
         gn2 = GameNightService.create_game_night('Night 2', date.today())
         gn3 = GameNightService.create_game_night('Night 3', date.today())
+
+        # Set gn2 as working context and add required teams and games
+        GameNightService.set_working_context(gn2.id)
+        TeamService.create_team('Team A', [{'firstName': 'A', 'lastName': 'Player'}], '#FF0000')
+        TeamService.create_team('Team B', [{'firstName': 'B', 'lastName': 'Player'}], '#00FF00')
+        GameService.create_game({
+            'name': 'Test Game',
+            'type': 'trivia',
+            'sequence_number': 1,
+            'point_scheme': 1,
+            'metric_type': 'score',
+            'scoring_direction': 'higher_better',
+            'public_input': False
+        }, [])
 
         # Activate gn2
         active_gn = GameNightService.set_active_game_night(gn2.id)
@@ -58,12 +75,49 @@ class TestGameNightService:
 
     def test_set_active_game_night_deactivates_previous(self, db_session):
         """Test that setting active deactivates previous active."""
+        from app.services.team_service import TeamService
+        from app.services.game_service import GameService
+
         gn1 = GameNightService.create_game_night('Night 1', date.today())
         gn2 = GameNightService.create_game_night('Night 2', date.today())
+
+        # Setup gn1 with teams and games
+        GameNightService.set_working_context(gn1.id)
+        TeamService.create_team('Team A', [{'firstName': 'A', 'lastName': 'Player'}], '#FF0000')
+        TeamService.create_team('Team B', [{'firstName': 'B', 'lastName': 'Player'}], '#00FF00')
+        GameService.create_game({
+            'name': 'Test Game',
+            'type': 'trivia',
+            'sequence_number': 1,
+            'point_scheme': 1,
+            'metric_type': 'score',
+            'scoring_direction': 'higher_better',
+            'public_input': False
+        }, [])
 
         # Activate gn1
         GameNightService.set_active_game_night(gn1.id)
         assert gn1.is_active is True
+
+        # Mark gn1's game as complete before switching
+        from app.models import Game
+        game1 = Game.query.filter_by(name='Test Game').first()
+        game1.isCompleted = True
+        db_session.commit()
+
+        # Setup gn2 with teams and games
+        GameNightService.set_working_context(gn2.id)
+        TeamService.create_team('Team C', [{'firstName': 'C', 'lastName': 'Player'}], '#0000FF')
+        TeamService.create_team('Team D', [{'firstName': 'D', 'lastName': 'Player'}], '#FFFF00')
+        GameService.create_game({
+            'name': 'Test Game 2',
+            'type': 'trivia',
+            'sequence_number': 1,
+            'point_scheme': 1,
+            'metric_type': 'score',
+            'scoring_direction': 'higher_better',
+            'public_input': False
+        }, [])
 
         # Activate gn2
         GameNightService.set_active_game_night(gn2.id)
@@ -75,12 +129,29 @@ class TestGameNightService:
 
     def test_get_active_game_night(self, db_session):
         """Test getting the active game night."""
+        from app.services.team_service import TeamService
+        from app.services.game_service import GameService
+
         gn1 = GameNightService.create_game_night('Night 1', date.today())
         gn2 = GameNightService.create_game_night('Night 2', date.today())
 
         # No active game night initially
         active = GameNightService.get_active_game_night()
         assert active is None
+
+        # Setup gn2 with teams and games
+        GameNightService.set_working_context(gn2.id)
+        TeamService.create_team('Team A', [{'firstName': 'A', 'lastName': 'Player'}], '#FF0000')
+        TeamService.create_team('Team B', [{'firstName': 'B', 'lastName': 'Player'}], '#00FF00')
+        GameService.create_game({
+            'name': 'Test Game',
+            'type': 'trivia',
+            'sequence_number': 1,
+            'point_scheme': 1,
+            'metric_type': 'score',
+            'scoring_direction': 'higher_better',
+            'public_input': False
+        }, [])
 
         # Set gn2 as active
         GameNightService.set_active_game_night(gn2.id)

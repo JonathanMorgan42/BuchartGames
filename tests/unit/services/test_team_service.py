@@ -13,12 +13,15 @@ class TestTeamService:
         assert len(result) == 3
         assert all(isinstance(team, Team) for team in result)
 
-    def test_get_all_teams_sorted_by_points(self, db_session, teams):
+    def test_get_all_teams_sorted_by_points(self, db_session, teams, game):
         """Test getting teams sorted by points."""
-        # Add points to teams
-        teams[0].totalPoints = 30
-        teams[1].totalPoints = 50
-        teams[2].totalPoints = 10
+        from app.models import Score
+
+        # Add points to teams via scores
+        score1 = Score(game_id=game.id, team_id=teams[0].id, points=30)
+        score2 = Score(game_id=game.id, team_id=teams[1].id, points=50)
+        score3 = Score(game_id=game.id, team_id=teams[2].id, points=10)
+        db_session.add_all([score1, score2, score3])
         db_session.commit()
 
         result = TeamService.get_all_teams(sort_by_points=True)

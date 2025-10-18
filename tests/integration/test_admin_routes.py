@@ -56,17 +56,17 @@ class TestTeamRoutes:
 class TestGameRoutes:
     """Test game management routes."""
 
-    def test_add_game_page_loads(self, authenticated_client, db_session, game_night):
+    def test_add_game_page_loads(self, authenticated_client, db_session, game_night, teams):
         """Test add game page loads."""
         response = authenticated_client.get('/admin/games/add')
         assert response.status_code == 200
         assert b'Game' in response.data
 
-    def test_add_game_success(self, authenticated_client, db_session, game_night):
+    def test_add_game_success(self, authenticated_client, db_session, game_night, teams):
         """Test adding a new game."""
         response = authenticated_client.post('/admin/games/add', data={
             'name': 'New Game',
-            'type': 'standard',
+            'type': 'trivia',  # Must be a valid choice from GameForm
             'sequence_number': 1,
             'point_scheme': 1,
             'metric_type': 'score',
@@ -89,7 +89,7 @@ class TestGameRoutes:
         """Test editing a game."""
         response = authenticated_client.post(f'/admin/games/edit/{game.id}', data={
             'name': 'Updated Game',
-            'type': 'tournament',
+            'type': 'strategy',  # Must be a valid choice from GameForm
             'sequence_number': game.sequence_number,
             'point_scheme': 2,
             'metric_type': 'time',
@@ -100,7 +100,7 @@ class TestGameRoutes:
         assert response.status_code == 200
         db_session.refresh(game)
         assert game.name == 'Updated Game'
-        assert game.type == 'tournament'
+        assert game.type == 'strategy'
 
 
 class TestScoreRoutes:

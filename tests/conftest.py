@@ -13,13 +13,10 @@ def app():
         db.create_all()
         yield app
         db.session.remove()
+        # Disable foreign keys temporarily for drop
+        db.session.execute(db.text('PRAGMA foreign_keys=OFF'))
         db.drop_all()
-
-
-@pytest.fixture(scope='function')
-def client(app):
-    """Create test client."""
-    return app.test_client()
+        db.session.execute(db.text('PRAGMA foreign_keys=ON'))
 
 
 @pytest.fixture(scope='function')
@@ -35,8 +32,18 @@ def db_session(app):
         db.session.rollback()
         db.session.remove()
 
-        # Drop all tables for clean state
+        # Disable foreign keys temporarily for drop
+        db.session.execute(db.text('PRAGMA foreign_keys=OFF'))
         db.drop_all()
+        db.session.execute(db.text('PRAGMA foreign_keys=ON'))
+
+
+@pytest.fixture(scope='function')
+def client(app, db_session):
+    """Create test client with database setup."""
+    # The db_session fixture ensures tables are created
+    # and we're using the same session throughout the test
+    return app.test_client()
 
 
 @pytest.fixture
@@ -52,6 +59,7 @@ def admin_user(db_session):
 @pytest.fixture
 def authenticated_client(client, admin_user):
     """Create an authenticated test client."""
+    # Simply log in using the proper endpoint with follow_redirects
     with client:
         client.post('/auth/login', data={
             'username': admin_user.username,
@@ -67,7 +75,8 @@ def game_night(db_session):
     gn = GameNight(
         name='Test Game Night',
         date=date.today(),
-        is_active=True
+        is_active=True,
+        is_working_context=True  # Admin routes need this for team/game creation
     )
     db_session.add(gn)
     db_session.commit()
@@ -107,8 +116,9 @@ def game(db_session, game_night):
     """Create a test game."""
     game = Game(
         name='Test Game',
-        type='standard',
+        type='trivia',  # Must be a valid choice from GameForm
         game_night_id=game_night.id,
+        sequence_number=1,
         point_scheme=1,
         metric_type='score',
         scoring_direction='higher_better'
@@ -135,7 +145,7 @@ def completed_game(db_session, game_night, teams):
         score = Score(
             game_id=game.id,
             team_id=team.id,
-            metric_value=100 - (i * 10),
+            score_value=100 - (i * 10),
             points=(3 - i)
         )
         db_session.add(score)

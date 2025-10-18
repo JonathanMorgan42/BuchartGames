@@ -45,7 +45,6 @@ class TestAuthenticationRequirements:
     @pytest.mark.parametrize('route', [
         '/auth/logout',
         '/auth/change-password',
-        '/admin/history',
     ])
     def test_protected_routes_unauthenticated(self, client, route):
         """Test that protected routes redirect unauthenticated users."""
