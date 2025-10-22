@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block content %}
+<!-- WebSocket Connection Status Indicator -->
+<div class="ws-status-indicator disconnected" title="Connecting...">
+    <span>Live</span>
+</div>
+
 <div class="page-header-detail">
     <div class="page-header-detail-top">
         <a href="{{ url_for('main.games') }}" class="back-button">
@@ -62,7 +67,7 @@
 <!-- Team Selector -->
 <div class="team-selector-container">
     <label for="team-selector">Select Team to Score:</label>
-    <select id="team-selector" class="team-selector" onchange="switchTeam()">
+    <select id="team-selector" class="team-selector" data-action="switch-team">
         <option value="">Choose a team...</option>
         {% for team in teams %}
         <option value="{{ team.id }}" data-color="{{ team.color }}">
@@ -102,18 +107,30 @@
         <div class="stopwatch-main">
             <div class="timer-display-large" id="timer-display">00:00.000</div>
             <div class="stopwatch-controls">
-                <button type="button" onclick="startStopwatch()" class="btn-timer btn-start">
+                <button type="button" data-action="start-stopwatch" class="btn-timer btn-start">
                     <i class="fas fa-play"></i>
                     <span>Start</span>
                 </button>
-                <button type="button" onclick="stopStopwatch()" class="btn-timer btn-stop">
+                <button type="button" data-action="stop-stopwatch" class="btn-timer btn-stop">
                     <i class="fas fa-stop"></i>
                     <span>Stop & Save</span>
                 </button>
-                <button type="button" onclick="resetStopwatch()" class="btn-timer btn-reset">
+                <button type="button" data-action="reset-stopwatch" class="btn-timer btn-reset">
                     <i class="fas fa-redo"></i>
                     <span>Reset</span>
                 </button>
+            </div>
+        </div>
+
+        <!-- Multi-Timer Stats (appears when multiple users are timing) -->
+        <div id="multi-timer-stats" class="multi-timer-stats" style="display: none;">
+            <div class="multi-timer-header">
+                <i class="fas fa-users"></i>
+                <span id="multi-timer-count">0 timers</span>
+                <span class="multi-timer-average" id="multi-timer-average"></span>
+            </div>
+            <div class="multi-timer-list" id="multi-timer-list">
+                <!-- Timer values will be inserted here by JavaScript -->
             </div>
         </div>
 
@@ -125,7 +142,7 @@
         {% endif %}
 
         <div class="unified-score-input">
-            <button type="button" class="score-btn btn-decrement" onclick="decrementScore()">
+            <button type="button" class="score-btn btn-decrement" data-action="decrement-score">
                 <i class="fas fa-minus"></i>
             </button>
 
@@ -135,9 +152,9 @@
                    placeholder="{% if game.metric_type == 'time' %}Seconds{% else %}Enter score{% endif %}"
                    step="0.01"
                    value=""
-                   oninput="onScoreChange()">
+                   data-action="score-change">
 
-            <button type="button" class="score-btn btn-increment" onclick="incrementScore()">
+            <button type="button" class="score-btn btn-increment" data-action="increment-score">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
@@ -225,7 +242,7 @@
 
     <!-- Clear Button -->
     <div class="action-buttons">
-        <button type="button" class="btn btn-warning" onclick="clearCurrentTeam()">
+        <button type="button" class="btn btn-warning" data-action="clear-team">
             <i class="fas fa-eraser"></i> Clear Team Score
         </button>
     </div>
@@ -243,14 +260,14 @@
 <form id="scoring-form" method="POST">
     {{ form.hidden_tag() }}
 
-    <!-- Save Button -->
+    <!-- Finalize Game -->
     <div class="form-actions">
-        <div class="checkbox-group">
-            {{ form.is_completed(class="form-check") }}
-            {{ form.is_completed.label }}
+        <div class="auto-save-info">
+            <i class="fas fa-info-circle"></i>
+            <span>All scores are saved automatically as you enter them</span>
         </div>
-        <button type="submit" class="btn btn-primary btn-save">
-            <i class="fas fa-save"></i> Save All Scores
+        <button type="submit" class="btn btn-action-primary" onclick="return confirmFinalizeGame()">
+            <i class="fas fa-flag-checkered"></i> Finalize Game & Update Leaderboard
         </button>
     </div>
 
@@ -260,6 +277,9 @@
     <input type="hidden" id="points-input-{{ team.id }}" name="points-input-{{ team.id }}" value="{{ existing_scores[team.id].points if team.id in existing_scores else 0 }}">
     <input type="hidden" id="penalties-{{ team.id }}" name="penalties-{{ team.id }}" value="">
     {% endfor %}
+
+    <!-- Hidden field to always mark as complete on submission -->
+    <input type="hidden" name="is_completed" value="y">
 </form>
 
 {% endblock %}
@@ -278,6 +298,12 @@ window.gameData = {
 window.teamsData = {{ teams_json|tojson|safe }};
 window.existingScores = {{ existing_scores_json|tojson|safe }};
 window.penaltiesData = {{ penalties|tojson|safe }};
+
+// Confirmation dialog for finalizing game
+function confirmFinalizeGame() {
+    return confirm('Are you sure you want to finalize this game?\n\nThis will:\n• Mark the game as complete\n• Update the leaderboard with final scores\n• Stop live scoring\n\nThis action cannot be undone.');
+}
 </script>
-<script src="{{ url_for('static', filename='js/scores.js') }}"></script>
+<script src="{{ url_for('static', filename='js/websocket-client.js') }}?v={{ cache_bust }}"></script>
+<script src="{{ url_for('static', filename='js/scores.js') }}?v={{ cache_bust }}"></script>
 {% endblock %}

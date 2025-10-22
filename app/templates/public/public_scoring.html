@@ -8,6 +8,19 @@
 {% endblock %}
 
 {% block content %}
+<!-- Auto-save Notification Banner -->
+<div id="auto-save-banner" class="auto-save-banner" style="display: none;">
+    <i class="fas fa-check-circle"></i>
+    <span id="auto-save-message">Changes saved automatically</span>
+</div>
+
+<!-- WebSocket Connection Status Indicator -->
+{% if not current_user.is_authenticated %}
+<div class="ws-status-indicator disconnected" title="Connecting...">
+    <span>Live</span>
+</div>
+{% endif %}
+
 <div class="page-header-detail">
     <div class="page-header-detail-top">
         <a href="{{ url_for('main.games') }}" class="back-button">
@@ -96,15 +109,47 @@
 
     <!-- Score Input Section -->
     <div class="score-section">
-        <h3>
-            {% if game.metric_type == 'time' %}
-            Time (seconds)
-            {% elif game.metric_type == 'count' %}
-            Count
-            {% else %}
-            Score
-            {% endif %}
-        </h3>
+        {% if game.metric_type == 'time' %}
+        <!-- Timer is the main feature for time-based games -->
+        <h3><i class="fas fa-stopwatch"></i> Stopwatch Timer</h3>
+        <p class="timer-help-text">Use the timer below - it will automatically fill in the score when you click Stop</p>
+
+        <div class="stopwatch-main">
+            <div class="timer-display-large" id="timer-display">00:00.000</div>
+            <div class="stopwatch-controls">
+                <button type="button" data-action="start-stopwatch" class="btn-timer btn-start">
+                    <i class="fas fa-play"></i>
+                    <span>Start</span>
+                </button>
+                <button type="button" data-action="stop-stopwatch" class="btn-timer btn-stop">
+                    <i class="fas fa-stop"></i>
+                    <span>Stop & Save</span>
+                </button>
+                <button type="button" data-action="reset-stopwatch" class="btn-timer btn-reset">
+                    <i class="fas fa-redo"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Multi-Timer Stats (appears when multiple users are timing) -->
+        <div id="multi-timer-stats" class="multi-timer-stats" style="display: none;">
+            <div class="multi-timer-header">
+                <i class="fas fa-users"></i>
+                <span id="multi-timer-count">0 timers</span>
+                <span class="multi-timer-average" id="multi-timer-average"></span>
+            </div>
+            <div class="multi-timer-list" id="multi-timer-list">
+                <!-- Timer values will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <div class="score-divider">
+            <span>Or enter time manually</span>
+        </div>
+        {% else %}
+        <h3>Score</h3>
+        {% endif %}
 
         <div class="unified-score-input">
             <button type="button" class="score-btn btn-decrement" data-action="decrement-score">
@@ -114,7 +159,7 @@
             <input type="number"
                    id="score-input"
                    class="score-input-field"
-                   placeholder="Enter score"
+                   placeholder="{% if game.metric_type == 'time' %}Seconds{% else %}Enter score{% endif %}"
                    step="0.01"
                    value=""
                    data-action="score-change">
@@ -123,23 +168,6 @@
                 <i class="fas fa-plus"></i>
             </button>
         </div>
-
-        {% if game.metric_type == 'time' %}
-        <div class="stopwatch-controls-mobile">
-            <div class="timer-display-mobile" id="timer-display">00:00:00</div>
-            <div class="stopwatch-buttons-mobile">
-                <button type="button" data-action="start-stopwatch" class="btn-stopwatch btn-start">
-                    <i class="fas fa-play"></i> Start
-                </button>
-                <button type="button" data-action="stop-stopwatch" class="btn-stopwatch btn-stop">
-                    <i class="fas fa-stop"></i> Stop
-                </button>
-                <button type="button" data-action="reset-stopwatch" class="btn-stopwatch btn-reset">
-                    <i class="fas fa-redo"></i> Reset
-                </button>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
     <!-- Penalties Section -->
@@ -246,16 +274,27 @@
 <form id="scoring-form" method="POST">
     {{ form.hidden_tag() }}
 
-    <!-- Save Button -->
-    <div class="form-actions-scoring">
-        <div class="checkbox-group">
-            {{ form.is_completed(class="form-check") }}
-            {{ form.is_completed.label }}
+    <!-- Finalize Game Button (Admin Only) -->
+    {% if current_user.is_authenticated %}
+    <div class="form-actions">
+        <div class="auto-save-info">
+            <i class="fas fa-info-circle"></i>
+            <span>All scores are saved automatically as you enter them</span>
         </div>
-        <button type="submit" class="btn btn-action-primary btn-save-scores">
-            <i class="fas fa-save"></i> Save All Scores
+        <button type="submit" class="btn btn-action-primary" onclick="return confirmFinalizeGame()">
+            <i class="fas fa-flag-checkered"></i> Finalize Game & Update Leaderboard
         </button>
     </div>
+
+    <!-- Hidden field to always mark as complete on submission -->
+    <input type="hidden" name="is_completed" value="y">
+    {% else %}
+    <!-- Public users: Auto-save enabled (no manual save button) -->
+    <div class="auto-save-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Your scores are saved automatically as you enter them</span>
+    </div>
+    {% endif %}
 
     <!-- Hidden inputs for all teams -->
     {% for team in teams %}
@@ -281,6 +320,12 @@ window.gameData = {
 window.teamsData = {{ teams_json|tojson|safe }};
 window.existingScores = {{ existing_scores_json|tojson|safe }};
 window.penaltiesData = {{ penalties|tojson|safe }};
+
+// Confirmation dialog for finalizing game
+function confirmFinalizeGame() {
+    return confirm('Are you sure you want to finalize this game?\n\nThis will:\n• Mark the game as complete\n• Update the leaderboard with final scores\n• Stop live scoring\n\nThis action cannot be undone.');
+}
 </script>
-<script src="{{ url_for('static', filename='js/scores.js') }}"></script>
+<script src="{{ url_for('static', filename='js/websocket-client.js') }}?v={{ cache_bust }}"></script>
+<script src="{{ url_for('static', filename='js/scores.js') }}?v={{ cache_bust }}"></script>
 {% endblock %}

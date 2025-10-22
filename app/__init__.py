@@ -7,11 +7,13 @@ from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_session import Session
+from flask_socketio import SocketIO
 from werkzeug.middleware.proxy_fix import ProxyFix
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 db = SQLAlchemy()
+socketio = SocketIO()
 
 
 # Enable foreign key constraints for SQLite
@@ -57,6 +59,16 @@ def create_app(config_name='development'):
     csrf.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
+
+    # Initialize SocketIO
+    socketio.init_app(
+        app,
+        cors_allowed_origins="*",  # Will be restricted by Flask's CORS policy
+        async_mode='threading',
+        manage_session=False,  # Use Flask-Login sessions
+        logger=False,
+        engineio_logger=False
+    )
     
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
@@ -90,13 +102,14 @@ def create_app(config_name='development'):
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 
         # Content Security Policy - allows inline scripts/styles (needed for app)
+        # Also allows socket.io CDN and WebSocket connections
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.socket.io; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
             "img-src 'self' data:; "
             "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
-            "connect-src 'self'; "
+            "connect-src 'self' ws: wss: https://cdn.socket.io; "
             "frame-ancestors 'none';"
         )
 
@@ -122,7 +135,11 @@ def create_app(config_name='development'):
         # Now create tables
         db.create_all()
         initialize_admins(app)
-    
+
+    # Register WebSocket event handlers
+    from app.websockets import register_handlers
+    register_handlers(socketio)
+
     return app
 
 

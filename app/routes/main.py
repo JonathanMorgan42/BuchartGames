@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
 import json
 import hashlib
+import time
 from datetime import datetime
 from collections import defaultdict
 
@@ -151,6 +152,7 @@ def view_game_scores(game_id):
 def public_score_game(game_id):
     """Public scoring page for games with public_input enabled."""
     from flask import request, flash, redirect
+    from flask_login import current_user
     from app.forms import LiveScoringForm
     from app.models import Team
 
@@ -204,17 +206,32 @@ def public_score_game(game_id):
                     if notes:
                         scores_data[team.id]['notes'] = notes
 
-            # Save scores
+            # Save scores (public users never mark as complete)
+            is_completed = form.is_completed.data if current_user.is_authenticated else False
             ScoreService.save_scores(
                 game_id,
                 scores_data,
-                form.is_completed.data
+                is_completed
             )
 
-            flash('Scores saved successfully!', 'success')
-            return redirect(url_for('main.games'))
+            # Check if this is an AJAX request (auto-save)
+            is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+            if is_ajax:
+                # Return JSON response for AJAX requests
+                return jsonify({'success': True, 'message': 'Scores saved successfully'})
+            else:
+                # Traditional form submission - redirect
+                flash('Scores saved successfully!', 'success')
+                return redirect(url_for('main.games'))
         except Exception as e:
-            flash(f'Error saving scores: {str(e)}', 'error')
+            # Check if AJAX request for error handling
+            is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+            if is_ajax:
+                return jsonify({'success': False, 'message': str(e)}), 400
+            else:
+                flash(f'Error saving scores: {str(e)}', 'error')
 
     penalties = game.penalties.all()
 
@@ -254,7 +271,8 @@ def public_score_game(game_id):
         existing_scores=existing_scores,
         existing_scores_json=existing_scores_dict,
         penalties=penalties_dict,
-        active_game_night=active_game_night
+        active_game_night=active_game_night,
+        cache_bust=int(time.time())
     )
 
 

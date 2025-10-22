@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
+import time
 
 from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
 from app.forms import TeamForm, GameForm, LiveScoringForm
@@ -407,7 +408,8 @@ def edit_scores(game_id):
         teams_json=teams_dict,
         existing_scores=existing_scores,
         existing_scores_json=existing_scores_dict,
-        penalties=penalties_dict
+        penalties=penalties_dict,
+        cache_bust=int(time.time())
     )
 
 

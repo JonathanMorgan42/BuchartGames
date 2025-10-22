@@ -4,19 +4,41 @@
  */
 
 // Global state
-let currentTeamId = null;
+// Variables that need to be accessed by websocket-client.js must be on window object
+window.currentTeamId = null;
+window.teamScores = {};
+window.teamPenalties = {};
+window.calculateRankingsAndPoints = null; // Will be assigned to function below
+window.updateRankingsOverview = null; // Will be assigned to function below
+window.updatePenaltyTotals = null; // Will be assigned to function below
+window.updateCurrentTeamDisplay = null; // Will be assigned to function below
+
+// Local variables (not needed by websocket-client.js)
 let globalTimer = null;
 let globalStartTime = 0;
 let globalElapsed = 0;
-let teamScores = {};
-let teamPenalties = {};
+let wsClient = null;
+let currentEditLock = null; // Track current lock: {teamId, field}
+let autoSaveTimer = null; // Debounce timer for auto-save
+let autoSaveBannerTimeout = null; // Timeout for hiding auto-save banner
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeScores();
-    updateRankingsOverview();
+
+    window.calculateRankingsAndPoints(); // Calculate rankings from existing scores
+    window.updateRankingsOverview(); // Display the rankings
     attachEventListeners();
+    initializeWebSocket();
+    restoreSavedTeamSelection(); // Restore team selection if page was refreshed
 });
+
+// Initialize WebSocket client
+function initializeWebSocket() {
+    if (window.gameData && window.gameData.id) {
+        wsClient = new GameSocketClient(window.gameData.id);
+    }
+}
 
 // Attach event listeners using data attributes
 function attachEventListeners() {
@@ -30,6 +52,31 @@ function attachEventListeners() {
     const scoreInput = document.querySelector('[data-action="score-change"]');
     if (scoreInput) {
         scoreInput.addEventListener('input', onScoreChange);
+
+        // Request lock when user focuses on input (before editing)
+        scoreInput.addEventListener('focus', function() {
+            if (window.currentTeamId && wsClient) {
+                // Only request lock if we don't already have it
+                if (!currentEditLock || currentEditLock.teamId !== window.currentTeamId || currentEditLock.field !== 'score') {
+                    wsClient.requestLock(window.currentTeamId, 'score');
+                    currentEditLock = {teamId: window.currentTeamId, field: 'score'};
+                }
+            }
+        });
+
+        // Release lock and auto-save when input loses focus
+        scoreInput.addEventListener('blur', function() {
+            if (currentEditLock && wsClient) {
+                // Get current score values - send BASE score, not final score
+                // (final score will be recalculated by each client based on their penalty data)
+                const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+                const points = window.teamScores[window.currentTeamId]?.points || 0;
+
+                // Release the lock with current score (this will also save and broadcast)
+                wsClient.releaseLock(currentEditLock.teamId, currentEditLock.field, baseScore, points);
+                currentEditLock = null;
+            }
+        });
     }
 
     // Score increment/decrement buttons
@@ -98,7 +145,7 @@ function initializeScores() {
     if (typeof window.existingScores !== 'undefined') {
         Object.keys(window.existingScores).forEach(teamId => {
             const score = window.existingScores[teamId];
-            teamScores[teamId] = {
+            window.teamScores[teamId] = {
                 baseScore: parseFloat(score.score_value) || 0,
                 penaltyTotal: 0,
                 finalScore: parseFloat(score.score_value) || 0,
@@ -111,8 +158,8 @@ function initializeScores() {
     // Initialize all teams
     if (typeof window.teamsData !== 'undefined') {
         window.teamsData.forEach(team => {
-            if (!teamScores[team.id]) {
-                teamScores[team.id] = {
+            if (!window.teamScores[team.id]) {
+                window.teamScores[team.id] = {
                     baseScore: 0,
                     penaltyTotal: 0,
                     finalScore: 0,
@@ -120,25 +167,37 @@ function initializeScores() {
                     points: 0
                 };
             }
-            teamPenalties[team.id] = {};
+            window.teamPenalties[team.id] = {};
         });
     }
 }
 
 // Switch to selected team
 function switchTeam() {
+    // Release any existing lock before switching
+    if (currentEditLock && wsClient && window.currentTeamId) {
+        const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+        const points = window.teamScores[window.currentTeamId]?.points || 0;
+        wsClient.releaseLock(currentEditLock.teamId, currentEditLock.field, baseScore, points);
+        currentEditLock = null;
+    }
+
     const selector = document.getElementById('team-selector');
     const teamId = selector.value;
     const scoringCard = document.getElementById('team-scoring-card');
 
     if (!teamId) {
         scoringCard.classList.add('display-none');
-        currentTeamId = null;
+        window.currentTeamId = null;
+        clearSavedTeamSelection();
         return;
     }
 
-    currentTeamId = teamId;
+    window.currentTeamId = teamId;
     const team = window.teamsData.find(t => t.id == teamId);
+
+    // Save team selection to sessionStorage
+    saveTeamSelection(teamId);
 
     // Show scoring card
     scoringCard.classList.remove('display-none');
@@ -148,14 +207,14 @@ function switchTeam() {
     document.getElementById('team-color').style.backgroundColor = team.color;
 
     // Load team's current score
-    const teamScore = teamScores[teamId];
+    const teamScore = window.teamScores[teamId];
     document.getElementById('score-input').value = teamScore.baseScore || '';
 
     // Reset timer when changing teams
     resetStopwatch();
 
     // Update rank and points display
-    updateCurrentTeamDisplay();
+    window.updateCurrentTeamDisplay();
 
     // Load penalties for this team
     loadTeamPenalties(teamId);
@@ -165,10 +224,10 @@ function switchTeam() {
 }
 
 // Update current team's rank and points display
-function updateCurrentTeamDisplay() {
-    if (!currentTeamId) return;
+window.updateCurrentTeamDisplay = function() {
+    if (!window.currentTeamId) return;
 
-    const teamScore = teamScores[currentTeamId];
+    const teamScore = window.teamScores[window.currentTeamId];
     const rankBadge = document.getElementById('rank-badge');
     const rankDisplay = document.getElementById('rank-display');
     const pointsDisplay = document.getElementById('points-display');
@@ -188,9 +247,9 @@ function updateCurrentTeamDisplay() {
 
 // Load penalties for current team
 function loadTeamPenalties(teamId) {
-    if (!teamPenalties[teamId]) teamPenalties[teamId] = {};
+    if (!window.teamPenalties[teamId]) window.teamPenalties[teamId] = {};
 
-    const penalties = teamPenalties[teamId];
+    const penalties = window.teamPenalties[teamId];
 
     // Reset all penalty displays
     if (window.penaltiesData) {
@@ -219,12 +278,12 @@ function loadTeamPenalties(teamId) {
         });
     }
 
-    updatePenaltyTotals();
+    window.updatePenaltyTotals();
 }
 
 // Unified score input handlers
 function incrementScore() {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     const input = document.getElementById('score-input');
     const currentValue = parseFloat(input.value) || 0;
@@ -233,7 +292,7 @@ function incrementScore() {
 }
 
 function decrementScore() {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     const input = document.getElementById('score-input');
     const currentValue = parseFloat(input.value) || 0;
@@ -244,100 +303,235 @@ function decrementScore() {
 }
 
 function onScoreChange() {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     const baseScore = parseFloat(document.getElementById('score-input').value) || 0;
-    teamScores[currentTeamId].baseScore = baseScore;
+    window.teamScores[window.currentTeamId].baseScore = baseScore;
 
-    updatePenaltyTotals();
-    calculateRankingsAndPoints();
-    updateCurrentTeamDisplay();
-    updateRankingsOverview();
+    window.updatePenaltyTotals();
+    window.calculateRankingsAndPoints();
+    window.updateCurrentTeamDisplay();
+    window.updateRankingsOverview();
     saveToHiddenInputs();
+
+    // Auto-save via WebSocket (debounced to prevent flooding)
+    // Send BASE score, not final score (final score will be recalculated by each client)
+    if (wsClient && window.currentTeamId) {
+        const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+        const points = window.teamScores[window.currentTeamId]?.points || 0;
+        wsClient.updateScore(window.currentTeamId, baseScore, points);
+    }
+}
+
+// Auto-save functionality for public users
+function triggerAutoSave() {
+    // Check if user is public (not authenticated)
+    // We check for the presence of the auto-save-info element as an indicator
+    const isPublicUser = document.querySelector('.auto-save-info') !== null;
+
+    if (!isPublicUser) {
+        return; // Admin users don't need auto-save
+    }
+
+    // Clear existing timer
+    if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+    }
+
+    // Set new timer (debounce: wait 2 seconds after last change)
+    autoSaveTimer = setTimeout(() => {
+        performAutoSave();
+    }, 2000);
+}
+
+async function performAutoSave() {
+    if (!window.currentTeamId) return;
+
+    const gameId = window.gameData ? window.gameData.id : null;
+    if (!gameId) return;
+
+    const formData = new FormData();
+
+    // Add CSRF token
+    const csrfToken = document.querySelector('input[name="csrf_token"]');
+    if (csrfToken) {
+        formData.append('csrf_token', csrfToken.value);
+    }
+
+    // Add all team scores (same as form submission)
+    Object.keys(window.teamScores).forEach(teamId => {
+        const scoreValue = document.getElementById(`score-${teamId}`);
+        const pointsValue = document.getElementById(`points-input-${teamId}`);
+        const penaltiesValue = document.getElementById(`penalties-${teamId}`);
+
+        if (scoreValue) formData.append(`score-${teamId}`, scoreValue.value);
+        if (pointsValue) formData.append(`points-input-${teamId}`, pointsValue.value);
+        if (penaltiesValue) formData.append(`penalties-${teamId}`, penaltiesValue.value);
+    });
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // Identify as AJAX request
+            }
+        });
+
+        if (response.ok) {
+            showAutoSaveBanner('Changes saved automatically');
+        } else {
+            showAutoSaveBanner('Error saving changes', true);
+        }
+    } catch (error) {
+        console.error('Auto-save error:', error);
+        showAutoSaveBanner('Error saving changes', true);
+    }
+}
+
+function showAutoSaveBanner(message, isError = false) {
+    const banner = document.getElementById('auto-save-banner');
+    const messageSpan = document.getElementById('auto-save-message');
+
+    if (!banner || !messageSpan) return;
+
+    // Update message
+    messageSpan.textContent = message;
+
+    // Update styling for errors
+    if (isError) {
+        banner.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+    } else {
+        banner.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+    }
+
+    // Clear existing timeout
+    if (autoSaveBannerTimeout) {
+        clearTimeout(autoSaveBannerTimeout);
+    }
+
+    // Show banner
+    banner.style.display = 'flex';
+    banner.classList.remove('hiding');
+
+    // Hide after 3 seconds
+    autoSaveBannerTimeout = setTimeout(() => {
+        banner.classList.add('hiding');
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 300); // Match CSS transition duration
+    }, 3000);
 }
 
 // Penalty handlers - Stackable
 function incrementPenalty(penaltyId, value, unit) {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
-    if (!teamPenalties[currentTeamId][penaltyId]) {
-        teamPenalties[currentTeamId][penaltyId] = 0;
+    if (!window.teamPenalties[window.currentTeamId][penaltyId]) {
+        window.teamPenalties[window.currentTeamId][penaltyId] = 0;
     }
 
-    teamPenalties[currentTeamId][penaltyId]++;
+    window.teamPenalties[window.currentTeamId][penaltyId]++;
 
     const counterElement = document.getElementById(`penalty-count-${penaltyId}`);
     if (counterElement) {
-        counterElement.textContent = teamPenalties[currentTeamId][penaltyId];
+        counterElement.textContent = window.teamPenalties[window.currentTeamId][penaltyId];
     }
 
-    updatePenaltyTotals();
-    calculateRankingsAndPoints();
-    updateCurrentTeamDisplay();
-    updateRankingsOverview();
+    window.updatePenaltyTotals();
+    window.calculateRankingsAndPoints();
+    window.updateCurrentTeamDisplay();
+    window.updateRankingsOverview();
     saveToHiddenInputs();
+
+    // Auto-save via WebSocket - send BASE score, not final score
+    if (wsClient && window.currentTeamId) {
+        const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+        const points = window.teamScores[window.currentTeamId]?.points || 0;
+        wsClient.updateScore(window.currentTeamId, baseScore, points);
+    }
+
+    triggerAutoSave();
 }
 
 function decrementPenalty(penaltyId) {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
-    if (!teamPenalties[currentTeamId][penaltyId] || teamPenalties[currentTeamId][penaltyId] === 0) {
+    if (!window.teamPenalties[window.currentTeamId][penaltyId] || window.teamPenalties[window.currentTeamId][penaltyId] === 0) {
         return;
     }
 
-    teamPenalties[currentTeamId][penaltyId]--;
+    window.teamPenalties[window.currentTeamId][penaltyId]--;
 
     const counterElement = document.getElementById(`penalty-count-${penaltyId}`);
     if (counterElement) {
-        counterElement.textContent = teamPenalties[currentTeamId][penaltyId];
+        counterElement.textContent = window.teamPenalties[window.currentTeamId][penaltyId];
     }
 
-    updatePenaltyTotals();
-    calculateRankingsAndPoints();
-    updateCurrentTeamDisplay();
-    updateRankingsOverview();
+    window.updatePenaltyTotals();
+    window.calculateRankingsAndPoints();
+    window.updateCurrentTeamDisplay();
+    window.updateRankingsOverview();
     saveToHiddenInputs();
+
+    // Auto-save via WebSocket - send BASE score, not final score
+    if (wsClient && window.currentTeamId) {
+        const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+        const points = window.teamScores[window.currentTeamId]?.points || 0;
+        wsClient.updateScore(window.currentTeamId, baseScore, points);
+    }
+
+    triggerAutoSave();
 }
 
 // Penalty handlers - One-time (toggle)
 function togglePenaltyTag(penaltyId, value, unit) {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     const tagElement = document.getElementById(`penalty-tag-${penaltyId}`);
 
-    if (!teamPenalties[currentTeamId][penaltyId]) {
-        teamPenalties[currentTeamId][penaltyId] = 0;
+    if (!window.teamPenalties[window.currentTeamId][penaltyId]) {
+        window.teamPenalties[window.currentTeamId][penaltyId] = 0;
     }
 
     // Toggle
-    if (teamPenalties[currentTeamId][penaltyId] === 0) {
-        teamPenalties[currentTeamId][penaltyId] = 1;
+    if (window.teamPenalties[window.currentTeamId][penaltyId] === 0) {
+        window.teamPenalties[window.currentTeamId][penaltyId] = 1;
         tagElement.classList.add('selected');
         tagElement.querySelector('.penalty-tag-icon').textContent = '🔵';
     } else {
-        teamPenalties[currentTeamId][penaltyId] = 0;
+        window.teamPenalties[window.currentTeamId][penaltyId] = 0;
         tagElement.classList.remove('selected');
         tagElement.querySelector('.penalty-tag-icon').textContent = '⚪';
     }
 
-    updatePenaltyTotals();
-    calculateRankingsAndPoints();
-    updateCurrentTeamDisplay();
-    updateRankingsOverview();
+    window.updatePenaltyTotals();
+    window.calculateRankingsAndPoints();
+    window.updateCurrentTeamDisplay();
+    window.updateRankingsOverview();
     saveToHiddenInputs();
+
+    // Auto-save via WebSocket - send BASE score, not final score
+    if (wsClient && window.currentTeamId) {
+        const baseScore = window.teamScores[window.currentTeamId]?.baseScore || 0;
+        const points = window.teamScores[window.currentTeamId]?.points || 0;
+        wsClient.updateScore(window.currentTeamId, baseScore, points);
+    }
+
+    triggerAutoSave();
 }
 
 // Update penalty totals display
-function updatePenaltyTotals() {
-    if (!currentTeamId) return;
+window.updatePenaltyTotals = function() {
+    if (!window.currentTeamId) return;
 
-    const baseScore = teamScores[currentTeamId].baseScore || 0;
+    const baseScore = window.teamScores[window.currentTeamId].baseScore || 0;
     let penaltyTotal = 0;
 
     // Calculate total penalties
-    if (window.penaltiesData && teamPenalties[currentTeamId]) {
+    if (window.penaltiesData && window.teamPenalties[window.currentTeamId]) {
         window.penaltiesData.forEach(penalty => {
-            const count = teamPenalties[currentTeamId][penalty.id] || 0;
+            const count = window.teamPenalties[window.currentTeamId][penalty.id] || 0;
             penaltyTotal += count * penalty.value;
         });
     }
@@ -354,22 +548,25 @@ function updatePenaltyTotals() {
     if (finalScoreDisplay) finalScoreDisplay.textContent = finalScore.toFixed(2);
 
     // Update team score (CRITICAL: Always update this regardless of whether penalty elements exist)
-    teamScores[currentTeamId].penaltyTotal = penaltyTotal;
-    teamScores[currentTeamId].finalScore = finalScore;
-}
+    window.teamScores[window.currentTeamId].penaltyTotal = penaltyTotal;
+    window.teamScores[window.currentTeamId].finalScore = finalScore;
+};
 
 // Calculate rankings and points for all teams
-function calculateRankingsAndPoints() {
+window.calculateRankingsAndPoints = function() {
     const teamsWithScores = [];
 
-    Object.keys(teamScores).forEach(teamId => {
-        if (teamScores[teamId].finalScore > 0 || teamScores[teamId].baseScore > 0) {
+    Object.keys(window.teamScores).forEach(teamId => {
+        const teamScore = window.teamScores[teamId];
+
+        if (teamScore.finalScore > 0 || teamScore.baseScore > 0) {
             teamsWithScores.push({
                 id: teamId,
-                score: teamScores[teamId].finalScore
+                score: teamScore.finalScore
             });
         }
     });
+
 
     // Sort teams by score
     const scoringDirection = window.gameData.scoringDirection;
@@ -387,41 +584,46 @@ function calculateRankingsAndPoints() {
         const rank = index + 1;
         const points = (totalTeams - rank + 1) * pointScheme;
 
-        teamScores[team.id].rank = rank;
-        teamScores[team.id].points = points;
+        window.teamScores[team.id].rank = rank;
+        window.teamScores[team.id].points = points;
     });
 
     // Reset ranks for teams without scores
-    Object.keys(teamScores).forEach(teamId => {
+    Object.keys(window.teamScores).forEach(teamId => {
         const hasScore = teamsWithScores.some(t => t.id == teamId);
         if (!hasScore) {
-            teamScores[teamId].rank = 0;
-            teamScores[teamId].points = 0;
+            window.teamScores[teamId].rank = 0;
+            window.teamScores[teamId].points = 0;
         }
     });
-}
+};
 
 // Update rankings overview display
-function updateRankingsOverview() {
+window.updateRankingsOverview = function() {
     const rankingsList = document.getElementById('rankings-list');
-    if (!rankingsList) return;
+    if (!rankingsList) {
+        return;
+    }
 
     // Get teams with scores
     const teamsWithScores = [];
 
-    Object.keys(teamScores).forEach(teamId => {
+    Object.keys(window.teamScores).forEach(teamId => {
         const team = window.teamsData.find(t => t.id == teamId);
-        if (team && teamScores[teamId].rank > 0) {
+        const teamScore = window.teamScores[teamId];
+
+        if (team && teamScore.rank > 0) {
             teamsWithScores.push({
                 id: teamId,
                 name: team.name,
                 color: team.color,
-                rank: teamScores[teamId].rank,
-                score: teamScores[teamId].finalScore,
-                points: teamScores[teamId].points
+                rank: teamScore.rank,
+                score: teamScore.finalScore,
+                points: teamScore.points
             });
         }
     });
+
 
     // Sort by rank
     teamsWithScores.sort((a, b) => a.rank - b.rank);
@@ -455,32 +657,32 @@ function updateRankingsOverview() {
     }
 
     rankingsList.innerHTML = html;
-}
+};
 
 // Save to hidden inputs for form submission
 function saveToHiddenInputs() {
-    Object.keys(teamScores).forEach(teamId => {
+    Object.keys(window.teamScores).forEach(teamId => {
         const scoreInput = document.getElementById(`score-${teamId}`);
         const pointsInput = document.getElementById(`points-input-${teamId}`);
         const penaltiesInput = document.getElementById(`penalties-${teamId}`);
 
         if (scoreInput) {
-            scoreInput.value = teamScores[teamId].finalScore || '';
+            scoreInput.value = window.teamScores[teamId].finalScore || '';
         }
 
         if (pointsInput) {
-            pointsInput.value = teamScores[teamId].points || 0;
+            pointsInput.value = window.teamScores[teamId].points || 0;
         }
 
-        if (penaltiesInput && teamPenalties[teamId]) {
-            penaltiesInput.value = JSON.stringify(teamPenalties[teamId]);
+        if (penaltiesInput && window.teamPenalties[teamId]) {
+            penaltiesInput.value = JSON.stringify(window.teamPenalties[teamId]);
         }
     });
 }
 
 // Clear current team
 function clearCurrentTeam() {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     if (window.showConfirmModal) {
         showConfirmModal({
@@ -502,29 +704,29 @@ function clearCurrentTeam() {
 }
 
 function performClearTeam() {
-    if (!currentTeamId) return;
+    if (!window.currentTeamId) return;
 
     // Reset score
     document.getElementById('score-input').value = '';
-    teamScores[currentTeamId].baseScore = 0;
-    teamScores[currentTeamId].penaltyTotal = 0;
-    teamScores[currentTeamId].finalScore = 0;
+    window.teamScores[window.currentTeamId].baseScore = 0;
+    window.teamScores[window.currentTeamId].penaltyTotal = 0;
+    window.teamScores[window.currentTeamId].finalScore = 0;
 
     // Reset penalties
-    teamPenalties[currentTeamId] = {};
+    window.teamPenalties[window.currentTeamId] = {};
 
     // Reload display
-    loadTeamPenalties(currentTeamId);
-    updatePenaltyTotals();
-    calculateRankingsAndPoints();
-    updateCurrentTeamDisplay();
-    updateRankingsOverview();
+    loadTeamPenalties(window.currentTeamId);
+    window.updatePenaltyTotals();
+    window.calculateRankingsAndPoints();
+    window.updateCurrentTeamDisplay();
+    window.updateRankingsOverview();
     saveToHiddenInputs();
 }
 
 // Stopwatch functions (for time-based games)
 function startStopwatch() {
-    if (!currentTeamId) {
+    if (!window.currentTeamId) {
         if (window.showAlertModal) {
             showAlertModal({
                 title: 'Team Required',
@@ -547,6 +749,11 @@ function startStopwatch() {
         globalElapsed = Date.now() - globalStartTime;
         document.getElementById('timer-display').textContent = formatTimeWithMillis(globalElapsed);
     }, 10); // Update every 10ms for smooth milliseconds
+
+    // Notify others that timer started
+    if (wsClient) {
+        wsClient.startTimer(window.currentTeamId);
+    }
 }
 
 function stopStopwatch() {
@@ -554,9 +761,15 @@ function stopStopwatch() {
         clearInterval(globalTimer);
         globalTimer = null;
 
-        if (currentTeamId) {
+        if (window.currentTeamId) {
             const seconds = (globalElapsed / 1000).toFixed(3);
             document.getElementById('score-input').value = seconds;
+
+            // Broadcast timer stop via WebSocket
+            if (wsClient) {
+                wsClient.stopTimer(window.currentTeamId, parseFloat(seconds));
+            }
+
             onScoreChange(); // This auto-saves the score to the hidden inputs
 
             // Show a brief success message
@@ -579,6 +792,12 @@ function resetStopwatch() {
     const timerDisplay = document.getElementById('timer-display');
     if (timerDisplay) {
         timerDisplay.textContent = '00:00.000';
+    }
+
+    // Also hide multi-timer stats when resetting
+    const statsPanel = document.getElementById('multi-timer-stats');
+    if (statsPanel) {
+        statsPanel.style.display = 'none';
     }
 }
 
@@ -607,4 +826,42 @@ function getOrdinalSuffix(num) {
     if (j === 2 && k !== 12) return num + "nd";
     if (j === 3 && k !== 13) return num + "rd";
     return num + "th";
+}
+
+// Team selection persistence functions
+function saveTeamSelection(teamId) {
+    if (window.gameData && window.gameData.id) {
+        const key = `selectedTeam_game_${window.gameData.id}`;
+        sessionStorage.setItem(key, teamId);
+    }
+}
+
+function clearSavedTeamSelection() {
+    if (window.gameData && window.gameData.id) {
+        const key = `selectedTeam_game_${window.gameData.id}`;
+        sessionStorage.removeItem(key);
+    }
+}
+
+function restoreSavedTeamSelection() {
+    if (window.gameData && window.gameData.id) {
+        const key = `selectedTeam_game_${window.gameData.id}`;
+        const savedTeamId = sessionStorage.getItem(key);
+
+        if (savedTeamId) {
+            const selector = document.getElementById('team-selector');
+            if (selector) {
+                // Check if the team still exists
+                const teamExists = window.teamsData && window.teamsData.some(t => t.id == savedTeamId);
+                if (teamExists) {
+                    selector.value = savedTeamId;
+                    // Trigger the change event to load the team
+                    switchTeam();
+                } else {
+                    // Team doesn't exist anymore, clear saved selection
+                    clearSavedTeamSelection();
+                }
+            }
+        }
+    }
 }
