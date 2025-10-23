@@ -43,6 +43,10 @@ def create_app(config_name='development'):
     from config import config_by_name
     app.config.from_object(config_by_name[config_name])
 
+    # Initialize structured logging
+    from app.utils.logger import GameNightLogger
+    GameNightLogger.setup(app, config_name)
+
     # Add ProxyFix middleware for production (handles X-Forwarded-* headers)
     if config_name == 'production':
         app.wsgi_app = ProxyFix(
@@ -114,6 +118,39 @@ def create_app(config_name='development'):
         )
 
         return response
+
+    # Register error handlers
+    from flask import render_template
+    from app.exceptions import GameNightException
+    from app.utils.logger import get_logger
+    error_logger = get_logger('app.errors')
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        """Handle 404 errors."""
+        error_logger.warning(f"404 error: {error}")
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        """Handle 403 errors."""
+        error_logger.warning(f"403 error: {error}")
+        return render_template('errors/403.html'), 403
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle 500 errors."""
+        db.session.rollback()
+        error_logger.error(f"500 error: {error}", exc_info=True)
+        return render_template('errors/500.html'), 500
+
+    @app.errorhandler(GameNightException)
+    def handle_gamenight_exception(error):
+        """Handle custom GameNight exceptions."""
+        error_logger.error(f"GameNight exception: {error.message}", exc_info=True)
+        if error.status_code >= 500:
+            db.session.rollback()
+        return render_template('errors/500.html'), error.status_code
 
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp

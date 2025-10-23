@@ -277,8 +277,8 @@ class TestTeamParticipantWorkflow:
         db_session.refresh(team)
 
         # Step 3: Verify
-        assert team.participants.count() == 2
-        participants = team.participants.all()
+        assert len(team.participants) == 2
+        participants = list(team.participants)
         assert participants[0].getFullName() in ['Alice Johnson', 'Bob Smith']
 
     def test_edit_team_workflow(self, db_session, teams):

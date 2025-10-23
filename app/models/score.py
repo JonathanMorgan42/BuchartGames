@@ -3,6 +3,9 @@ from app import db
 
 class Score(db.Model):
     __tablename__ = 'score'
+    __table_args__ = (
+        db.Index('ix_score_game_team', 'game_id', 'team_id'),  # Composite index for game+team lookups
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     points = db.Column(db.Integer, default=0)

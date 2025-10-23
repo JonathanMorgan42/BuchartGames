@@ -3,6 +3,9 @@ from app import db
 
 class Game(db.Model):
     __tablename__ = 'game'
+    __table_args__ = (
+        db.Index('ix_game_night_sequence', 'game_night_id', 'sequence_number'),  # Composite index for game night + ordering
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

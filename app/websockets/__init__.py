@@ -7,6 +7,9 @@ from app.websockets.timer_aggregator import TimerAggregator
 from app.models.score import Score
 from app.models.game import Game
 from app import db
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 # Initialize managers
 lock_manager = EditLockManager()
@@ -173,7 +176,7 @@ def register_handlers(socketio):
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-                print(f"Error saving score on unlock: {e}")
+                logger.error(f"Error saving score on unlock for game_id={game_id}, team_id={team_id}: {e}", exc_info=True)
 
         # Release the lock
         lock_manager.release_lock(game_id, team_id, field, user_id)

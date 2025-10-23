@@ -5,12 +5,16 @@ import hashlib
 import time
 from datetime import datetime
 from collections import defaultdict
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
 from app.models import Score, Tournament
 from app.forms.feedback_forms import FeedbackForm
+from app.exceptions import ValidationError, DatabaseError, NotFoundError
+from app.utils.logger import get_logger
 
 main_bp = Blueprint('main', __name__)
+logger = get_logger(__name__)
 
 # Simple in-memory rate limiting for feedback submissions
 feedback_submissions = defaultdict(list)
@@ -151,10 +155,12 @@ def view_game_scores(game_id):
 @main_bp.route('/games/score/<int:game_id>', methods=['GET', 'POST'])
 def public_score_game(game_id):
     """Public scoring page for games with public_input enabled."""
-    from flask import request, flash, redirect
     from flask_login import current_user
     from app.forms import LiveScoringForm
-    from app.models import Team
+    from app.utils.route_helpers import (
+        get_teams_for_game_night, collect_scores_from_form,
+        serialize_penalties, serialize_teams, serialize_existing_scores, is_ajax_request
+    )
 
     game = GameService.get_game_by_id(game_id)
 
@@ -163,16 +169,8 @@ def public_score_game(game_id):
         flash('Public scoring is not enabled for this game.', 'error')
         return redirect(url_for('main.games'))
 
-    # Get teams from the same game night as the game
-    if game.game_night_id:
-        teams = Team.query.filter_by(game_night_id=game.game_night_id).all()
-    else:
-        # Fallback to active game night teams
-        active_gn = GameNightService.get_active_game_night()
-        if active_gn:
-            teams = Team.query.filter_by(game_night_id=active_gn.id).all()
-        else:
-            teams = Team.query.all()
+    # Get teams and existing scores
+    teams = get_teams_for_game_night(game.game_night_id)
     existing_scores = ScoreService.get_existing_scores_dict(game_id)
 
     form = LiveScoringForm()
@@ -182,84 +180,43 @@ def public_score_game(game_id):
     if request.method == 'POST' and form.validate_on_submit():
         try:
             # Collect scores from form
-            scores_data = {}
-            for team in teams:
-                score_value = request.form.get(f'score-{team.id}')
-                points = request.form.get(f'points-input-{team.id}')
-                notes = request.form.get(f'notes-{team.id}')
-
-                if score_value or points:
-                    scores_data[team.id] = {}
-
-                    if score_value:
-                        try:
-                            scores_data[team.id]['score'] = float(score_value)
-                        except (ValueError, TypeError):
-                            pass
-
-                    if points:
-                        try:
-                            scores_data[team.id]['points'] = int(points)
-                        except (ValueError, TypeError):
-                            pass
-
-                    if notes:
-                        scores_data[team.id]['notes'] = notes
+            scores_data = collect_scores_from_form(request, teams)
 
             # Save scores (public users never mark as complete)
             is_completed = form.is_completed.data if current_user.is_authenticated else False
-            ScoreService.save_scores(
-                game_id,
-                scores_data,
-                is_completed
-            )
+            ScoreService.save_scores(game_id, scores_data, is_completed)
 
-            # Check if this is an AJAX request (auto-save)
-            is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-
-            if is_ajax:
-                # Return JSON response for AJAX requests
+            # Handle AJAX vs traditional form submission
+            if is_ajax_request(request):
                 return jsonify({'success': True, 'message': 'Scores saved successfully'})
             else:
-                # Traditional form submission - redirect
                 flash('Scores saved successfully!', 'success')
                 return redirect(url_for('main.games'))
-        except Exception as e:
-            # Check if AJAX request for error handling
-            is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-            if is_ajax:
+        except (ValidationError, ValueError) as e:
+            logger.warning(f"Validation error saving scores for game_id={game_id}: {e}")
+            if is_ajax_request(request):
                 return jsonify({'success': False, 'message': str(e)}), 400
             else:
                 flash(f'Error saving scores: {str(e)}', 'error')
+        except SQLAlchemyError as e:
+            logger.error(f"Database error saving scores for game_id={game_id}: {e}", exc_info=True)
+            if is_ajax_request(request):
+                return jsonify({'success': False, 'message': 'Database error occurred'}), 500
+            else:
+                flash('Database error occurred while saving scores', 'error')
+        except Exception as e:
+            logger.error(f"Unexpected error saving scores for game_id={game_id}: {e}", exc_info=True)
+            if is_ajax_request(request):
+                return jsonify({'success': False, 'message': 'An unexpected error occurred'}), 500
+            else:
+                flash('An unexpected error occurred while saving scores', 'error')
 
+    # Serialize data for template
     penalties = game.penalties.all()
-
-    # Convert penalties to dictionaries for JSON serialization
-    penalties_dict = [{
-        'id': p.id,
-        'name': p.name,
-        'value': p.value,
-        'unit': 'seconds' if game.metric_type == 'time' else 'points',
-        'stackable': p.stackable
-    } for p in penalties]
-
-    # Convert teams to dictionaries for JSON serialization
-    teams_dict = [{
-        'id': t.id,
-        'name': t.name,
-        'color': t.color
-    } for t in teams]
-
-    # Convert existing_scores to dictionaries for JSON serialization
-    existing_scores_dict = {}
-    for team_id, score in existing_scores.items():
-        existing_scores_dict[team_id] = {
-            'score_value': score.score_value,
-            'points': score.points,
-            'notes': score.notes
-        }
-
+    penalties_dict = serialize_penalties(penalties, game)
+    teams_dict = serialize_teams(teams)
+    existing_scores_dict = serialize_existing_scores(existing_scores)
     active_game_night = GameNightService.get_active_game_night()
 
     return render_template(
@@ -381,8 +338,15 @@ def score_match_public(match_id):
             winner_team_id=data.get('winner_team_id')
         )
         return jsonify({'success': True})
-    except Exception as e:
+    except ValidationError as e:
+        logger.warning(f"Validation error scoring tournament match {match_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 400
+    except SQLAlchemyError as e:
+        logger.error(f"Database error scoring tournament match {match_id}: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Database error occurred'}), 500
+    except Exception as e:
+        logger.error(f"Unexpected error scoring tournament match {match_id}: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'An unexpected error occurred'}), 500
 
 
 @main_bp.route('/history')
@@ -480,8 +444,11 @@ def submit_feedback():
                 json.dump(feedback_data, f, indent=2)
 
             flash('Thank you for your feedback! We appreciate your input.', 'success')
+        except (IOError, OSError) as e:
+            logger.error(f'File system error saving feedback: {e}', exc_info=True)
+            flash('There was an error submitting your feedback. Please try again.', 'error')
         except Exception as e:
-            current_app.logger.error(f'Error saving feedback: {str(e)}')
+            logger.error(f'Unexpected error saving feedback: {e}', exc_info=True)
             flash('There was an error submitting your feedback. Please try again.', 'error')
 
         return redirect(url_for('main.index'))

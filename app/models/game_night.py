@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 from app import db
 
 
@@ -29,10 +30,34 @@ class GameNight(db.Model):
         return self.games.filter_by(isCompleted=True).count()
 
     def get_leaderboard(self):
-        """Get sorted leaderboard for this game night."""
-        teams = self.teams.all()
-        # Sort by total points descending, using game-night-specific points
-        return sorted(teams, key=lambda t: t.get_points_for_game_night(self.id) or 0, reverse=True)
+        """
+        Get sorted leaderboard for this game night.
+
+        Optimized to avoid N+1 queries by eager loading teams with their scores and games.
+        """
+        from app.models.team import Team
+        from app.models.score import Score
+
+        # Eager load teams with their scores and the games for those scores
+        # This prevents N+1 queries by loading everything in one query
+        teams = db.session.query(Team).options(
+            joinedload(Team.scores).joinedload(Score.game)
+        ).filter(Team.game_night_id == self.id).all()
+
+        # Calculate points in Python after loading all data
+        team_points = []
+        for team in teams:
+            total_points = sum(
+                score.points for score in team.scores
+                if score.game and score.game.game_night_id == self.id
+            )
+            team_points.append((team, total_points))
+
+        # Sort by points descending
+        team_points.sort(key=lambda x: x[1], reverse=True)
+
+        # Return just the teams in sorted order
+        return [team for team, points in team_points]
 
     def get_winner(self):
         """Get the winning team (team with highest points) for this game night."""

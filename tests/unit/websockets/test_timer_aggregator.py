@@ -1,5 +1,6 @@
 """Unit tests for TimerAggregator."""
 import pytest
+from datetime import date
 from app import create_app, db
 from app.websockets.timer_aggregator import TimerAggregator
 from app.models.timer_record import TimerRecord
@@ -16,7 +17,14 @@ def app():
     with app.app_context():
         db.create_all()
         yield app
+        # Clean up session and data before dropping tables
+        db.session.rollback()
+        db.session.close()
         db.session.remove()
+        # Clear all data to avoid FK constraint issues
+        for table in reversed(db.metadata.sorted_tables):
+            db.session.execute(table.delete())
+        db.session.commit()
         db.drop_all()
 
 
@@ -30,7 +38,7 @@ def aggregator():
 def sample_data(app):
     """Create sample game and team data."""
     with app.app_context():
-        gn = GameNight(name='Test Night', is_active=True)
+        gn = GameNight(name='Test Night', date=date.today(), is_active=True)
         db.session.add(gn)
         db.session.flush()
 

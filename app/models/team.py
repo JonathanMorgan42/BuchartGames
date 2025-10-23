@@ -9,8 +9,8 @@ class Team(db.Model):
     color = db.Column(db.String(7), nullable=False, default='#3b82f6')
     game_night_id = db.Column(db.Integer, db.ForeignKey('game_night.id'), nullable=True, index=True)
 
-    scores = db.relationship('Score', back_populates='team', lazy='dynamic', cascade='all, delete-orphan')
-    participants = db.relationship('Participant', back_populates='team', lazy='dynamic', cascade='all, delete-orphan')
+    scores = db.relationship('Score', back_populates='team', lazy='select', cascade='all, delete-orphan')
+    participants = db.relationship('Participant', back_populates='team', lazy='select', cascade='all, delete-orphan')
     game_night = db.relationship('GameNight', back_populates='teams')
     
     @property
@@ -79,7 +79,7 @@ class Team(db.Model):
 
     @property
     def games_played(self):
-        return self.scores.count()
+        return len(self.scores)
 
     def __repr__(self):
         return f'<Team {self.name}>'

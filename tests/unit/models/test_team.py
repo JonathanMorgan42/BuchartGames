@@ -86,7 +86,7 @@ class TestTeamModel:
         """Test relationship with participants."""
         team = teams[0]
 
-        team_participants = team.participants.all()
+        team_participants = list(team.participants)
         assert len(team_participants) == 2  # From fixture
         assert all(p.team_id == team.id for p in team_participants)
 

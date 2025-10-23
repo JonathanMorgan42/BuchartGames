@@ -109,7 +109,7 @@ class TestDatabaseIntegrity:
         gn = GameNightFactory.create(db_session)
         team = TeamFactory.create(db_session, game_night_id=gn.id, participant_count=2)
 
-        participant_count = len(team.participants.all())
+        participant_count = len(team.participants)
         assert participant_count == 2
 
         # Delete team

@@ -68,7 +68,7 @@ class TestParticipantModel:
 
         # Test bidirectional relationship
         assert participant.team == team
-        assert participant in team.participants.all()
+        assert participant in team.participants
 
     def test_first_name_required(self, db_session, teams):
         """Test that firstName is required."""

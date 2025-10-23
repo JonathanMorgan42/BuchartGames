@@ -87,7 +87,7 @@ class TeamService:
         if color:
             team.color = color
 
-        participants = team.participants.all()
+        participants = list(team.participants)
         for i, participant_data in enumerate(participants_data):
             if i < len(participants):
                 participants[i].firstName = participant_data['firstName']

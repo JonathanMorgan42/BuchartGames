@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 import time
 
 from app.services import TeamService, GameService, ScoreService, TournamentService, GameNightService
@@ -9,8 +10,11 @@ from app.forms import TeamForm, GameForm, LiveScoringForm
 from app.forms.tournament_forms import TournamentSetupForm, MatchScoreForm
 from app.forms.game_night_forms import GameNightForm
 from app.models import Team, Game, Tournament, Match, GameNight
+from app.exceptions import ValidationError, DatabaseError, NotFoundError
+from app.utils.logger import get_logger
 
 admin_bp = Blueprint('admin', __name__)
+logger = get_logger(__name__)
 
 
 # ============================================================================
@@ -74,7 +78,7 @@ def edit_team(team_id):
     form = TeamForm()
 
     if request.method == 'GET':
-        participants = team.participants.all()
+        participants = list(team.participants)
         form.name.data = team.name
         form.color.data = team.color
 
@@ -130,7 +134,11 @@ def delete_team(team_id):
     try:
         TeamService.delete_team(team_id)
         flash('Team deleted successfully!', 'success')
+    except SQLAlchemyError as e:
+        logger.error(f'Database error deleting team {team_id}: {e}', exc_info=True)
+        flash('Error deleting team: Database error occurred', 'error')
     except Exception as e:
+        logger.error(f'Unexpected error deleting team {team_id}: {e}', exc_info=True)
         flash(f'Error deleting team: {str(e)}', 'error')
 
     return redirect(url_for('main.teams'))

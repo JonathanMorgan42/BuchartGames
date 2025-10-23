@@ -28,11 +28,12 @@ class TestFeedbackForm:
     """Test feedback form submission."""
 
     def test_feedback_form_renders_on_index(self, client, db_session):
-        """Test that feedback form appears on index page."""
+        """Test that feedback link appears on index page."""
         response = client.get('/')
         assert response.status_code == 200
-        assert b'We\'d love your feedback' in response.data or b'We&#39;d love your feedback' in response.data
-        assert b'submit-feedback' in response.data
+        # Check for the feedback link/button text
+        assert b'Please Give Me Your Feedback' in response.data or b'feedback' in response.data.lower()
+        assert b'/feedback' in response.data
 
     def test_feedback_submission_success(self, app, db_session):
         """Test successful feedback submission."""
@@ -42,6 +43,9 @@ class TestFeedbackForm:
                 'scoring_clarity': '5',
                 'overall_clarity': '4',
                 'mobile_usability': '5',
+                'navigation_ease': '4',
+                'visual_design': '5',
+                'feature_satisfaction': '4',
                 'suggestions': 'Great app! Love the design.',
                 'csrf_token': 'dummy'  # CSRF is disabled in testing
             }, follow_redirects=True)
@@ -86,6 +90,9 @@ class TestFeedbackForm:
                     'scoring_clarity': '5',
                     'overall_clarity': '5',
                     'mobile_usability': '5',
+                    'navigation_ease': '5',
+                    'visual_design': '5',
+                    'feature_satisfaction': '5',
                     'suggestions': f'Feedback {i}',
                     'csrf_token': 'dummy'
                 }, follow_redirects=True)
@@ -96,6 +103,9 @@ class TestFeedbackForm:
                 'scoring_clarity': '5',
                 'overall_clarity': '5',
                 'mobile_usability': '5',
+                'navigation_ease': '5',
+                'visual_design': '5',
+                'feature_satisfaction': '5',
                 'suggestions': 'One too many',
                 'csrf_token': 'dummy'
             }, follow_redirects=True)
@@ -111,6 +121,9 @@ class TestFeedbackForm:
                 'scoring_clarity': '3',
                 'overall_clarity': '4',
                 'mobile_usability': '3',
+                'navigation_ease': '4',
+                'visual_design': '3',
+                'feature_satisfaction': '4',
                 'suggestions': '',  # Empty suggestions
                 'csrf_token': 'dummy'
             }, follow_redirects=True)
@@ -126,6 +139,9 @@ class TestFeedbackForm:
             'scoring_clarity': '5',
             'overall_clarity': '5',
             'mobile_usability': '5',
+            'navigation_ease': '5',
+            'visual_design': '5',
+            'feature_satisfaction': '5',
             'suggestions': long_text,
             'csrf_token': 'dummy'
         }, follow_redirects=True)

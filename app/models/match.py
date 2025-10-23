@@ -3,6 +3,9 @@ from app import db
 
 class Match(db.Model):
     __tablename__ = 'match'
+    __table_args__ = (
+        db.Index('ix_match_tournament_round', 'tournament_id', 'round_number'),  # Composite index for tournament bracket queries
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)

@@ -75,7 +75,7 @@
                     {% if current_user.is_authenticated %}
                     <li>
                         <a href="{{ url_for('admin.game_night_management') }}"
-                           class="{{ 'active' if 'game_night' in request.endpoint else '' }}">
+                           class="{{ 'active' if request.endpoint and 'game_night' in request.endpoint else '' }}">
                             <i class="fas fa-shield-alt"></i> Management
                         </a>
                     </li>

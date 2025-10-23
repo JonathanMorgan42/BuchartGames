@@ -55,5 +55,14 @@ build/
 node_modules/
 package-lock.json
 
+# Frontend build artifacts
+app/static/dist/
+
+# Feedback data
+feedback_data/
+
+# Logs
+logs/
+
 # Migrations (empty directory structure)
 migrations/

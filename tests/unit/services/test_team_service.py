@@ -60,7 +60,7 @@ class TestTeamService:
         assert team.game_night_id == game_night.id
 
         # Verify participants were created
-        participants = team.participants.all()
+        participants = list(team.participants)
         assert len(participants) == 2
         assert participants[0].firstName == 'John'
         assert participants[1].firstName == 'Jane'
@@ -99,7 +99,7 @@ class TestTeamService:
         assert updated_team.color == '#ABCDEF'
 
         # Verify participants were updated
-        participants = updated_team.participants.all()
+        participants = list(updated_team.participants)
         assert participants[0].firstName == 'Updated'
         assert participants[1].firstName == 'Updated'
 
